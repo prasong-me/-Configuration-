@@ -1,0 +1,16 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://example.invalid/configuration-platform/schemas/target-manifest.schema.json",
+  "title":"Target Manifest",
+  "type":"object",
+  "required":["id","version","evidence","capabilities"],
+  "properties":{
+    "id":{"type":"string","minLength":1},
+    "version":{"type":"string","minLength":1},
+    "status":{"type":"string"},
+    "evidence":{"type":"array","items":{"type":"object","required":["url","level"],"properties":{"url":{"type":"string","format":"uri"},"level":{"type":"string","enum":["OFFICIAL","PRIMARY","OBSERVED","SECONDARY"]},"retrieved":{"type":"string"},"note":{"type":"string"}},"additionalProperties":false}},
+    "capabilities":{"type":"object","additionalProperties":{"type":"string","enum":["SUPPORTED","LIMITED","TRANSFORMABLE","LOSSY","UNSUPPORTED","UNKNOWN"]}},
+    "limitations":{"type":"array","items":{"type":"string"}}
+  },
+  "additionalProperties":false
+}
