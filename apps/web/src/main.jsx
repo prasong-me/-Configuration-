@@ -2,13 +2,15 @@ import React,{useMemo,useState} from "react";
 import {createRoot} from "react-dom/client";
 import {compatibilityReport,redact} from "../../../packages/core/src/index.js";
 import {compileSurge} from "../../../packages/surge-adapter/src/index.js";
+import {
+  exportFormats,
+  getExportArtifact
+} from "../../../packages/targets/src/exporters.js";
 import "./style.css";
 
 const targets=[
   {id:"example",label:"อ้างอิง / Core test"},
-  {id:"surge",label:"Surge 5 — ข้อมูลการทดสอบ"},
-  {id:"wireguard",label:"WireGuard — Template"},
-  {id:"shadowrocket",label:"Shadowrocket — DNS test"}
+  ...exportFormats.map(x=>({id:x.id,label:x.label}))
 ];
 
 const surgeExample={dnsServers:["1.1.1.1","1.0.0.1"],rules:[],finalPolicy:"DIRECT"};
@@ -41,38 +43,15 @@ const testEvidence={
   }
 };
 
-const wireGuardTemplate=`[Interface]
-PrivateKey = <REPLACE_WITH_NEW_PRIVATE_KEY>
-Address = 10.7.0.10/24
-DNS = 1.1.1.1, 1.0.0.1
-
-[Peer]
-PublicKey = <PEER_PUBLIC_KEY>
-AllowedIPs = 10.7.0.1/32
-Endpoint = 127.0.0.1:51820
-PersistentKeepalive = 25
-`;
-
-const shadowrocketEvidence=`[General]
-dns-server = 1.1.1.1, 1.0.0.1
-
-# Evidence-only test values from the current test cycle.
-# Do not add "system" when the goal is to keep Effective DNS separate
-# from the Wi-Fi/router DNS.
-#
-# Tested system DNS observed separately:
-# 94.140.14.15, 94.140.14.16
-`;
-
 const exportBundle=()=>({
-  schemaVersion:"0.2-test-bundle",
+  schemaVersion:"0.3-test-bundle",
   generatedAt:new Date().toISOString(),
   policy:policyForExport,
   evidence:testEvidence,
-  artifacts:{
-    wireguardTemplate:wireGuardTemplate,
-    shadowrocketEvidence:shadowrocketEvidence
-  },
+  artifacts:Object.fromEntries(exportFormats.map(x=>[
+    x.id,
+    {file:`${x.id}${x.extension}`,status:x.status,content:getExportArtifact(x.id)}
+  ])),
   safety:{
     secretsExcluded:true,
     privateKeysExcluded:true,
@@ -96,10 +75,10 @@ function App(){
   const [malware,setMalware]=useState(true);
   const [trackers,setTrackers]=useState(true);
   const [separateBlocking,setSeparateBlocking]=useState(true);
-  const [target,setรูปแบบการใช้งาน]=useState("surge");
+  const [target,setTarget]=useState("surge");
 
   const policy=useMemo(()=>({
-    version:"0.2",
+    version:"0.3",
     policy:{
       name,
       vpn,
@@ -108,7 +87,7 @@ function App(){
       blocking:{
         malware,
         trackers,
-        separateFromResolver:true
+        separateFromResolver:separateBlocking
       },
       architecture:{
         normalDns:true,
@@ -117,20 +96,23 @@ function App(){
         hideResolverIdentityFromApp:"not-guaranteed"
       }
     }
-  }),[name,vpn,dns,malware,trackers]);
+  }),[name,vpn,dns,malware,trackers,separateBlocking]);
 
   const policyForExport=redact(policy);
-  const report=useMemo(()=>compatibilityReport(policy,target),[policy,target]);
+  const report=useMemo(()=>compatibilityReport(policy,target==="example"?"surge":target),[policy,target]);
 
   const surgeArtifact=useMemo(()=>{
     try{return compileSurge({policy:surgeExample});}
     catch(e){return {error:e.message};}
   },[]);
 
+  const selectedFormat=exportFormats.find(x=>x.id===target)||exportFormats[0];
+  const selectedArtifact=getExportArtifact(selectedFormat.id);
+
   return <main>
     <header>
       <h1>Network Configuration</h1>
-      <p>จัดการ DNS, VPN, Routing และนโยบายบล็อกแยกจากกัน พร้อมเก็บข้อมูลจากการทดสอบจริง</p>
+      <p>จัดการ DNS, VPN, Routing และนโยบายบล็อกแยกจากกัน พร้อมส่งออกไฟล์ตามรูปแบบของแต่ละแอป</p>
     </header>
 
     <section className="grid">
@@ -153,37 +135,45 @@ function App(){
           </select>
         </label>
 
-        <h3>ส่งออกไฟล์</h3>
+        <h3>ส่งออกไฟล์ทุกแอป</h3>
+        <p className="muted">เลือกแอปเพื่อดูไฟล์ที่สร้างได้ แล้วดาวน์โหลดไปทดลองจริงทีละฟังก์ชัน</p>
+
+        {exportFormats.map(format=>{
+          const artifact=getExportArtifact(format.id);
+          return <div className="export-item" key={format.id}>
+            <div className="export-head">
+              <strong>{format.label}</strong>
+              <span className={`badge badge-${format.status}`}>{format.status}</span>
+            </div>
+            <small>{format.extension} — {format.description}</small>
+            <button onClick={()=>{
+              setTarget(format.id);
+              download(`${format.id}-config${format.extension}`,artifact,format.mime);
+            }}>
+              Export {format.label}
+            </button>
+          </div>;
+        })}
+
         <button onClick={()=>download("policy.json",JSON.stringify(policyForExport,null,2),"application/json")} disabled={!report.exportable}>
           Export Policy
         </button>
         <button onClick={()=>download("network-test-bundle.json",JSON.stringify(exportBundle(),null,2),"application/json")}>
           Export ข้อมูลการทดสอบทั้งหมด
         </button>
-        <button onClick={()=>download("wireguard-template.conf",wireGuardTemplate,"text/plain")}>
-          Export WireGuard Template
-        </button>
-        <button onClick={()=>download("shadowrocket-dns-evidence.conf",shadowrocketEvidence,"text/plain")}>
-          Export Shadowrocket DNS Test
-        </button>
       </div>
 
       <div className="card">
-        <h2>ผลการรองรับ</h2>
-        {Object.entries(report.capabilities).map(([f,x])=>
-          <div className="row" key={f}>
-            <span>{f}</span><strong>{x.requested?x.state:"NOT_REQUESTED"}</strong>
-          </div>
-        )}
-
-        <h3>ข้อมูลจากการทดสอบ</h3>
-        <pre>{JSON.stringify(testEvidence,null,2)}</pre>
-
-        <h3>Diagnostics</h3>
-        {report.diagnostics.length
-          ? <ul>{report.diagnostics.map((d,i)=><li key={i}><strong>{d.level}</strong> {d.code}: {d.message}</li>)}</ul>
-          : <p>ไม่พบ Diagnostics</p>
-        }
+        <h2>รูปแบบไฟล์ที่เลือก</h2>
+        <div className="export-head">
+          <strong>{selectedFormat.label}</strong>
+          <span className={`badge badge-${selectedFormat.status}`}>{selectedFormat.status}</span>
+        </div>
+        <p>{selectedFormat.description}</p>
+        <pre>{selectedArtifact}</pre>
+        <button onClick={()=>download(`${selectedFormat.id}-config${selectedFormat.extension}`,selectedArtifact,selectedFormat.mime)}>
+          Download {selectedFormat.label}
+        </button>
 
         {target==="surge"&&<>
           <h3>Surge test pack</h3>
@@ -196,17 +186,21 @@ function App(){
           }
         </>}
 
-        {target==="wireguard"&&<>
-          <h3>WireGuard Template</h3>
-          <pre>{wireGuardTemplate}</pre>
-          <p>Template นี้ไม่ใส่ Private Key จริง และไม่อ้างว่า EM Proxy สามารถตั้งค่าภายในได้</p>
-        </>}
+        <h3>ผลการรองรับ</h3>
+        {Object.entries(report.capabilities).map(([f,x])=>
+          <div className="row" key={f}>
+            <span>{f}</span><strong>{x.requested?x.state:"NOT_REQUESTED"}</strong>
+          </div>
+        )}
 
-        {target==="shadowrocket"&&<>
-          <h3>Shadowrocket DNS Test</h3>
-          <pre>{shadowrocketEvidence}</pre>
-          <p>ผลทดสอบ: Effective DNS = 1.1.1.1, 1.0.0.1 และ System DNS ที่รายงานแยกต่างหาก = 94.140.14.15, 94.140.14.16</p>
-        </>}
+        <h3>ข้อมูลจากการทดสอบ</h3>
+        <pre>{JSON.stringify(testEvidence,null,2)}</pre>
+
+        <h3>Diagnostics</h3>
+        {report.diagnostics.length
+          ? <ul>{report.diagnostics.map((d,i)=><li key={i}><strong>{d.level}</strong> {d.code}: {d.message}</li></ul>
+          : <p>ไม่พบ Diagnostics</p>
+        }
 
         <h3>Policy ที่สร้าง</h3>
         <pre>{JSON.stringify(policy,null,2)}</pre>
@@ -214,4 +208,5 @@ function App(){
     </section>
   </main>
 }
+
 createRoot(document.getElementById("root")).render(<App/>);
