@@ -76,6 +76,7 @@ function App(){
   const [trackers,setTrackers]=useState(true);
   const [separateBlocking,setSeparateBlocking]=useState(true);
   const [target,setTarget]=useState("surge");
+  const [selectedFunction,setSelectedFunction]=useState("dns");
 
   const policy=useMemo(()=>({
     version:"0.3",
@@ -108,6 +109,8 @@ function App(){
 
   const selectedFormat=exportFormats.find(x=>x.id===target)||exportFormats[0];
   const selectedArtifact=getExportArtifact(selectedFormat.id);
+  const functions=selectedFormat.functions||[];
+  const activeFunction=functions.find(x=>x.id===selectedFunction)||functions[0];
 
   return <main>
     <header>
@@ -135,25 +138,74 @@ function App(){
           </select>
         </label>
 
-        <h3>ส่งออกไฟล์ทุกแอป</h3>
-        <p className="muted">เลือกแอปเพื่อดูไฟล์ที่สร้างได้ แล้วดาวน์โหลดไปทดลองจริงทีละฟังก์ชัน</p>
+        <h3>กำหนดค่าและแนวทางส่งคอนฟิก</h3>
+        <p className="muted">เลือกแอป → เลือกฟังก์ชัน → ดูจุดกำหนดค่า → ทำตามขั้นตอนทดสอบจริงทีละฟังก์ชัน</p>
 
-        {exportFormats.map(format=>{
-          const artifact=getExportArtifact(format.id);
-          return <div className="export-item" key={format.id}>
-            <div className="export-head">
-              <strong>{format.label}</strong>
-              <span className={`badge badge-${format.status}`}>{format.status}</span>
-            </div>
-            <small>{format.extension} — {format.description}</small>
-            <button onClick={()=>{
-              setTarget(format.id);
-              download(`${format.id}-config${format.extension}`,artifact,format.mime);
-            }}>
-              Export {format.label}
+        <label>แอปเป้าหมาย
+          <select value={target} onChange={e=>{
+            setTarget(e.target.value);
+            setSelectedFunction("dns");
+          }}>
+            {exportFormats.map(t=><option value={t.id} key={t.id}>{t.label}</option>)}
+          </select>
+        </label>
+
+        <div className="function-list">
+          {functions.map(fn=>
+            <button
+              className={activeFunction?.id===fn.id?"function-button active":"function-button"}
+              key={fn.id}
+              onClick={()=>setSelectedFunction(fn.id)}
+            >
+              {fn.title}
             </button>
-          </div>;
-        })}
+          )}
+        </div>
+
+        {activeFunction&&<div className="guide-panel">
+          <div className="export-head">
+            <strong>{activeFunction.title}</strong>
+            <span className="badge badge-template">TEST</span>
+          </div>
+          <div className="guide-row">
+            <span>จุดกำหนดค่า</span>
+            <code>{activeFunction.config}</code>
+          </div>
+          <div className="guide-row">
+            <span>วิธีทดสอบ</span>
+            <p>{activeFunction.test}</p>
+          </div>
+          <button onClick={()=>{
+            const guide={
+              target:selectedFormat.label,
+              function:activeFunction,
+              artifact:getExportArtifact(selectedFormat.id),
+              note:"ใช้เป็นชุดอ้างอิงสำหรับทดสอบฟังก์ชันนี้บนแอปจริง; ห้ามถือว่าเป็นผลยืนยันจนกว่าจะทดสอบจริง"
+            };
+            download(
+              `${selectedFormat.id}-${activeFunction.id}-test.json`,
+              JSON.stringify(guide,null,2),
+              "application/json"
+            );
+          }}>
+            ส่งออกชุดทดสอบฟังก์ชันนี้
+          </button>
+        </div>}
+
+        <h3>ส่งออกโปรไฟล์เต็ม</h3>
+        <div className="export-item">
+          <div className="export-head">
+            <strong>{selectedFormat.label}</strong>
+            <span className={`badge badge-${selectedFormat.status}`}>{selectedFormat.status}</span>
+          </div>
+          <small>{selectedFormat.extension} — {selectedFormat.description}</small>
+          <button onClick={()=>{
+            const artifact=getExportArtifact(selectedFormat.id);
+            download(`${selectedFormat.id}-config${selectedFormat.extension}`,artifact,selectedFormat.mime);
+          }}>
+            Export {selectedFormat.label}
+          </button>
+        </div>
 
         <button onClick={()=>download("policy.json",JSON.stringify(policyForExport,null,2),"application/json")} disabled={!report.exportable}>
           Export Policy
