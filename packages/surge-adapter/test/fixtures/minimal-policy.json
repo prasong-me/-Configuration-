@@ -1,0 +1,4 @@
+{
+  "version":"0.1",
+  "policy":{"dnsServers":["1.1.1.1"],"rules":[{"type":"DOMAIN-SUFFIX","value":"example.com","policy":"DIRECT"}],"finalPolicy":"DIRECT"}
+}
