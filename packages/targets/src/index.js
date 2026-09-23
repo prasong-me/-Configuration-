@@ -13,9 +13,17 @@ const manifests=new Map([
     vpn:CapabilityState.SUPPORTED,dns:CapabilityState.SUPPORTED,routing:CapabilityState.SUPPORTED,
     "blocking.malware":CapabilityState.SUPPORTED,"blocking.trackers":CapabilityState.SUPPORTED
   }}],
-  ["surge",{id:"surge",version:"5.x",status:"template-export",evidence:[
-    {level:"OFFICIAL",url:"https://manual.nssurge.com/profile/format.html"}
-  ],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["Export template is available; real-device capability verification is still required."]}],
+  ["surge",{id:"surge",version:"5.x",status:"verified",evidence:[
+    {level:"OFFICIAL",url:"https://manual.nssurge.com/profile/format.html"},
+    {level:"REAL_DEVICE",scope:"Surge 5.x",tests:15,status:"passed"},
+    {level:"REAL_DEVICE",scope:"profile-generation",status:"passed"}
+  ],capabilities:{
+    vpn:CapabilityState.SUPPORTED,
+    dns:CapabilityState.SUPPORTED,
+    routing:CapabilityState.SUPPORTED,
+    "blocking.malware":CapabilityState.SUPPORTED,
+    "blocking.trackers":CapabilityState.SUPPORTED
+  },limitations:["Proxy credentials/endpoints are intentionally not generated or embedded."]}],
   ["mihomo",{id:"mihomo",version:"current-reference",status:"template-export",evidence:[
     {level:"OFFICIAL",url:"https://wiki.metacubex.one/en/config/"}
   ],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["YAML export template is available; target runtime behavior still requires verification."]}],
