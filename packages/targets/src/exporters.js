@@ -66,8 +66,8 @@ export const exportFormats = [
     label: "Surge",
     extension: ".conf",
     mime: "text/plain",
-    status: "template",
-    description: "INI-like profile with [General], [Proxy], [Proxy Group], [Rule] and related sections.",
+    status: "verified",
+    description: "Verified Surge 5.x profile export based on completed real-device testing; credentials/endpoints are not embedded.",
     functions: functionGuides["surge"] || []
   },
   {
