@@ -8,8 +8,16 @@ import {
 } from "../../../packages/targets/src/exporters.js";
 import "./style.css";
 
+
+const translations={
+  th:{
+    language:"ภาษา",thai:"ไทย",english:"English",title:"Network Configuration",subtitle:"จัดการ DNS, VPN, Routing และนโยบายบล็อกแยกจากกัน พร้อมส่งออกไฟล์ตามรูปแบบของแต่ละแอป",profile:"ตั้งค่าโปรไฟล์",profileName:"ชื่อโปรไฟล์",vpn:"VPN / ตัวกลาง",dns:"DNS ปกติ",malware:"บล็อก Malware",trackers:"บล็อก Tracker",separate:"แยกระบบบล็อกออกจาก DNS",target:"Target",configGuide:"กำหนดค่าและแนวทางส่งคอนฟิก",guideIntro:"เลือกแอป → เลือกฟังก์ชัน → ดูจุดกำหนดค่า → ทำตามขั้นตอนทดสอบจริงทีละฟังก์ชัน",appTarget:"แอปเป้าหมาย",configPoint:"จุดกำหนดค่า",testMethod:"วิธีทดสอบ",exportTest:"ส่งออกชุดทดสอบฟังก์ชันนี้",preflight:"ตรวจสอบก่อนส่งออก",preflightOk:"ผ่านการตรวจสอบเชิงโครงสร้าง",preflightBlocked:"หยุดการส่งออกอัตโนมัติ",noBlocking:"ไม่มี diagnostic ระดับที่บล็อกการส่งออก",preflightNote:"ปุ่มส่งออก target จะเปิดก็ต่อเมื่อ target/function นั้นผ่านการตรวจ syntax + adapter + evidence จริงแล้ว",fullExport:"ส่งออกโปรไฟล์เต็ม",exportPolicy:"Export Policy",exportEvidence:"Export ข้อมูลการทดสอบทั้งหมด",format:"รูปแบบไฟล์ที่เลือก",download:"Download",surgePack:"Surge test pack",surgeNote:"ทดสอบทีละความสามารถบนเครื่องจริง; ชุดนี้ไม่ฝัง Private Key, credential หรือ certificate",downloadFixture:"Download fixture",support:"ผลการรองรับ",evidence:"ข้อมูลจากการทดสอบ",diagnostics:"Diagnostics",noDiagnostics:"ไม่พบ Diagnostics",generatedPolicy:"Policy ที่สร้าง",reference:"อ้างอิง / Core test"},
+  en:{
+    language:"Language",thai:"ไทย",english:"English",title:"Network Configuration",subtitle:"Manage DNS, VPN, Routing and separate blocking policies, with exports tailored to each app.",profile:"Profile settings",profileName:"Profile name",vpn:"VPN / Intermediary",dns:"Normal DNS",malware:"Block Malware",trackers:"Block Trackers",separate:"Separate blocking from DNS",target:"Target",configGuide:"Configuration and test guidance",guideIntro:"Select an app → select a function → review the configuration point → test one function at a time on the real app.",appTarget:"Target app",configPoint:"Configuration point",testMethod:"Test method",exportTest:"Export function test pack",preflight:"Pre-export check",preflightOk:"Structural checks passed",preflightBlocked:"Export automatically blocked",noBlocking:"No blocking-level diagnostics",preflightNote:"Target export is enabled only when the target/function has verified syntax, adapter support and real evidence.",fullExport:"Full profile export",exportPolicy:"Export Policy",exportEvidence:"Export all test evidence",format:"Selected file format",download:"Download",surgePack:"Surge test pack",surgeNote:"Test each capability on the real device; this pack contains no private key, credential or certificate.",downloadFixture:"Download fixture",support:"Support status",evidence:"Test evidence",diagnostics:"Diagnostics",noDiagnostics:"No diagnostics",generatedPolicy:"Generated Policy",reference:"Reference / Core test"}
+};
+
 const targets=[
-  {id:"example",label:"อ้างอิง / Core test"},
+  {id:"example",label:translations.th.reference},
   ...exportFormats.map(x=>({id:x.id,label:x.label}))
 ];
 
@@ -123,28 +131,28 @@ function App(){
 
     <section className="grid">
       <div className="card">
-        <h2>ตั้งค่าโปรไฟล์</h2>
+        <h2>{tr.profile}</h2>
 
-        <label>ชื่อโปรไฟล์
+        <label>{tr.profileName}
           <input value={name} onChange={e=>setName(e.target.value)}/>
         </label>
 
-        <label><input type="checkbox" checked={vpn} onChange={e=>setVpn(e.target.checked)}/> VPN / ตัวกลาง</label>
-        <label><input type="checkbox" checked={dns} onChange={e=>setDns(e.target.checked)}/> DNS ปกติ</label>
-        <label><input type="checkbox" checked={malware} onChange={e=>setMalware(e.target.checked)}/> บล็อก Malware</label>
-        <label><input type="checkbox" checked={trackers} onChange={e=>setTrackers(e.target.checked)}/> บล็อก Tracker</label>
-        <label><input type="checkbox" checked={separateBlocking} onChange={e=>setSeparateBlocking(e.target.checked)}/> แยกระบบบล็อกออกจาก DNS</label>
+        <label><input type="checkbox" checked={vpn} onChange={e=>setVpn(e.target.checked)}/> {tr.vpn}</label>
+        <label><input type="checkbox" checked={dns} onChange={e=>setDns(e.target.checked)}/> {tr.dns}</label>
+        <label><input type="checkbox" checked={malware} onChange={e=>setMalware(e.target.checked)}/> {tr.malware}</label>
+        <label><input type="checkbox" checked={trackers} onChange={e=>setTrackers(e.target.checked)}/> {tr.trackers}</label>
+        <label><input type="checkbox" checked={separateBlocking} onChange={e=>setSeparateBlocking(e.target.checked)}/> {tr.separate}</label>
 
-        <label>Target
+        <label>{tr.target}
           <select value={target} onChange={e=>setTarget(e.target.value)}>
             {targets.map(t=><option value={t.id} key={t.id}>{t.label}</option>)}
           </select>
         </label>
 
-        <h3>กำหนดค่าและแนวทางส่งคอนฟิก</h3>
-        <p className="muted">เลือกแอป → เลือกฟังก์ชัน → ดูจุดกำหนดค่า → ทำตามขั้นตอนทดสอบจริงทีละฟังก์ชัน</p>
+        <h3>{tr.configGuide}</h3>
+        <p className="muted">{tr.guideIntro}</p>
 
-        <label>แอปเป้าหมาย
+        <label>{tr.appTarget}
           <select value={target} onChange={e=>{
             setTarget(e.target.value);
             setSelectedFunction("dns");
@@ -171,11 +179,11 @@ function App(){
             <span className="badge badge-template">TEST</span>
           </div>
           <div className="guide-row">
-            <span>จุดกำหนดค่า</span>
+            <span>{tr.configPoint}</span>
             <code>{activeFunction.config}</code>
           </div>
           <div className="guide-row">
-            <span>วิธีทดสอบ</span>
+            <span>{tr.testMethod}</span>
             <p>{activeFunction.test}</p>
           </div>
           <button disabled={!exportAllowed} onClick={()=>{
@@ -195,16 +203,16 @@ function App(){
           </button>
         </div>}
 
-        <h3>ตรวจสอบก่อนส่งออก</h3>
+        <h3>{tr.preflight}</h3>
         <div className={`preflight ${exportAllowed?"preflight-ok":"preflight-blocked"}`}>
-          <strong>{exportAllowed?"ผ่านการตรวจสอบเชิงโครงสร้าง":"หยุดการส่งออกอัตโนมัติ"}</strong>
+          <strong>{exportAllowed?tr.preflightOk:tr.preflightBlocked}</strong>
           {exportBlockReasons.length>0
             ? <ul>{exportBlockReasons.map((d,i)=><li key={i}>{d.code}: {d.message}</li>)}</ul>
-            : <p>ไม่มี diagnostic ระดับที่บล็อกการส่งออก</p>}
-          <small>ปุ่มส่งออก target จะเปิดก็ต่อเมื่อ target/function นั้นผ่านการตรวจ syntax + adapter + evidence จริงแล้ว</small>
+            : <p>{tr.noBlocking}</p>}
+          <small>{tr.preflightNote}</small>
         </div>
 
-        <h3>ส่งออกโปรไฟล์เต็ม</h3>
+        <h3>{tr.fullExport}</h3>
         <div className="export-item">
           <div className="export-head">
             <strong>{selectedFormat.label}</strong>
@@ -228,7 +236,7 @@ function App(){
       </div>
 
       <div className="card">
-        <h2>รูปแบบไฟล์ที่เลือก</h2>
+        <h2>{tr.format}</h2>
         <div className="export-head">
           <strong>{selectedFormat.label}</strong>
           <span className={`badge badge-${selectedFormat.status}`}>{selectedFormat.status}</span>
@@ -240,8 +248,8 @@ function App(){
         </button>
 
         {target==="surge"&&<>
-          <h3>Surge test pack</h3>
-          <p>ทดสอบทีละความสามารถบนเครื่องจริง; ชุดนี้ไม่ฝัง Private Key, credential หรือ certificate</p>
+          <h3>{tr.surgePack}</h3>
+          <p>{tr.surgeNote}</p>
           <pre>{surgeArtifact.content||surgeArtifact.error}</pre>
           {!surgeArtifact.error&&
             <button disabled={!exportAllowed} onClick={()=>download("surge-fixture.conf",surgeArtifact.content,"text/plain")}>
@@ -250,23 +258,23 @@ function App(){
           }
         </>}
 
-        <h3>ผลการรองรับ</h3>
+        <h3>{tr.support}</h3>
         {Object.entries(report.capabilities).map(([f,x])=>
           <div className="row" key={f}>
             <span>{f}</span><strong>{x.requested?x.state:"NOT_REQUESTED"}</strong>
           </div>
         )}
 
-        <h3>ข้อมูลจากการทดสอบ</h3>
+        <h3>{tr.evidence}</h3>
         <pre>{JSON.stringify(testEvidence,null,2)}</pre>
 
-        <h3>Diagnostics</h3>
+        <h3>{tr.diagnostics}</h3>
         {report.diagnostics.length
           ? <ul>{report.diagnostics.map((d,i)=><li key={i}><strong>{d.level}</strong> {d.code}: {d.message}</li></ul>
-          : <p>ไม่พบ Diagnostics</p>
+          : <p>{tr.noDiagnostics}</p>
         }
 
-        <h3>Policy ที่สร้าง</h3>
+        <h3>{tr.generatedPolicy}</h3>
         <pre>{JSON.stringify(policy,null,2)}</pre>
       </div>
     </section>
