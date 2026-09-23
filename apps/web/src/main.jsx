@@ -33,7 +33,7 @@ const surgeRealityTest=[
   "# Default: all other traffic goes DIRECT",
   "FINAL,DIRECT",
   ""
-].join("\\n");
+].join("\n");
 function download(name,text,mime){const blob=new Blob([text],{type:mime});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),0)}
 function App(){
  const [name,setName]=useState("My Privacy Profile"); const [vpn,setVpn]=useState(false); const [dns,setDns]=useState(true); const [malware,setMalware]=useState(true); const [trackers,setTrackers]=useState(true); const [target,setTarget]=useState("surge");
