@@ -10,7 +10,7 @@ export { CapabilityState, DiagnosticLevel, diagnostic, hasBlockingDiagnostics, r
 export function normalizePolicy(input) {
   const source=input ?? {};
   const policy=source.policy && typeof source.policy==="object" ? source.policy : source;
-  return {version:source.version ?? "0.1",policy:{vpn:Boolean(policy.vpn),dns:Boolean(policy.dns),routing:Boolean(policy.routing),blocking:{malware:Boolean(policy.blocking?.malware),trackers:Boolean(policy.blocking?.trackers)},...(policy.providers ? {providers:policy.providers} : {})}};
+  const normalized={vpn:Boolean(policy.vpn),dns:Boolean(policy.dns),routing:Boolean(policy.routing),blocking:{malware:Boolean(policy.blocking?.malware),trackers:Boolean(policy.blocking?.trackers)},...(policy.providers ? {providers:policy.providers} : {})};\n  if(typeof policy.name==="string"&&policy.name.trim()) normalized.name=policy.name.trim();\n  if(Array.isArray(policy.dnsServers)) normalized.dnsServers=policy.dnsServers.filter(x=>typeof x==="string"&&x.trim()).map(x=>x.trim());\n  if(Array.isArray(policy.rules)) normalized.rules=policy.rules;\n  if(typeof policy.finalPolicy==="string"&&policy.finalPolicy.trim()) normalized.finalPolicy=policy.finalPolicy.trim();\n  if(typeof policy.bypassSystem==="boolean") normalized.bypassSystem=policy.bypassSystem;\n  return {version:source.version ?? "0.1",policy:normalized};
 }
 const FEATURE_PATHS={vpn:p=>p.vpn,dns:p=>p.dns,routing:p=>p.routing,"blocking.malware":p=>p.blocking?.malware,"blocking.trackers":p=>p.blocking?.trackers};
 export function compatibilityReport(policyInput,targetId){
