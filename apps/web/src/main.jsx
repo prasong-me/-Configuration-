@@ -222,7 +222,7 @@ function App(){
             <span className={`badge badge-${selectedFormat.status}`}>{selectedFormat.status}</span>
           </div>
           <small>{selectedFormat.extension} — {selectedFormat.description}</small>
-          <button onClick={()=>{
+          <button disabled={!exportAllowed} onClick={()=>{
             const artifact=getExportArtifact(selectedFormat.id);
             download(`${selectedFormat.id}-config${selectedFormat.extension}`,artifact,selectedFormat.mime);
           }}>
