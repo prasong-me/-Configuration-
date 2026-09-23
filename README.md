@@ -6,7 +6,7 @@ Evidence-first configuration compiler and web application.
 
 - Core policy normalization, validation, threat diagnostics and capability gating: implemented.
 - Evidence registry: implemented.
-- Surge minimal serializer: implemented for a deliberately small fixture-backed subset.
+- Surge 5.x profile serializer: implemented for the verified profile structure; proxy credentials/endpoints are never invented or embedded.
 - Mihomo/WireGuard: evidence-only; no serializer is claimed complete.
 - Apple MobileConfig: evidence-only; target/application compatibility must be verified separately.
 
