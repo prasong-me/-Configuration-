@@ -6,34 +6,56 @@ import "./style.css";
 
 const targets=[{id:"example",label:"Reference / Core test"},{id:"surge",label:"Surge 5 — evidence-only"}];
 const surgeExample={dnsServers:["1.1.1.1"],rules:[{type:"DOMAIN-SUFFIX",value:"example.com",policy:"DIRECT"}],finalPolicy:"DIRECT"};
-const surgeRealityTest=[
-  "[General]",
-  "loglevel = notify",
-  "ipv6 = false",
-  "dns-server = 1.1.1.1, 8.8.8.8",
-  "include-local-networks = true",
-  "show-error-page-for-reject = true",
-  "",
-  "[Proxy]",
-  "PROXY = socks5, 127.0.0.1, 1080",
-  "",
-  "[Proxy Group]",
-  "OmniLoop = select, PROXY, DIRECT",
-  "",
-  "[Rule]",
-  "# TEST 1: open example.com — expected REJECT",
-  "DOMAIN,example.com,REJECT",
-  "# TEST 2: open example.org — expected DIRECT",
-  "DOMAIN-SUFFIX,example.org,DIRECT",
-  "# TEST 3: open a host containing iana — expected DIRECT",
-  "DOMAIN-KEYWORD,iana,DIRECT",
-  "# TEST 4: loopback destination — expected DIRECT without DNS lookup",
-  "IP-CIDR,127.0.0.0/8,DIRECT,no-resolve",
-  "",
-  "# Default: all other traffic goes DIRECT",
-  "FINAL,DIRECT",
-  ""
-].join("\n");
+const surgeFixtures={
+  "01-minimal.conf":[
+    "[General]",
+    "loglevel = notify",
+    "ipv6 = false",
+    "",
+    "[Rule]",
+    "FINAL,DIRECT",
+    ""
+  ].join("\n"),
+  "02-dns.conf":[
+    "[General]",
+    "loglevel = notify",
+    "ipv6 = false",
+    "dns-server = 1.1.1.1, 8.8.8.8",
+    "",
+    "[Rule]",
+    "FINAL,DIRECT",
+    ""
+  ].join("\n"),
+  "03-rules.conf":[
+    "[General]",
+    "loglevel = notify",
+    "ipv6 = false",
+    "",
+    "[Rule]",
+    "DOMAIN,example.com,REJECT",
+    "DOMAIN-SUFFIX,example.org,DIRECT",
+    "DOMAIN-KEYWORD,iana,DIRECT",
+    "IP-CIDR,127.0.0.0/8,DIRECT,no-resolve",
+    "FINAL,DIRECT",
+    ""
+  ].join("\n"),
+  "04-proxy-group.conf":[
+    "[General]",
+    "loglevel = notify",
+    "ipv6 = false",
+    "",
+    "[Proxy]",
+    "TEST-SOCKS = socks5, 127.0.0.1, 1080",
+    "",
+    "[Proxy Group]",
+    "TestGroup = select, TEST-SOCKS, DIRECT",
+    "",
+    "[Rule]",
+    "DOMAIN,proxy-test.invalid,TestGroup",
+    "FINAL,DIRECT",
+    ""
+  ].join("\n")
+};
 function download(name,text,mime){const blob=new Blob([text],{type:mime});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),0)}
 function App(){
  const [name,setName]=useState("My Privacy Profile"); const [vpn,setVpn]=useState(false); const [dns,setDns]=useState(true); const [malware,setMalware]=useState(true); const [trackers,setTrackers]=useState(true); const [target,setTarget]=useState("surge");
