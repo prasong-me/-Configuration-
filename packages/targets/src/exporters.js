@@ -68,7 +68,7 @@ export const exportFormats = [
     mime: "text/plain",
     status: "template",
     description: "INI-like profile with [General], [Proxy], [Proxy Group], [Rule] and related sections.",
-    functions: functionGuides["mihomo"] || []
+    functions: functionGuides["surge"] || []
   },
   {
     id: "mihomo",
@@ -77,7 +77,7 @@ export const exportFormats = [
     mime: "text/yaml",
     status: "template",
     description: "YAML configuration using dns, proxies, proxy-groups and rules.",
-    functions: functionGuides["wireguard"] || []
+    functions: functionGuides["mihomo"] || []
   },
   {
     id: "wireguard",
@@ -86,7 +86,7 @@ export const exportFormats = [
     mime: "text/plain",
     status: "template",
     description: "Standard WireGuard INI-style configuration.",
-    functions: functionGuides["shadowrocket"] || []
+    functions: functionGuides["wireguard"] || []
   },
   {
     id: "shadowrocket",
@@ -95,7 +95,7 @@ export const exportFormats = [
     mime: "text/plain",
     status: "template",
     description: "Shadowrocket profile format; DNS and routing sections are separated.",
-    functions: functionGuides["loon"] || []
+    functions: functionGuides["shadowrocket"] || []
   },
   {
     id: "loon",
@@ -104,7 +104,7 @@ export const exportFormats = [
     mime: "text/plain",
     status: "template",
     description: "Loon section-based configuration with [General], [Proxy], [Proxy Group] and [Rule].",
-    functions: functionGuides["stash"] || []
+    functions: functionGuides["loon"] || []
   },
   {
     id: "stash",
@@ -113,7 +113,7 @@ export const exportFormats = [
     mime: "text/yaml",
     status: "template",
     description: "YAML configuration with dns and rules sections.",
-    functions: functionGuides["quantumult-x"] || []
+    functions: functionGuides["stash"] || []
   },
   {
     id: "quantumult-x",
@@ -122,7 +122,7 @@ export const exportFormats = [
     mime: "text/plain",
     status: "template",
     description: "Quantumult X section-based configuration.",
-    functions: functionGuides["apple-dns-declaration"] || []
+    functions: functionGuides["quantumult-x"] || []
   },
   {
     id: "apple-dns-declaration",
@@ -131,7 +131,7 @@ export const exportFormats = [
     mime: "application/json",
     status: "reference",
     description: "Current declarative configuration format for com.apple.configuration.network.dns-settings.",
-    functions: functionGuides["apple-mobileconfig-legacy"] || []
+    functions: functionGuides["apple-dns-declaration"] || []
   },
   {
     id: "apple-mobileconfig-legacy",
@@ -140,7 +140,7 @@ export const exportFormats = [
     mime: "application/xml",
     status: "legacy",
     description: "Legacy managed DNS payload; retained only for compatibility testing.",
-    functions: functionGuides["surge"] || []
+    functions: functionGuides["apple-mobileconfig-legacy"] || []
   }
 ];
 
