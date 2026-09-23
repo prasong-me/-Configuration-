@@ -2,11 +2,17 @@
 
 ## Official evidence
 
-Mihomo publishes a configuration reference covering inbounds, routing rules, outbounds, DNS, proxy groups and other configuration areas. citeturn0search2
+Mihomo publishes a configuration reference covering inbounds, routing rules, outbounds, DNS, proxy groups and other configuration areas.
 
-Mihomo documents TUN as a way to capture system traffic and support automatic routing, DNS hijacking and per-application routing. citeturn0search14
+Source: https://wiki.metacubex.one/en/config/
 
-Mihomo warns that binding to `0.0.0.0` exposes a listener on every network interface. citeturn0search14
+Mihomo documents TUN as a way to capture system traffic and support automatic routing, DNS hijacking and per-application routing.
+
+Source: https://wiki.metacubex.one/en/config/inbound/
+
+Mihomo warns that binding to `0.0.0.0` exposes a listener on every network interface.
+
+Source: https://wiki.metacubex.one/en/config/inbound/
 
 ## Project status
 
