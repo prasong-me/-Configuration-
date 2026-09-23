@@ -112,7 +112,7 @@ function App(){
   const functions=selectedFormat.functions||[];
   const activeFunction=functions.find(x=>x.id===selectedFunction)||functions[0];
   const preflight=useMemo(()=>compatibilityReport(policy,target),[policy,target]);
-  const exportAllowed=false;
+  const exportAllowed=preflight.exportable && selectedFormat.status==="verified";
   const exportBlockReasons=preflight.diagnostics.filter(d=>d.level==="CRITICAL"||d.level==="HIGH");
 
   return <main>
