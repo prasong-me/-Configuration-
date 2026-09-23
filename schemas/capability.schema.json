@@ -1,0 +1,19 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://example.invalid/configuration-platform/schemas/capability.schema.json",
+  "title":"Target Capability",
+  "type":"object",
+  "required":["target","version","features"],
+  "properties":{
+    "target":{"type":"string","minLength":1},
+    "version":{"type":"string","minLength":1},
+    "features":{
+      "type":"object",
+      "additionalProperties":{
+        "type":"string",
+        "enum":["SUPPORTED","LIMITED","TRANSFORMABLE","LOSSY","UNSUPPORTED","UNKNOWN"]
+      }
+    }
+  },
+  "additionalProperties":false
+}
