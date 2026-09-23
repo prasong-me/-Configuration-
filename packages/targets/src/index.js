@@ -1,12 +1,55 @@
 import { CapabilityState } from "../../capabilities/src/index.js";
 
-const UNKNOWN_CAPABILITIES={vpn:CapabilityState.UNKNOWN,dns:CapabilityState.UNKNOWN,routing:CapabilityState.UNKNOWN,"blocking.malware":CapabilityState.UNKNOWN,"blocking.trackers":CapabilityState.UNKNOWN};
+const UNKNOWN_CAPABILITIES={
+  vpn:CapabilityState.UNKNOWN,
+  dns:CapabilityState.UNKNOWN,
+  routing:CapabilityState.UNKNOWN,
+  "blocking.malware":CapabilityState.UNKNOWN,
+  "blocking.trackers":CapabilityState.UNKNOWN
+};
+
 const manifests=new Map([
-  ["example",{id:"example",version:"0.1",status:"reference-only",evidence:[],capabilities:{vpn:CapabilityState.SUPPORTED,dns:CapabilityState.SUPPORTED,routing:CapabilityState.SUPPORTED,"blocking.malware":CapabilityState.SUPPORTED,"blocking.trackers":CapabilityState.SUPPORTED}}],
-  ["surge",{id:"surge",version:"5.x",status:"evidence-only",evidence:[{level:"OFFICIAL",url:"https://manual.nssurge.com/profile/format.html"}],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["No serializer is registered yet."]}],
-  ["mihomo",{id:"mihomo",version:"current-reference",status:"evidence-only",evidence:[{level:"OFFICIAL",url:"https://wiki.metacubex.one/en/config/"}],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["No serializer is registered yet."]}],
-  ["wireguard",{id:"wireguard",version:"standard-config",status:"evidence-only",evidence:[{level:"OFFICIAL",url:"https://www.wireguard.com/"}],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["Base syntax is documented; target-app import behavior still requires separate verification."]}]
+  ["example",{id:"example",version:"0.1",status:"reference-only",evidence:[],capabilities:{
+    vpn:CapabilityState.SUPPORTED,dns:CapabilityState.SUPPORTED,routing:CapabilityState.SUPPORTED,
+    "blocking.malware":CapabilityState.SUPPORTED,"blocking.trackers":CapabilityState.SUPPORTED
+  }}],
+  ["surge",{id:"surge",version:"5.x",status:"template-export",evidence:[
+    {level:"OFFICIAL",url:"https://manual.nssurge.com/profile/format.html"}
+  ],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["Export template is available; real-device capability verification is still required."]}],
+  ["mihomo",{id:"mihomo",version:"current-reference",status:"template-export",evidence:[
+    {level:"OFFICIAL",url:"https://wiki.metacubex.one/en/config/"}
+  ],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["YAML export template is available; target runtime behavior still requires verification."]}],
+  ["wireguard",{id:"wireguard",version:"standard-config",status:"template-export",evidence:[
+    {level:"OFFICIAL",url:"https://www.wireguard.com/"}
+  ],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["Standard syntax template is available; target-app import behavior still requires separate verification."]}],
+  ["shadowrocket",{id:"shadowrocket",version:"current-reference",status:"template-export",evidence:[
+    {level:"REFERENCE",url:"https://github.com/LOWERTOP/Shadowrocket/wiki"}
+  ],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["Profile template is available; exact runtime behavior must be tested in the installed app version."]}],
+  ["loon",{id:"loon",version:"current-reference",status:"template-export",evidence:[
+    {level:"REFERENCE",url:"https://github.com/Loon0x00/LoonManual"}
+  ],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["Section-based template is available; exact runtime behavior must be tested in the installed app version."]}],
+  ["stash",{id:"stash",version:"current-reference",status:"template-export",evidence:[
+    {level:"OFFICIAL",url:"https://stash.wiki/en/configuration/example-config"}
+  ],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["YAML template is available; exact runtime behavior must be tested in the installed app version."]}],
+  ["quantumult-x",{id:"quantumult-x",version:"current-reference",status:"template-export",evidence:[
+    {level:"REFERENCE",url:"https://github.com/crossutility/Quantumult-X"}
+  ],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["Configuration template is available; exact runtime behavior must be tested in the installed app version."]}],
+  ["apple-dns-declaration",{id:"apple-dns-declaration",version:"current-declarative",status:"reference-export",evidence:[
+    {level:"OFFICIAL",url:"https://developer.apple.com/documentation/devicemanagement/networkdnssettings"}
+  ],capabilities:{vpn:CapabilityState.UNKNOWN,dns:CapabilityState.SUPPORTED,routing:CapabilityState.UNKNOWN,"blocking.malware":CapabilityState.UNKNOWN,"blocking.trackers":CapabilityState.UNKNOWN},limitations:["This is the current declarative DNS configuration model, not a general-purpose proxy/VPN profile."]}],
+  ["apple-mobileconfig-legacy",{id:"apple-mobileconfig-legacy",version:"legacy",status:"legacy-export",evidence:[
+    {level:"OFFICIAL",url:"https://developer.apple.com/documentation/devicemanagement/dnssettings"}
+  ],capabilities:{vpn:CapabilityState.UNKNOWN,dns:CapabilityState.SUPPORTED,routing:CapabilityState.UNKNOWN,"blocking.malware":CapabilityState.UNKNOWN,"blocking.trackers":CapabilityState.UNKNOWN},limitations:["Legacy DNSSettings payload; Apple documents the declarative network DNS configuration as the replacement on newer OS versions."]}
 ]);
-export function getTargetManifest(targetId){const manifest=manifests.get(targetId);return manifest ? structuredClone(manifest) : null;}
-export function listTargetManifests(){return [...manifests.values()].map(x=>structuredClone(x));}
-export function registerTargetManifest(manifest){if(!manifest?.id||!manifest?.capabilities)throw new TypeError("Target manifest requires id and capabilities.");manifests.set(manifest.id,structuredClone(manifest));}
+
+export function getTargetManifest(targetId){
+  const manifest=manifests.get(targetId);
+  return manifest ? structuredClone(manifest) : null;
+}
+export function listTargetManifests(){
+  return [...manifests.values()].map(x=>structuredClone(x));
+}
+export function registerTargetManifest(manifest){
+  if(!manifest?.id||!manifest?.capabilities)throw new TypeError("Target manifest requires id and capabilities.");
+  manifests.set(manifest.id,structuredClone(manifest));
+}
