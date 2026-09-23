@@ -5,6 +5,7 @@ import { listTargetManifests } from "../packages/targets/src/index.js";
 
 test("normalizePolicy creates canonical shape",()=>{assert.deepEqual(normalizePolicy({vpn:true,blocking:{trackers:true}}),{version:"0.1",policy:{vpn:true,dns:false,routing:false,blocking:{malware:false,trackers:true}}});});
 test("unknown targets cannot export",()=>{const r=compatibilityReport({vpn:true},"does-not-exist");assert.equal(r.exportable,false);assert.ok(r.diagnostics.some(x=>x.code==="TARGET_UNKNOWN"));});
+test("high diagnostics also block export",()=>{const r=compatibilityReport({vpn:true},"surge");assert.equal(r.exportable,false);assert.ok(r.diagnostics.some(x=>x.level==="CRITICAL"));});
 test("evidence-only targets do not claim unsupported capabilities",()=>{const r=compatibilityReport({vpn:true},"surge");assert.equal(r.exportable,false);assert.equal(r.capabilities.vpn.state,"UNKNOWN");assert.ok(r.diagnostics.some(x=>x.code==="CAPABILITY_UNKNOWN"));});
 test("verified reference capability can report exportability",()=>{const r=compatibilityReport({vpn:true},"example");assert.equal(r.exportable,true);assert.equal(r.capabilities.vpn.state,"SUPPORTED");});
 test("compile refuses missing adapter",()=>{const r=compile({vpn:true},"example",null);assert.equal(r.ok,false);assert.equal(r.report.exportable,false);assert.ok(r.report.diagnostics.some(x=>x.code==="ADAPTER_UNAVAILABLE"));});
