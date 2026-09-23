@@ -50,7 +50,7 @@ const buildExportBundle=(policyForExport)=>({
   evidence:testEvidence,
   artifacts:Object.fromEntries(exportFormats.map(x=>[
     x.id,
-    {file:\`${x.id}\${x.extension}\`,status:x.status,content:getExportArtifact(x.id)}
+    {file:x.id+x.extension,status:x.status,content:getExportArtifact(x.id)}
   ])),
   safety:{
     secretsExcluded:true,
