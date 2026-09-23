@@ -1,0 +1,25 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://example.invalid/configuration-platform/schemas/manifest.schema.json",
+  "title":"Configuration Bundle Manifest",
+  "type":"object",
+  "required":["formatVersion","profile","artifacts"],
+  "properties":{
+    "formatVersion":{"type":"string"},
+    "profile":{"type":"string","minLength":1},
+    "artifacts":{
+      "type":"array",
+      "items":{
+        "type":"object",
+        "required":["target","status","path"],
+        "properties":{
+          "target":{"type":"string"},
+          "status":{"type":"string","enum":["supported","partial","failed","not-generated"]},
+          "path":{"type":"string"}
+        },
+        "additionalProperties":false
+      }
+    }
+  },
+  "additionalProperties":false
+}
