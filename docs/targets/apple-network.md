@@ -6,13 +6,21 @@ This evidence covers Apple platform networking capabilities relevant to the proj
 
 ## Verified facts
 
-Apple documents encrypted DNS through the declarative configuration type `com.apple.configuration.network.dns-settings`. Local installs are supported for this configuration, subject to the availability rules documented by Apple. citeturn0search9
+Apple documents encrypted DNS through the declarative configuration type `com.apple.configuration.network.dns-settings`. Local installs are supported for this configuration, subject to Apple's availability rules.
 
-Apple documents VPN plugin configuration through `com.apple.configuration.network.vpn.vpn-plugin`, with local enrollment available on iOS/iPadOS for supported configurations. citeturn0search11
+Source: https://developer.apple.com/documentation/devicemanagement/networkdnssettings
 
-Per-App VPN has additional MDM and app-management requirements; it is not equivalent to simply generating a profile file. citeturn0search3
+Apple documents VPN plugin configuration through `com.apple.configuration.network.vpn.vpn-plugin`, with local enrollment available on supported iOS/iPadOS configurations.
 
-Apple's Network Extension framework is the supported API family for VPN applications. citeturn0search13
+Source: https://developer.apple.com/documentation/devicemanagement/networkvpnvpnplugin
+
+Per-App VPN has additional MDM and app-management requirements; it is not equivalent to simply generating a profile file.
+
+Source: https://developer.apple.com/documentation/networkextension/netunnelprovidermanager
+
+Apple's Network Extension framework is the supported API family for VPN applications.
+
+Source: https://developer.apple.com/videos/play/wwdc2025/234/
 
 ## Project rule
 
