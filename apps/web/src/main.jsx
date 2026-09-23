@@ -58,7 +58,7 @@ const buildExportBundle=(policyForExport)=>({
   evidence:testEvidence,
   artifacts:Object.fromEntries(exportFormats.map(x=>[
     x.id,
-    {file:x.id+x.extension,status:x.status,content:getExportArtifact(x.id)}
+    {file:x.id+x.extension,status:x.status,content:getExportArtifact(x.id, policyForExport)}
   ])),
   safety:{
     secretsExcluded:true,
@@ -100,7 +100,7 @@ function App(){
         trackers,
         separateFromResolver:separateBlocking
       },
-      architecture:{
+      dnsServers:["1.1.1.1","1.0.0.1"],\n      rules:[],\n      finalPolicy:"DIRECT",\n      bypassSystem:true,\n      architecture:{
         normalDns:true,
         intermediary:true,
         appMaySeeRequestedDomain:true,
@@ -118,7 +118,7 @@ function App(){
   },[]);
 
   const selectedFormat=exportFormats.find(x=>x.id===target)||exportFormats[0];
-  const selectedArtifact=getExportArtifact(selectedFormat.id);
+  const selectedArtifact=getExportArtifact(selectedFormat.id,policyForExport);
   const functions=selectedFormat.functions||[];
   const activeFunction=functions.find(x=>x.id===selectedFunction)||functions[0];
   const preflight=useMemo(()=>compatibilityReport(policy,target),[policy,target]);
@@ -193,7 +193,7 @@ function App(){
             const guide={
               target:selectedFormat.label,
               function:activeFunction,
-              artifact:getExportArtifact(selectedFormat.id),
+              artifact:getExportArtifact(selectedFormat.id,policyForExport),
               note:"ใช้เป็นชุดอ้างอิงสำหรับทดสอบฟังก์ชันนี้บนแอปจริง; ห้ามถือว่าเป็นผลยืนยันจนกว่าจะทดสอบจริง"
             };
             download(
@@ -223,7 +223,7 @@ function App(){
           </div>
           <small>{selectedFormat.extension} — {selectedFormat.description}</small>
           <button disabled={!exportAllowed} onClick={()=>{
-            const artifact=getExportArtifact(selectedFormat.id);
+            const artifact=getExportArtifact(selectedFormat.id,policyForExport);
             download(`${selectedFormat.id}-config${selectedFormat.extension}`,artifact,selectedFormat.mime);
           }}>
             Export {selectedFormat.label}
