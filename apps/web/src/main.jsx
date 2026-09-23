@@ -1,6 +1,6 @@
 import React,{useMemo,useState} from "react";
 import {createRoot} from "react-dom/client";
-import {compatibilityReport,redact} from "../../../packages/core/src/index.js";
+import {compatibilityReport,compile,redact} from "../../../packages/core/src/index.js";
 import {compileSurge} from "../../../packages/surge-adapter/src/index.js";
 import {
   exportFormats,
@@ -111,6 +111,9 @@ function App(){
   const selectedArtifact=getExportArtifact(selectedFormat.id);
   const functions=selectedFormat.functions||[];
   const activeFunction=functions.find(x=>x.id===selectedFunction)||functions[0];
+  const preflight=useMemo(()=>compatibilityReport(policy,target),[policy,target]);
+  const exportAllowed=preflight.exportable;
+  const exportBlockReasons=preflight.diagnostics.filter(d=>d.level==="CRITICAL"||d.level==="HIGH");
 
   return <main>
     <header>
@@ -175,7 +178,7 @@ function App(){
             <span>วิธีทดสอบ</span>
             <p>{activeFunction.test}</p>
           </div>
-          <button onClick={()=>{
+          <button disabled={!exportAllowed} onClick={()=>{
             const guide={
               target:selectedFormat.label,
               function:activeFunction,
@@ -192,6 +195,15 @@ function App(){
           </button>
         </div>}
 
+        <h3>ตรวจสอบก่อนส่งออก</h3>
+        <div className={`preflight ${exportAllowed?"preflight-ok":"preflight-blocked"}`}>
+          <strong>{exportAllowed?"ผ่านการตรวจสอบเชิงโครงสร้าง":"หยุดการส่งออกอัตโนมัติ"}</strong>
+          {exportBlockReasons.length>0
+            ? <ul>{exportBlockReasons.map((d,i)=><li key={i}>{d.code}: {d.message}</li>)}</ul>
+            : <p>ไม่มี diagnostic ระดับที่บล็อกการส่งออก</p>}
+          <small>ระบบจะไม่ถือว่า configuration ใช้งานได้จริงเพียงเพราะสร้างไฟล์ได้ ต้องมี target adapter ที่ผ่านการตรวจและ evidence จากการทดสอบจริงด้วย</small>
+        </div>
+
         <h3>ส่งออกโปรไฟล์เต็ม</h3>
         <div className="export-item">
           <div className="export-head">
@@ -207,7 +219,7 @@ function App(){
           </button>
         </div>
 
-        <button onClick={()=>download("policy.json",JSON.stringify(policyForExport,null,2),"application/json")} disabled={!report.exportable}>
+        <button onClick={()=>download("policy.json",JSON.stringify(policyForExport,null,2),"application/json")} disabled={!exportAllowed}>
           Export Policy
         </button>
         <button onClick={()=>download("network-test-bundle.json",JSON.stringify(exportBundle(),null,2),"application/json")}>
