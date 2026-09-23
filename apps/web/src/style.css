@@ -1,3 +1,25 @@
 *{box-sizing:border-box}html{background:#f5f7fa}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans Thai","Noto Sans",system-ui,sans-serif;background:#f5f7fa;color:#17202a;line-height:1.55}main{max-width:1120px;margin:auto;padding:clamp(14px,3vw,32px)}header{margin-bottom:18px}header h1{margin:0 0 6px;font-size:clamp(25px,5vw,36px)}header p{margin:0;color:#5d6875}.grid{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:16px}.card{background:#fff;border:1px solid #dfe3e8;border-radius:16px;padding:clamp(16px,3vw,22px);box-shadow:0 3px 16px rgba(0,0,0,.05)}h2,h3{margin-top:0}label{display:block;margin:14px 0;font-weight:600}label input[type=checkbox]{width:20px;height:20px;vertical-align:-5px;margin-right:8px}input:not([type=checkbox]),select{display:block;width:100%;min-height:46px;padding:10px 12px;margin-top:7px;border:1px solid #ccd2d8;border-radius:10px;background:#fff;font-size:16px}button{width:100%;min-height:46px;margin:6px 0;padding:11px 15px;border:0;border-radius:10px;background:#17202a;color:#fff;cursor:pointer;font-size:15px;font-weight:650}button:disabled{opacity:.45}.row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #eee;padding:11px 0}.row span{overflow-wrap:anywhere}.row strong{white-space:nowrap}pre{background:#111;color:#eee;padding:14px;border-radius:10px;overflow:auto;font-size:12px;line-height:1.5;max-height:420px}ul{padding-left:22px}.card h3{margin-top:22px}.muted{color:#687482;font-size:14px}.export-item{border:1px solid #e2e6ea;border-radius:12px;padding:12px;margin:10px 0;background:#fafbfc}.export-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:5px}.export-item small{display:block;color:#687482;line-height:1.45}.badge{display:inline-flex;align-items:center;min-height:24px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:750;white-space:nowrap;text-transform:uppercase}.badge-template{background:#e8f1ff;color:#24558f}.badge-reference{background:#eef0f3;color:#4c5661}.badge-legacy{background:#fff2df;color:#8a5a00}@media(max-width:800px){.grid{grid-template-columns:1fr}main{padding:12px}.card{border-radius:14px;padding:15px}header{padding:4px 3px}.row{align-items:flex-start}pre{font-size:11px;max-height:360px}.export-item{padding:11px}}
 .function-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.function-button{margin:0;background:#eef1f4;color:#17202a;text-align:left}.function-button.active{background:#17202a;color:#fff}.guide-panel{border:1px solid #cfd6dd;border-radius:12px;padding:14px;margin:10px 0 16px;background:#f8fafc}.guide-row{border-top:1px solid #e2e6ea;padding:10px 0}.guide-row>span{display:block;font-size:12px;font-weight:750;color:#687482;text-transform:uppercase;margin-bottom:4px}.guide-row p{margin:0}.guide-row code{display:block;background:#111;color:#eee;padding:9px;border-radius:8px;overflow:auto}@media(max-width:520px){.function-list{grid-template-columns:1fr}}
 .language-menu{display:flex;justify-content:flex-end;margin-bottom:12px}.language-menu label{display:flex;align-items:center;gap:8px;font-size:.9rem}.language-menu select{width:auto;min-width:110px;padding:7px 10px}
+
+/* Mobile-first layout */
+main{width:100%;max-width:1180px;margin:0 auto;padding:14px}
+header{margin-bottom:14px}
+header h1{font-size:clamp(24px,7vw,36px);line-height:1.2}
+header p{font-size:14px;line-height:1.5}
+.grid{grid-template-columns:1fr;gap:12px}
+.card{width:100%;padding:14px;border-radius:13px;box-shadow:0 2px 10px rgba(0,0,0,.045)}
+label{margin:12px 0;font-size:15px}
+input:not([type=checkbox]),select,button{min-height:48px;font-size:16px}
+.language-menu{justify-content:flex-end;margin-bottom:10px}
+.language-menu select{min-height:42px;width:auto}
+.function-list{grid-template-columns:1fr;gap:7px}
+.function-button{text-align:center}
+.guide-panel{padding:12px;margin:8px 0 14px}
+.guide-row{padding:9px 0}
+.row{gap:8px;font-size:14px}
+pre{max-width:100%;font-size:11px;line-height:1.45;max-height:320px;white-space:pre;overflow:auto}
+.export-head{align-items:flex-start}
+.badge{flex-shrink:0}
+@media(min-width:700px){main{padding:22px}.grid{grid-template-columns:minmax(320px,420px) minmax(0,1fr);gap:16px}.function-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:380px){main{padding:9px}.card{padding:12px;border-radius:11px}header h1{font-size:23px}.card h2{font-size:20px}.card h3{font-size:17px}.row{font-size:13px}.guide-row code{font-size:11px}}
