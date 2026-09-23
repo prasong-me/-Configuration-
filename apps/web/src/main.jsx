@@ -1,6 +1,6 @@
 import React,{useMemo,useState} from "react";
 import {createRoot} from "react-dom/client";
-import {compatibilityReport,compile,redact} from "../../../packages/core/src/index.js";
+import {compatibilityReport,redact} from "../../../packages/core/src/index.js";
 import {compileSurge} from "../../../packages/surge-adapter/src/index.js";
 import {
   exportFormats,
@@ -112,7 +112,7 @@ function App(){
   const functions=selectedFormat.functions||[];
   const activeFunction=functions.find(x=>x.id===selectedFunction)||functions[0];
   const preflight=useMemo(()=>compatibilityReport(policy,target),[policy,target]);
-  const exportAllowed=preflight.exportable;
+  const exportAllowed=false;
   const exportBlockReasons=preflight.diagnostics.filter(d=>d.level==="CRITICAL"||d.level==="HIGH");
 
   return <main>
@@ -201,7 +201,7 @@ function App(){
           {exportBlockReasons.length>0
             ? <ul>{exportBlockReasons.map((d,i)=><li key={i}>{d.code}: {d.message}</li>)}</ul>
             : <p>ไม่มี diagnostic ระดับที่บล็อกการส่งออก</p>}
-          <small>ระบบจะไม่ถือว่า configuration ใช้งานได้จริงเพียงเพราะสร้างไฟล์ได้ ต้องมี target adapter ที่ผ่านการตรวจและ evidence จากการทดสอบจริงด้วย</small>
+          <small>ปุ่มส่งออก target จะเปิดก็ต่อเมื่อ target/function นั้นผ่านการตรวจ syntax + adapter + evidence จริงแล้ว</small>
         </div>
 
         <h3>ส่งออกโปรไฟล์เต็ม</h3>
@@ -222,7 +222,7 @@ function App(){
         <button onClick={()=>download("policy.json",JSON.stringify(policyForExport,null,2),"application/json")} disabled={!exportAllowed}>
           Export Policy
         </button>
-        <button onClick={()=>download("network-test-bundle.json",JSON.stringify(exportBundle(),null,2),"application/json")}>
+        <button onClick={()=>download("network-test-bundle.json",JSON.stringify(buildExportBundle(policyForExport),null,2),"application/json")}>
           Export ข้อมูลการทดสอบทั้งหมด
         </button>
       </div>
@@ -244,7 +244,7 @@ function App(){
           <p>ทดสอบทีละความสามารถบนเครื่องจริง; ชุดนี้ไม่ฝัง Private Key, credential หรือ certificate</p>
           <pre>{surgeArtifact.content||surgeArtifact.error}</pre>
           {!surgeArtifact.error&&
-            <button onClick={()=>download("surge-fixture.conf",surgeArtifact.content,"text/plain")}>
+            <button disabled={!exportAllowed} onClick={()=>download("surge-fixture.conf",surgeArtifact.content,"text/plain")}>
               Download fixture
             </button>
           }
