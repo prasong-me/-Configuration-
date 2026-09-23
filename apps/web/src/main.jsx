@@ -77,6 +77,8 @@ function download(name,text,mime){
 }
 
 function App(){
+  const [language,setLanguage]=useState("th");
+  const tr=translations[language];
   const [name,setName]=useState("My Privacy Profile");
   const [vpn,setVpn]=useState(false);
   const [dns,setDns]=useState(true);
@@ -125,8 +127,9 @@ function App(){
 
   return <main>
     <header>
-      <h1>Network Configuration</h1>
-      <p>จัดการ DNS, VPN, Routing และนโยบายบล็อกแยกจากกัน พร้อมส่งออกไฟล์ตามรูปแบบของแต่ละแอป</p>
+      <div className="language-menu"><label>{tr.language}<select value={language} onChange={e=>setLanguage(e.target.value)}><option value="th">{tr.thai}</option><option value="en">{tr.english}</option></select></label></div>
+      <h1>{tr.title}</h1>
+      <p>{tr.subtitle}</p>
     </header>
 
     <section className="grid">
