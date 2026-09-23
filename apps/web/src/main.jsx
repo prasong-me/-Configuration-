@@ -235,7 +235,7 @@ function App(){
         </div>
         <p>{selectedFormat.description}</p>
         <pre>{selectedArtifact}</pre>
-        <button onClick={()=>download(`${selectedFormat.id}-config${selectedFormat.extension}`,selectedArtifact,selectedFormat.mime)}>
+        <button disabled={!exportAllowed} onClick={()=>download(`${selectedFormat.id}-config${selectedFormat.extension}`,selectedArtifact,selectedFormat.mime)}>
           Download {selectedFormat.label}
         </button>
 
