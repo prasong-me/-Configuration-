@@ -222,7 +222,7 @@ function App(){
         <button onClick={()=>download("policy.json",JSON.stringify(policyForExport,null,2),"application/json")} disabled={!exportAllowed}>
           Export Policy
         </button>
-        <button onClick={()=>download("network-test-bundle.json",JSON.stringify(buildExportBundle(policyForExport),null,2),"application/json")}>
+        <button disabled={!exportAllowed} onClick={()=>download("network-test-bundle.json",JSON.stringify(buildExportBundle(policyForExport),null,2),"application/json")}>
           Export ข้อมูลการทดสอบทั้งหมด
         </button>
       </div>
