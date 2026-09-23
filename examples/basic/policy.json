@@ -1,0 +1,21 @@
+{
+  "version": "0.1",
+  "policy": {
+    "name": "basic-example",
+    "description": "Minimal example of a canonical policy.",
+    "vpn": {
+      "enabled": false
+    },
+    "dns": {
+      "enabled": true
+    },
+    "routing": {
+      "ipv4": true,
+      "ipv6": true
+    },
+    "blocking": {
+      "malware": false,
+      "tracker": false
+    }
+  }
+}
