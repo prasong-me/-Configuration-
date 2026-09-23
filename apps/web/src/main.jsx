@@ -5,10 +5,10 @@ import {compileSurge} from "../../../packages/surge-adapter/src/index.js";
 import "./style.css";
 
 const targets=[
-  {id:"example",label:"Reference / Core test"},
-  {id:"surge",label:"Surge 5 — evidence-only"},
-  {id:"wireguard",label:"WireGuard — template/evidence-only"},
-  {id:"shadowrocket",label:"Shadowrocket — tested DNS evidence-only"}
+  {id:"example",label:"อ้างอิง / Core test"},
+  {id:"surge",label:"Surge 5 — ข้อมูลการทดสอบ"},
+  {id:"wireguard",label:"WireGuard — Template"},
+  {id:"shadowrocket",label:"Shadowrocket — DNS test"}
 ];
 
 const surgeExample={dnsServers:["1.1.1.1","1.0.0.1"],rules:[],finalPolicy:"DIRECT"};
@@ -96,7 +96,7 @@ function App(){
   const [malware,setMalware]=useState(true);
   const [trackers,setTrackers]=useState(true);
   const [separateBlocking,setSeparateBlocking]=useState(true);
-  const [target,setTarget]=useState("surge");
+  const [target,setรูปแบบการใช้งาน]=useState("surge");
 
   const policy=useMemo(()=>({
     version:"0.2",
@@ -129,23 +129,23 @@ function App(){
 
   return <main>
     <header>
-      <h1>Configuration Platform</h1>
-      <p>Evidence-first configuration builder for DNS, VPN, routing and separate blocking policies.</p>
+      <h1>Network Configuration</h1>
+      <p>จัดการ DNS, VPN, Routing และนโยบายบล็อกแยกจากกัน พร้อมเก็บข้อมูลจากการทดสอบจริง</p>
     </header>
 
     <section className="grid">
       <div className="card">
-        <h2>Policy Builder</h2>
+        <h2>ตั้งค่าโปรไฟล์</h2>
 
-        <label>Profile name
+        <label>ชื่อโปรไฟล์
           <input value={name} onChange={e=>setName(e.target.value)}/>
         </label>
 
-        <label><input type="checkbox" checked={vpn} onChange={e=>setVpn(e.target.checked)}/> VPN / intermediary</label>
-        <label><input type="checkbox" checked={dns} onChange={e=>setDns(e.target.checked)}/> Normal DNS resolution</label>
-        <label><input type="checkbox" checked={malware} onChange={e=>setMalware(e.target.checked)}/> Malware blocking policy</label>
-        <label><input type="checkbox" checked={trackers} onChange={e=>setTrackers(e.target.checked)}/> Tracker blocking policy</label>
-        <label><input type="checkbox" checked={separateBlocking} onChange={e=>setSeparateBlocking(e.target.checked)}/> Keep blocking as a separate policy</label>
+        <label><input type="checkbox" checked={vpn} onChange={e=>setVpn(e.target.checked)}/> VPN / ตัวกลาง</label>
+        <label><input type="checkbox" checked={dns} onChange={e=>setDns(e.target.checked)}/> DNS ปกติ</label>
+        <label><input type="checkbox" checked={malware} onChange={e=>setMalware(e.target.checked)}/> บล็อก Malware</label>
+        <label><input type="checkbox" checked={trackers} onChange={e=>setTrackers(e.target.checked)}/> บล็อก Tracker</label>
+        <label><input type="checkbox" checked={separateBlocking} onChange={e=>setSeparateBlocking(e.target.checked)}/> แยกระบบบล็อกออกจาก DNS</label>
 
         <label>Target
           <select value={target} onChange={e=>setTarget(e.target.value)}>
@@ -153,41 +153,41 @@ function App(){
           </select>
         </label>
 
-        <h3>Export</h3>
+        <h3>ส่งออกไฟล์</h3>
         <button onClick={()=>download("policy.json",JSON.stringify(policyForExport,null,2),"application/json")} disabled={!report.exportable}>
-          Export canonical Policy
+          Export Policy
         </button>
         <button onClick={()=>download("network-test-bundle.json",JSON.stringify(exportBundle(),null,2),"application/json")}>
-          Export full test bundle
+          Export ข้อมูลการทดสอบทั้งหมด
         </button>
         <button onClick={()=>download("wireguard-template.conf",wireGuardTemplate,"text/plain")}>
-          Export WireGuard template
+          Export WireGuard Template
         </button>
         <button onClick={()=>download("shadowrocket-dns-evidence.conf",shadowrocketEvidence,"text/plain")}>
-          Export Shadowrocket DNS evidence
+          Export Shadowrocket DNS Test
         </button>
       </div>
 
       <div className="card">
-        <h2>Compatibility Report</h2>
+        <h2>ผลการรองรับ</h2>
         {Object.entries(report.capabilities).map(([f,x])=>
           <div className="row" key={f}>
             <span>{f}</span><strong>{x.requested?x.state:"NOT_REQUESTED"}</strong>
           </div>
         )}
 
-        <h3>Test Evidence</h3>
+        <h3>ข้อมูลจากการทดสอบ</h3>
         <pre>{JSON.stringify(testEvidence,null,2)}</pre>
 
         <h3>Diagnostics</h3>
         {report.diagnostics.length
           ? <ul>{report.diagnostics.map((d,i)=><li key={i}><strong>{d.level}</strong> {d.code}: {d.message}</li>)}</ul>
-          : <p>No diagnostics.</p>
+          : <p>ไม่พบ Diagnostics</p>
         }
 
         {target==="surge"&&<>
-          <h3>Surge isolated test pack</h3>
-          <p>ทดสอบทีละความสามารถบนเครื่องจริง; ชุดนี้ไม่ฝัง private key, credential หรือ certificate</p>
+          <h3>Surge test pack</h3>
+          <p>ทดสอบทีละความสามารถบนเครื่องจริง; ชุดนี้ไม่ฝัง Private Key, credential หรือ certificate</p>
           <pre>{surgeArtifact.content||surgeArtifact.error}</pre>
           {!surgeArtifact.error&&
             <button onClick={()=>download("surge-fixture.conf",surgeArtifact.content,"text/plain")}>
@@ -197,18 +197,18 @@ function App(){
         </>}
 
         {target==="wireguard"&&<>
-          <h3>WireGuard template</h3>
+          <h3>WireGuard Template</h3>
           <pre>{wireGuardTemplate}</pre>
-          <p>Template intentionally omits private keys and does not claim that EM Proxy capabilities are configurable.</p>
+          <p>Template นี้ไม่ใส่ Private Key จริง และไม่อ้างว่า EM Proxy สามารถตั้งค่าภายในได้</p>
         </>}
 
         {target==="shadowrocket"&&<>
-          <h3>Shadowrocket evidence-only profile</h3>
+          <h3>Shadowrocket DNS Test</h3>
           <pre>{shadowrocketEvidence}</pre>
-          <p>Tested behavior: Effective DNS was observed as 1.1.1.1 and 1.0.0.1 while system DNS was separately reported as 94.140.14.15 and 94.140.14.16.</p>
+          <p>ผลทดสอบ: Effective DNS = 1.1.1.1, 1.0.0.1 และ System DNS ที่รายงานแยกต่างหาก = 94.140.14.15, 94.140.14.16</p>
         </>}
 
-        <h3>Canonical Policy</h3>
+        <h3>Policy ที่สร้าง</h3>
         <pre>{JSON.stringify(policy,null,2)}</pre>
       </div>
     </section>
