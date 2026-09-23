@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/configuration-platform/schemas/policy.schema.json",
+  "title": "Canonical Policy",
+  "type": "object",
+  "required": ["version", "policy"],
+  "properties": {
+    "version": { "type": "string" },
+    "policy": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "vpn": { "type": "object" },
+        "dns": { "type": "object" },
+        "routing": { "type": "object" },
+        "proxy": { "type": "object" },
+        "blocking": { "type": "object" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}
