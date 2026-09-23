@@ -43,14 +43,14 @@ const testEvidence={
   }
 };
 
-const exportBundle=()=>({
+const buildExportBundle=(policyForExport)=>({
   schemaVersion:"0.3-test-bundle",
   generatedAt:new Date().toISOString(),
   policy:policyForExport,
   evidence:testEvidence,
   artifacts:Object.fromEntries(exportFormats.map(x=>[
     x.id,
-    {file:`${x.id}${x.extension}`,status:x.status,content:getExportArtifact(x.id)}
+    {file:\`${x.id}\${x.extension}\`,status:x.status,content:getExportArtifact(x.id)}
   ])),
   safety:{
     secretsExcluded:true,
