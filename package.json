@@ -1,0 +1,1 @@
+{"name":"configuration-platform","private":true,"version":"0.1.0","type":"module","scripts":{"test":"node --test tests/**/*.test.js","test:core":"node --test tests/core.test.js","build:web":"npm --prefix apps/web install && npm --prefix apps/web run build"},"workspaces":["packages/*","apps/*"]}
