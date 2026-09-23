@@ -2,7 +2,9 @@
 
 ## Official evidence
 
-WireGuard documents the standard configuration model using `[Interface]` and `[Peer]` sections, including fields such as `Address`, `DNS`, `PrivateKey`, `PublicKey`, `AllowedIPs`, and `Endpoint`. citeturn0search48
+WireGuard documents the standard configuration model using `[Interface]` and `[Peer]` sections, including fields such as `Address`, `DNS`, `PrivateKey`, `PublicKey`, `AllowedIPs`, and `Endpoint`.
+
+Source: https://www.wireguard.com/talks/netdev2017-slides.pdf
 
 ## Project status
 
