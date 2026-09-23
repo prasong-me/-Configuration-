@@ -68,7 +68,7 @@ export const exportFormats = [
     mime: "text/plain",
     status: "template",
     description: "INI-like profile with [General], [Proxy], [Proxy Group], [Rule] and related sections.",
-    functions: functionGuides["surge"] || []
+    functions: functionGuides["mihomo"] || []
   },
   {
     id: "mihomo",
@@ -77,7 +77,7 @@ export const exportFormats = [
     mime: "text/yaml",
     status: "template",
     description: "YAML configuration using dns, proxies, proxy-groups and rules.",
-    functions: functionGuides["surge"] || []
+    functions: functionGuides["wireguard"] || []
   },
   {
     id: "wireguard",
@@ -86,7 +86,7 @@ export const exportFormats = [
     mime: "text/plain",
     status: "template",
     description: "Standard WireGuard INI-style configuration.",
-    functions: functionGuides["surge"] || []
+    functions: functionGuides["shadowrocket"] || []
   },
   {
     id: "shadowrocket",
@@ -95,7 +95,7 @@ export const exportFormats = [
     mime: "text/plain",
     status: "template",
     description: "Shadowrocket profile format; DNS and routing sections are separated.",
-    functions: functionGuides["surge"] || []
+    functions: functionGuides["loon"] || []
   },
   {
     id: "loon",
@@ -104,7 +104,7 @@ export const exportFormats = [
     mime: "text/plain",
     status: "template",
     description: "Loon section-based configuration with [General], [Proxy], [Proxy Group] and [Rule].",
-    functions: functionGuides["surge"] || []
+    functions: functionGuides["stash"] || []
   },
   {
     id: "stash",
@@ -113,7 +113,7 @@ export const exportFormats = [
     mime: "text/yaml",
     status: "template",
     description: "YAML configuration with dns and rules sections.",
-    functions: functionGuides["surge"] || []
+    functions: functionGuides["quantumult-x"] || []
   },
   {
     id: "quantumult-x",
@@ -122,7 +122,7 @@ export const exportFormats = [
     mime: "text/plain",
     status: "template",
     description: "Quantumult X section-based configuration.",
-    functions: functionGuides["surge"] || []
+    functions: functionGuides["apple-dns-declaration"] || []
   },
   {
     id: "apple-dns-declaration",
@@ -131,7 +131,7 @@ export const exportFormats = [
     mime: "application/json",
     status: "reference",
     description: "Current declarative configuration format for com.apple.configuration.network.dns-settings.",
-    functions: functionGuides["surge"] || []
+    functions: functionGuides["apple-mobileconfig-legacy"] || []
   },
   {
     id: "apple-mobileconfig-legacy",
