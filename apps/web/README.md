@@ -1,10 +1,10 @@
-# Web App
+# เว็บแอป
 
-The first milestone is intentionally small: a browser-only Policy Builder and Capability Preview.
+เป้าหมายระยะแรกตั้งใจให้มีขนาดเล็ก โดยเป็นตัวสร้างนโยบายบนเบราว์เซอร์และหน้าดูความสามารถของ Target
 
-It does not install profiles, alter device settings, intercept traffic, or act as a VPN runtime. It generates a canonical Policy JSON artifact that can later be compiled by target adapters.
+เว็บแอปนี้ไม่ได้ติดตั้งโปรไฟล์ เปลี่ยนการตั้งค่าอุปกรณ์ ดักรับทราฟฟิก หรือทำหน้าที่เป็น VPN runtime แต่จะสร้าง Canonical Policy JSON ซึ่งสามารถนำไปคอมไพล์ด้วย Target Adapter ได้ในภายหลัง
 
-Run locally:
+การรันภายในเครื่อง:
 
 ```
 cd apps/web
