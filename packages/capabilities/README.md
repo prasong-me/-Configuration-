@@ -1,8 +1,8 @@
-# Capability Engine
+# เครื่องยนต์ความสามารถ
 
-The Capability Engine answers whether a Target can represent a requested policy feature.
+เครื่องยนต์ความสามารถตอบว่า Target สามารถแทนฟีเจอร์ของ Policy ที่ร้องขอได้หรือไม่
 
-States:
+สถานะ:
 
 - SUPPORTED
 - LIMITED
@@ -11,4 +11,4 @@ States:
 - UNSUPPORTED
 - UNKNOWN
 
-The engine is descriptive. It does not grant permissions or bypass target restrictions.
+เครื่องยนต์นี้มีหน้าที่อธิบายสถานะเท่านั้น ไม่ได้มอบสิทธิ์หรือข้ามข้อจำกัดของ Target
