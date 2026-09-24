@@ -5,7 +5,8 @@ import {getTargetTestRecord} from "../../../packages/targets/src/index.js";
 import {compileSurge} from "../../../packages/surge-adapter/src/index.js";
 import {
   exportFormats,
-  getExportArtifact
+  getExportArtifact,
+  getExportWarnings
 } from "../../../packages/targets/src/exporters.js";
 import "./style.css";
 import {createIosWebClipMobileConfig} from "./mobileconfig.js";
@@ -106,6 +107,10 @@ function App(){
       },
       dnsServers:dnsServers.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean),
       proxyServer:proxyServer.trim(),
+      dnsProtocol:"HTTPS",
+      dnsServerUrl:dnsServers.trim()?`https://dns.example.com/dns-query`:"",
+      dnsDomains:[],
+      webAppUrl:window.location.href,
       rules:[],
       finalPolicy:"DIRECT",
       bypassSystem:true,
@@ -135,6 +140,7 @@ function App(){
   const hasRealTestEvidence=Boolean(targetTestRecord?.testsPassed>0);
   const exportAllowed=preflight.exportable;
   const exportBlockReasons=preflight.diagnostics.filter(d=>d.level==="CRITICAL"||d.level==="HIGH");
+  const exportWarnings=getExportWarnings(selectedFormat.id,policyForExport);
 
   return <main>
     <header>
@@ -227,6 +233,8 @@ function App(){
             ส่งออกชุดทดสอบฟังก์ชันนี้
           </button>
         </div>}
+
+        {exportWarnings.length>0&&<div className="preflight preflight-warning"><strong>คำเตือนก่อนใช้งาน</strong><ul>{exportWarnings.map((w,i)=><li key={i}>{w.code}: {w.message}</li>)}</ul></div>}
 
         <div className="quick-actions">
           <strong>Actions</strong>
