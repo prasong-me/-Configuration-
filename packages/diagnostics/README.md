@@ -1,12 +1,12 @@
 # Diagnostics
 
-A shared diagnostic model for validation, capability analysis, threat management, compilation, and target adapters.
+โมเดล diagnostics ที่ใช้ร่วมกันสำหรับการตรวจสอบ validation การวิเคราะห์ความสามารถ การจัดการภัยคุกคาม การคอมไพล์ และ Target Adapter
 
-Levels:
+ระดับ:
 
 - INFO
 - WARNING
 - HIGH
 - CRITICAL
 
-Each diagnostic should include a stable code, message, and optional policy path, target, and feature.
+Diagnostic แต่ละรายการควรมีรหัสที่คงที่ ข้อความ และอาจระบุ policy path, target และ feature
