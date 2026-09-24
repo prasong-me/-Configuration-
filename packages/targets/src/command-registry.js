@@ -40,6 +40,11 @@ const registry=Object.freeze({
     domain:{kind:CommandKind.RULE,section:"filter_local",operator:"host"},
     ipCidr:{kind:CommandKind.RULE,section:"filter_local",operator:"ip-cidr"}
   }},
+  "apple-mobileconfig":{id:"apple-mobileconfig",commands:{
+    dns:{kind:CommandKind.DNS,payloadType:"com.apple.dnsSettings.managed"},
+    webClip:{kind:CommandKind.RULE,payloadType:"com.apple.webClip.managed"},
+    vpn:{kind:CommandKind.ROUTE,payloadType:"VPN"}
+  }},
   wireguard:{id:"wireguard",commands:{
     dns:{kind:CommandKind.DNS,section:"Interface",key:"DNS",listSeparator:", "},
     ipCidr:{kind:CommandKind.ROUTE,key:"AllowedIPs",listSeparator:", "}
