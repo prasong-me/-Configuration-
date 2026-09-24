@@ -294,7 +294,7 @@ function App(){
         )}
 
         <h3>{tr.evidence}</h3>
-        <pre>{JSON.stringify(targetTestRecord || legacyTestEvidence,null,2)}</pre>
+        <pre>{JSON.stringify(targetTestRecord || testEvidence,null,2)}</pre>
 
         <h3>{tr.diagnostics}</h3>
         {report.diagnostics.length
