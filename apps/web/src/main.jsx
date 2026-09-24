@@ -106,7 +106,8 @@ function App(){
       dnsServers:dnsServers.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean),
       proxyServer:proxyServer.trim(),
       rules:[],
-      finalPolicy:"DIRECT",\n      bypassSystem:true,\n      architecture:{
+      finalPolicy:"DIRECT",
+      bypassSystem:true,\n      architecture:{
         normalDns:true,
         intermediary:true,
         appMaySeeRequestedDomain:true,
