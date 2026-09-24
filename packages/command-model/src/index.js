@@ -1,4 +1,4 @@
-const VERSION="1.0";
+const VERSION="1.1";
 
 export const CommandKind=Object.freeze({
   DNS:"dns",
@@ -7,6 +7,13 @@ export const CommandKind=Object.freeze({
   RULE:"rule",
   ROUTE:"route",
   BLOCK:"block"
+});
+
+export const ActionKind=Object.freeze({
+  DIRECT:"direct",
+  PROXY:"proxy",
+  BLOCK:"block",
+  FINAL:"final"
 });
 
 function cleanString(value,path){
@@ -21,19 +28,21 @@ function assertInteger(value,path,min,max){
 
 function isIPv4(address){
   const parts=address.split(".");
-  return parts.length===4&&parts.every(part=>/^(0|[1-9]\\d*)$/.test(part)&&Number(part)<=255);
+  return parts.length===4&&parts.every(part=>/^(0|[1-9]\d*)$/.test(part)&&Number(part)<=255);
 }
 
 function isIPv6(address){
-  if(address.includes(".")) return false;
   if(address.includes(":::")) return false;
   const parts=address.split("::");
   if(parts.length>2) return false;
-  const left=parts[0]?parts[0].split(":"):[];
-  const right=parts.length===2&&parts[1]?parts[1].split(":"):[];
   const valid=group=>/^[0-9a-fA-F]{1,4}$/.test(group);
-  if(!left.every(valid)||!right.every(valid)) return false;
-  return parts.length===2 ? left.length+right.length<8 : left.length===8;
+  const expandEmbedded=group=>group.includes(".")&&isIPv4(group);
+  const groups=part=>part?part.split(":"):[];
+  const left=groups(parts[0]);
+  const right=parts.length===2?groups(parts[1]):[];
+  const count=(left.concat(right)).reduce((n,g)=>n+(expandEmbedded(g)?2:1),0);
+  if(!left.every(g=>valid(g)||expandEmbedded(g))||!right.every(g=>valid(g)||expandEmbedded(g))) return false;
+  return parts.length===2 ? count<8 : count===8;
 }
 
 function normalizeAddress(input,path){
@@ -53,78 +62,78 @@ function normalizeIpNetwork(input,path){
   return {...base,prefix};
 }
 
-export function ipAddress(input={}){
-  return Object.freeze({
-    type:"ip",
-    ...normalizeAddress(input,"ip")
-  });
+export function ipAddress(input={}) {
+  return Object.freeze({type:"ip",...normalizeAddress(input,"ip")});
 }
 
-export function ipNetwork(input={}){
-  return Object.freeze({
-    type:"ip-network",
-    ...normalizeIpNetwork(input,"ip-network")
-  });
+export function ipNetwork(input={}) {
+  return Object.freeze({type:"ip-network",...normalizeIpNetwork(input,"ip-network")});
 }
 
-export function endpoint(input={}){
+export function domainName(input={}) {
+  const value=cleanString(input.value??input,"domain.value").toLowerCase();
+  if(value.length>253||value.includes(" ")) throw new TypeError("domain.value must be a valid domain name.");
+  return Object.freeze({type:"domain",value});
+}
+
+export function port(input={}) {
+  const value=typeof input==="number"?input:input.value;
+  return Object.freeze({type:"port",value:assertInteger(value,"port.value",1,65535)});
+}
+
+export function endpoint(input={}) {
   const base=normalizeAddress(input,"endpoint");
-  const port=assertInteger(input.port,"endpoint.port",1,65535);
+  const p=port({value:input.port});
   const protocol=cleanString(input.protocol,"endpoint.protocol").toLowerCase();
-  return Object.freeze({
-    type:"endpoint",
-    ...base,
-    port,
-    protocol
-  });
+  return Object.freeze({type:"endpoint",...base,port:p.value,protocol});
 }
 
-export function dnsCommand(input={}){
-  const servers=Array.isArray(input.servers)
-    ? input.servers.map((x,i)=>cleanString(x,"dns.servers["+i+"]"))
-    : [];
-  return Object.freeze({
-    kind:CommandKind.DNS,
-    servers,
-    mode:cleanString(input.mode||"plain","dns.mode")
-  });
+export function dnsCommand(input={}) {
+  const servers=Array.isArray(input.servers)?input.servers.map((x,i)=>{
+    if(typeof x==="string") return cleanString(x,"dns.servers["+i+"]");
+    return {...ipAddress(x)};
+  }):[];
+  return Object.freeze({kind:CommandKind.DNS,servers,mode:cleanString(input.mode||"plain","dns.mode")});
 }
 
-export function proxyCommand(input={}){
-  const port=input.port==null?null:assertInteger(input.port,"proxy.port",1,65535);
+export function proxyCommand(input={}) {
+  const p=input.port==null?null:port({value:input.port}).value;
+  const credentialRef=typeof input.credentialRef==="string"&&input.credentialRef.trim()?input.credentialRef.trim():null;
   return Object.freeze({
     kind:CommandKind.PROXY,
     protocol:cleanString(input.protocol||"http","proxy.protocol").toLowerCase(),
     server:cleanString(input.server,"proxy.server"),
-    port,
-    username:typeof input.username==="string"&&input.username.trim()?input.username.trim():null,
-    password:typeof input.password==="string"&&input.password.trim()?input.password:null,
+    port:p,
+    credentialRef,
     options:input.options&&typeof input.options==="object"?structuredClone(input.options):{}
   });
 }
 
-export function ipCommand(input={}){
+function normalizeAction(value,path){
+  const action=typeof value==="string"?value:value?.type;
+  if(!Object.values(ActionKind).includes(action)) throw new TypeError(path+" must use a supported semantic action.");
+  return {type:action};
+}
+
+export function ipCommand(input={}) {
   return Object.freeze({
     kind:CommandKind.RULE,
-    matcher:"ip",
-    values:(Array.isArray(input.values)?input.values:[]).map((x,i)=>{
-      const value=x?.prefix==null?ipAddress(x):ipNetwork(x);
-      return {...value};
-    }),
-    policy:cleanString(input.policy||"DIRECT","ip.policy")
+    matcher:{type:"ip"},
+    values:(Array.isArray(input.values)?input.values:[]).map(x=>x?.prefix==null?ipAddress(x):ipNetwork(x)),
+    action:normalizeAction(input.action??input.policy??ActionKind.DIRECT,"ip.action")
   });
 }
 
-export function domainCommand(input={}){
+export function domainCommand(input={}) {
   return Object.freeze({
     kind:CommandKind.RULE,
-    matcher:cleanString(input.matcher||"domain","domain.matcher"),
-    values:(Array.isArray(input.values)?input.values:[]).map((x,i)=>cleanString(x,"domain.values["+i+"]")),
-    policy:cleanString(input.policy||"DIRECT","domain.policy")
+    matcher:{type:cleanString(input.matcher||"domain","domain.matcher")},
+    values:(Array.isArray(input.values)?input.values:[]).map((x,i)=>domainName({value:x})),
+    action:normalizeAction(input.action??input.policy??ActionKind.DIRECT,"domain.action")
   });
 }
 
-export function configurationDocument(commands=[]){
+export function configurationDocument(commands=[]) {
   if(!Array.isArray(commands)) throw new TypeError("commands must be an array.");
   return Object.freeze({version:VERSION,commands:structuredClone(commands)});
 }
