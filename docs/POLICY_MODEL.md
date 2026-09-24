@@ -1,15 +1,15 @@
-# Canonical Policy Model
+# โมเดล Policy มาตรฐานกลาง
 
-The Canonical Policy Model is the platform-neutral representation of user intent.
+Canonical Policy Model คือรูปแบบข้อมูลที่ไม่ขึ้นกับแพลตฟอร์มและใช้แทนความต้องการของผู้ใช้
 
-## Goals
+## เป้าหมาย
 
-- Express intent without target-specific syntax.
-- Remain deterministic and versioned.
-- Allow target adapters to report partial support.
-- Avoid silently changing requested behavior.
+- แสดงความต้องการโดยไม่ผูกกับ syntax ของ Target
+- มีผลลัพธ์ที่กำหนดแน่นอนและมีเวอร์ชัน
+- เปิดให้ Target Adapter รายงานการรองรับเพียงบางส่วน
+- หลีกเลี่ยงการเปลี่ยนพฤติกรรมที่ผู้ใช้ร้องขอโดยไม่แจ้ง
 
-## Initial domains
+## ขอบเขตเริ่มต้น
 
 - vpn
 - dns
@@ -19,7 +19,7 @@ The Canonical Policy Model is the platform-neutral representation of user intent
 - privacy
 - providers
 
-## Example
+## ตัวอย่าง
 
 ```json
 {
@@ -37,4 +37,4 @@ The Canonical Policy Model is the platform-neutral representation of user intent
 }
 ```
 
-This model describes intent only. It does not claim that every Target can implement every field.
+โมเดลนี้อธิบายเพียงความต้องการ ไม่ได้หมายความว่า Target ทุกตัวสามารถนำทุก field ไปใช้งานได้
