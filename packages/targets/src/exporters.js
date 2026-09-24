@@ -1,4 +1,5 @@
 import { compileSurge } from "../../surge-adapter/src/index.js";
+import { compileAppleMobileConfig, compileAppleDeclarativeDns } from "../../apple-adapter/src/index.js";
 
 const defaultPolicy = {finalPolicy:"DIRECT",bypassSystem:true};
 
@@ -50,6 +51,11 @@ const functionGuides = {
     {id:"ipv6",title:"IPv6",config:"[dns] → no-ipv6",test:"ทดสอบ A/AAAA แยกกัน"},
     {id:"routing",title:"Routing",config:"[filter_local] / [filter_remote] / [policy]",test:"ทดสอบ filter → policy ทีละ rule"},
     {id:"blocking",title:"Blocking",config:"filter → reject",test:"ทดสอบเฉพาะโดเมนที่กำหนด"}
+  ],
+  "apple-mobileconfig": [
+    {id:"dns",title:"DNS",config:"com.apple.dnsSettings.managed",test:"ติดตั้ง MobileConfig แล้วตรวจ DNS ที่ระบบใช้งาน"},
+    {id:"webclip",title:"Web App",config:"com.apple.webClip.managed",test:"ติดตั้ง profile แล้วตรวจ Web App บน Home Screen"},
+    {id:"vpn",title:"VPN",config:"VPN payload ตามชนิดที่เลือก",test:"ตรวจสถานะ VPN และทดสอบการเชื่อมต่อจริง"}
   ],
   "apple-dns-declaration": [
     {id:"dns",title:"DNS Settings",config:"com.apple.configuration.network.dns-settings",test:"ติดตั้ง declaration แล้วตรวจ DNS ที่ระบบใช้"},
@@ -127,6 +133,15 @@ export const exportFormats = [
     functions: functionGuides["quantumult-x"] || []
   },
   {
+    id: "apple-mobileconfig",
+    label: "Apple iOS MobileConfig",
+    extension: ".mobileconfig",
+    mime: "application/x-apple-aspen-config",
+    status: "generated",
+    description: "Apple Configuration Profile สำหรับติดตั้งโดยตรงบน iOS; payload ที่ต้องพึ่ง Extension จะแสดงคำเตือนตามค่าที่ผู้ใช้เลือก.",
+    functions: functionGuides["apple-mobileconfig"] || []
+  },
+  {
     id: "apple-dns-declaration",
     label: "Apple Network DNS Settings",
     extension: ".json",
@@ -145,6 +160,18 @@ export const exportFormats = [
     functions: functionGuides["apple-mobileconfig-legacy"] || []
   }
 ];
+
+export function getExportArtifact(targetId,policyInput={}) {
+  if(targetId==="apple-mobileconfig") return compileAppleMobileConfig(policyInput).content;
+  if(targetId==="apple-dns-declaration") return JSON.stringify(compileAppleDeclarativeDns(policyInput),null,2);
+  if(targetId==="surge") return exportSurge(policyInput);
+  return "";
+}
+
+export function getExportWarnings(targetId,policyInput={}) {
+  if(targetId==="apple-mobileconfig") return compileAppleMobileConfig(policyInput).warnings;
+  return [];
+}
 
 export function exportSurge(policyInput = {}) {
   const input = policyInput?.policy ? policyInput : {policy:defaultPolicy};
