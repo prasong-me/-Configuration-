@@ -86,8 +86,8 @@ export const exportFormats = [
     label: "WireGuard",
     extension: ".conf",
     mime: "text/plain",
-    status: "template",
-    description: "Standard WireGuard INI-style configuration.",
+    status: "partial-tested",
+    description: "Standard WireGuard INI-style configuration; real-device evidence exists only for the recorded VPN observation, so verified export remains blocked.",
     functions: functionGuides["wireguard"] || []
   },
   {
@@ -95,8 +95,8 @@ export const exportFormats = [
     label: "Shadowrocket",
     extension: ".conf",
     mime: "text/plain",
-    status: "template",
-    description: "Shadowrocket profile format; DNS and routing sections are separated.",
+    status: "partial-tested",
+    description: "Shadowrocket profile format; real-device evidence exists only for the recorded DNS observation, so verified export remains blocked; DNS and routing sections are separated.",
     functions: functionGuides["shadowrocket"] || []
   },
   {
