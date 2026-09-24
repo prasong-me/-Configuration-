@@ -1,35 +1,35 @@
-# Surge Target Evidence
+# หลักฐาน Target ของ Surge
 
 ## Target
 
-Surge 5 / Surge profile format.
+Surge 5 / รูปแบบโปรไฟล์ Surge
 
-## Official evidence
+## หลักฐานทางการ
 
-Surge's official manual states that profiles use an INI-like format with sections including `[General]`, `[Proxy]`, `[Proxy Group]`, `[Rule]`, `[Host]`, `[URL Rewrite]`, `[MITM]`, `[WireGuard <name>]`, and others.
+คู่มือทางการของ Surge ระบุว่าโปรไฟล์ใช้รูปแบบคล้าย INI โดยมี section เช่น `[General]`, `[Proxy]`, `[Proxy Group]`, `[Rule]`, `[Host]`, `[URL Rewrite]`, `[MITM]`, `[WireGuard <name>]` และ section อื่น ๆ
 
-Source: https://manual.nssurge.com/profile/format.html
+แหล่งข้อมูล: https://manual.nssurge.com/profile/format.html
 
-Surge documents URL-scheme installation through `surge:///install-config?url=...`.
+Surge มีเอกสารเกี่ยวกับการติดตั้งผ่าน URL scheme `surge:///install-config?url=...`
 
-Source: https://manual.nssurge.com/tools/url-scheme.html
+แหล่งข้อมูล: https://manual.nssurge.com/tools/url-scheme.html
 
-Surge documents an HTTP API with an API key for programmatic control.
+Surge มีเอกสารเกี่ยวกับ HTTP API ซึ่งใช้ API key สำหรับการควบคุมผ่านโปรแกรม
 
-Source: https://manual.nssurge.com/tools/http-api.html
+แหล่งข้อมูล: https://manual.nssurge.com/tools/http-api.html
 
-Surge documents its WireGuard policy syntax separately and explicitly states that this creates an application-level outbound policy rather than installing a system-wide WireGuard VPN.
+Surge มีเอกสาร syntax สำหรับ WireGuard policy แยกต่างหาก และระบุอย่างชัดเจนว่าสิ่งนี้สร้าง outbound policy ระดับแอป ไม่ใช่การติดตั้ง WireGuard แบบครอบคลุมทั้งระบบ
 
-Source: https://manual.nssurge.com/policies/wireguard.html
+แหล่งข้อมูล: https://manual.nssurge.com/policies/wireguard.html
 
-## Project status
+## สถานะของโครงการ
 
-The evidence is sufficient to begin a Surge serializer design, but not sufficient to mark every feature supported.
+หลักฐานมีเพียงพอสำหรับเริ่มออกแบบ Surge serializer แต่ยังไม่เพียงพอที่จะทำเครื่องหมายว่าทุกฟีเจอร์รองรับ
 
-The first adapter must start with a small fixture-backed subset and reject fields outside that subset.
+Adapter รุ่นแรกต้องเริ่มจาก subset ขนาดเล็กที่มี fixture รองรับ และต้องปฏิเสธ field ที่อยู่นอกขอบเขตดังกล่าว
 
-## Known security boundary
+## ขอบเขตความปลอดภัยที่ทราบ
 
-Surge's MITM feature requires a trusted CA and can decrypt only hosts declared in its configuration. Private CA material must never be committed to this repository.
+ฟีเจอร์ MITM ของ Surge ต้องใช้ trusted CA และสามารถถอดรหัสได้เฉพาะ host ที่ประกาศไว้ในการตั้งค่า ข้อมูล private CA ต้องไม่ commit ลง repository นี้
 
-Source: https://manual.nssurge.com/http/mitm.html
+แหล่งข้อมูล: https://manual.nssurge.com/http/mitm.html
