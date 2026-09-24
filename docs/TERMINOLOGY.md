@@ -1,22 +1,22 @@
-# Terminology
+# คำศัพท์
 
-| Term | Definition |
+| คำศัพท์ | คำจำกัดความ |
 |---|---|
-| Policy | Platform-neutral description of desired behavior |
-| Profile | Saved policy collection |
-| Target | Destination application, OS feature, or runtime |
-| Capability | Feature supported by a target |
-| Adapter | Target-specific semantic mapping |
-| Compiler | Policy-to-target transformation engine |
-| Parser | Target-to-policy import engine |
-| Serializer | Target syntax writer |
-| Validator | Correctness and compatibility checker |
-| Diagnostic | Error, warning, or informational result |
-| Bundle | Multiple target artifacts produced from one policy |
-| Provider | External data source |
-| Manifest | Bundle metadata |
-| Runtime | Component that applies configuration |
+| Policy | คำอธิบายพฤติกรรมที่ต้องการโดยไม่ผูกกับแพลตฟอร์ม |
+| Profile | ชุด Policy ที่บันทึกไว้ |
+| Target | แอปพลิเคชัน ระบบปฏิบัติการ หรือ runtime ปลายทาง |
+| Capability | ฟีเจอร์ที่ Target รองรับ |
+| Adapter | การแมปเชิงความหมายที่เฉพาะกับ Target |
+| Compiler | เครื่องยนต์แปลงจาก Policy ไปเป็น Target |
+| Parser | เครื่องยนต์นำเข้าจาก Target กลับเป็น Policy |
+| Serializer | ตัวเขียน syntax ของ Target |
+| Validator | ตัวตรวจสอบความถูกต้องและความเข้ากันได้ |
+| Diagnostic | ผลการตรวจสอบประเภท error, warning หรือข้อมูล |
+| Bundle | artifact ของหลาย Target ที่สร้างจาก Policy เดียวกัน |
+| Provider | แหล่งข้อมูลภายนอก |
+| Manifest | ข้อมูลกำกับของชุดผลลัพธ์ |
+| Runtime | ส่วนประกอบที่นำการตั้งค่าไปใช้งาน |
 
-## Canonical vocabulary
+## คำศัพท์มาตรฐาน
 
-The terms above should be used consistently in code, documentation, issues, and API design.
+ควรใช้คำศัพท์ข้างต้นอย่างสม่ำเสมอในโค้ด เอกสาร issue และการออกแบบ API
