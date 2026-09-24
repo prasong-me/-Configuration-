@@ -1,33 +1,33 @@
-# Evidence System
+# ระบบหลักฐาน
 
-Target adapters are evidence-driven.
+Target Adapter ต้องพัฒนาจากหลักฐานที่ตรวจสอบได้
 
-Each target must have:
-1. authoritative documentation references;
-2. a version/date snapshot;
-3. a capability manifest;
-4. representative fixtures;
-5. parser/serializer tests;
-6. explicit limitations.
+แต่ละ Target ต้องมี:
+1. แหล่งอ้างอิงเอกสารที่เชื่อถือได้
+2. snapshot ของเวอร์ชันและวันที่
+3. manifest ของความสามารถ
+4. fixture ที่เป็นตัวแทนการใช้งานจริง
+5. การทดสอบ parser/serializer
+6. ข้อจำกัดที่ระบุไว้อย่างชัดเจน
 
-Unknown behavior remains UNKNOWN. The compiler must not infer unsupported features from similar products.
+พฤติกรรมที่ยังไม่ทราบต้องคงสถานะ UNKNOWN คอมไพเลอร์ต้องไม่อนุมานว่าฟีเจอร์ที่ไม่รองรับสามารถใช้ได้ เพียงเพราะผลิตภัณฑ์ที่คล้ายกันรองรับ
 
-## Evidence levels
+## ระดับของหลักฐาน
 
-- OFFICIAL: vendor/platform documentation or source controlled by the target owner.
-- PRIMARY: target repository/specification maintained by the project owner.
-- OBSERVED: reproducible behavior verified by tests; must not be treated as an official guarantee.
-- SECONDARY: independent documentation used only as supporting context.
+- OFFICIAL: เอกสารหรือซอร์สโค้ดของผู้จำหน่าย/แพลตฟอร์ม หรือแหล่งที่เจ้าของ Target ควบคุม
+- PRIMARY: Repository หรือ specification ของ Target ที่ผู้ดูแลโครงการเป็นผู้ดูแล
+- OBSERVED: พฤติกรรมที่ทดสอบและทำซ้ำได้ ห้ามถือเป็นการรับรองอย่างเป็นทางการ
+- SECONDARY: เอกสารอิสระที่ใช้เป็นข้อมูลประกอบเท่านั้น
 
-Only OFFICIAL/PRIMARY evidence may promote a target capability to SUPPORTED without an explicit OBSERVED fixture.
+เฉพาะหลักฐานระดับ OFFICIAL/PRIMARY เท่านั้นที่สามารถใช้ยกระดับความสามารถของ Target เป็น SUPPORTED โดยไม่มี fixture ระดับ OBSERVED ที่ระบุไว้อย่างชัดเจน
 
-## Review record
+## บันทึกการตรวจสอบ
 
-Each target evidence file records:
-- target ID
-- target version
-- source URL
-- retrieved date
-- evidence level
-- covered features
-- limitations
+ไฟล์หลักฐานของแต่ละ Target ต้องบันทึก:
+- Target ID
+- เวอร์ชันของ Target
+- URL ของแหล่งข้อมูล
+- วันที่เรียกดูข้อมูล
+- ระดับของหลักฐาน
+- ฟีเจอร์ที่ครอบคลุม
+- ข้อจำกัด
