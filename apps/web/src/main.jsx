@@ -107,7 +107,8 @@ function App(){
       proxyServer:proxyServer.trim(),
       rules:[],
       finalPolicy:"DIRECT",
-      bypassSystem:true,\n      architecture:{
+      bypassSystem:true,
+      architecture:{
         normalDns:true,
         intermediary:true,
         appMaySeeRequestedDomain:true,
