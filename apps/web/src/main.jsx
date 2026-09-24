@@ -315,10 +315,8 @@ function App(){
         <pre>{JSON.stringify(targetTestRecord || testEvidence,null,2)}</pre>
 
         <h3>{tr.diagnostics}</h3>
-        {report.diagnostics.length
-          ? <ul>{report.diagnostics.map((d,i)=><li key={i}><strong>{d.level}</strong> {d.code}: {d.message}</li></ul>
-          : <p>{tr.noDiagnostics}</p>
-        }
+        {report.diagnostics.length>0 && <ul>{report.diagnostics.map((d,i)=><li key={i}><strong>{d.level}</strong> {d.code}: {d.message}</li>)}</ul>}
+        {report.diagnostics.length===0 && <p>{tr.noDiagnostics}</p>}
 
         <h3>{tr.generatedPolicy}</h3>
         <pre>{JSON.stringify(policy,null,2)}</pre>
