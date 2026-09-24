@@ -91,6 +91,7 @@ function App(){
   const [target,setTarget]=useState("surge");
   const [dnsServers,setDnsServers]=useState("");
   const [proxyServer,setProxyServer]=useState("");
+  const [dnsServerUrl,setDnsServerUrl]=useState("");
   const [selectedFunction,setSelectedFunction]=useState("dns");
 
   const policy=useMemo(()=>({
@@ -108,7 +109,7 @@ function App(){
       dnsServers:dnsServers.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean),
       proxyServer:proxyServer.trim(),
       dnsProtocol:"HTTPS",
-      dnsServerUrl:dnsServers.trim()?`https://dns.example.com/dns-query`:"",
+      dnsServerUrl:dnsServerUrl.trim(),
       dnsDomains:[],
       webAppUrl:window.location.href,
       rules:[],
@@ -121,7 +122,7 @@ function App(){
         hideResolverIdentityFromApp:"not-guaranteed"
       }
     }
-  }),[name,vpn,dns,malware,trackers,separateBlocking,dnsServers,proxyServer]);
+  }),[name,vpn,dns,malware,trackers,separateBlocking,dnsServers,proxyServer,dnsServerUrl]);
 
   const policyForExport=redact(policy);
   const report=useMemo(()=>compatibilityReport(policy,target==="example"?"surge":target),[policy,target]);
@@ -167,6 +168,10 @@ function App(){
           <label>DNS Server
             <textarea value={dnsServers} onChange={e=>setDnsServers(e.target.value)} placeholder="เช่น 1.1.1.1, 1.0.0.1" rows="2"/>
             <small className="field-hint">ใส่หลายค่าได้ คั่นด้วยเครื่องหมายจุลภาคหรือช่องว่าง</small>
+          </label>
+          <label>Encrypted DNS URL
+            <input value={dnsServerUrl} onChange={e=>setDnsServerUrl(e.target.value)} placeholder="เช่น https://dns.example.com/dns-query"/>
+            <small className="field-hint">ใช้เมื่อเลือก DNS-over-HTTPS สำหรับ Apple</small>
           </label>
           <label>Proxy Server
             <input value={proxyServer} onChange={e=>setProxyServer(e.target.value)} placeholder="เช่น proxy.example.com:8080"/>
