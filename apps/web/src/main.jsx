@@ -54,11 +54,11 @@ const testEvidence={
   }
 };
 
-const buildExportBundle=(policyForExport)=>({
+const buildExportBundle=(policyForExport,evidence)=>({
   schemaVersion:"0.3-test-bundle",
   generatedAt:new Date().toISOString(),
   policy:policyForExport,
-  evidence:targetTestRecord,
+  evidence,
   artifacts:Object.fromEntries(exportFormats.map(x=>[
     x.id,
     {file:x.id+x.extension,status:x.status,content:getExportArtifact(x.id, policyForExport)}
@@ -275,7 +275,7 @@ function App(){
         <button onClick={()=>download("policy.json",JSON.stringify(policyForExport,null,2),"application/json")} disabled={!exportAllowed}>
           Export Policy
         </button>
-        <button disabled={!exportAllowed} onClick={()=>download("network-test-bundle.json",JSON.stringify(buildExportBundle(policyForExport),null,2),"application/json")}>
+        <button disabled={!exportAllowed} onClick={()=>download("network-test-bundle.json",JSON.stringify(buildExportBundle(policyForExport,targetTestRecord),null,2),"application/json")}>
           Export ข้อมูลการทดสอบทั้งหมด
         </button>
       </div>
