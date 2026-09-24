@@ -1,25 +1,25 @@
-# Implementation Rules
+# กฎการพัฒนา
 
-## No invented target behavior
+## ห้ามสร้างพฤติกรรมของ Target ขึ้นเอง
 
-If a target feature has no verified specification, fixture, or implementation, its capability remains `UNKNOWN` and export is blocked.
+หากฟีเจอร์ของ Target ไม่มี specification, fixture หรือ implementation ที่ตรวจสอบได้ ความสามารถนั้นต้องคงสถานะ `UNKNOWN` และการส่งออกต้องถูกระงับ
 
-## Evidence before adapter code
+## ต้องมีหลักฐานก่อนเขียน Adapter
 
-Every target adapter must identify an authoritative source and include fixtures proving the emitted syntax.
+Target Adapter ทุกตัวต้องระบุแหล่งข้อมูลที่เชื่อถือได้ และมี fixture ที่พิสูจน์ syntax ที่สร้างออกมา
 
-## Compile means real output
+## การคอมไพล์ต้องสร้างผลลัพธ์จริง
 
-An adapter is not complete because a function returns an object. It is complete only when automated tests exercise it and the produced artifact is validated against the target syntax.
+Adapter ไม่ถือว่าสมบูรณ์เพียงเพราะฟังก์ชันคืนค่า object แต่ต้องมี automated tests ที่เรียกใช้งานจริง และตรวจสอบ artifact ที่สร้างขึ้นกับ syntax ของ Target
 
-## No silent loss
+## ห้ามสูญเสียข้อมูลโดยไม่แจ้ง
 
-Unsupported and lossy transformations must produce diagnostics before export.
+การแปลงที่ไม่รองรับหรือทำให้ข้อมูลสูญเสียต้องสร้าง diagnostics ก่อนการส่งออก
 
-## Secrets stay out of policy
+## ข้อมูลลับไม่อยู่ใน Policy
 
-Credentials, private keys, and tokens are runtime inputs or protected references, not ordinary committed policy values.
+Credential, private key และ token เป็นข้อมูลที่ส่งเข้ามาใน runtime หรืออ้างอิงผ่านกลไกที่ป้องกันไว้ ไม่ใช่ค่าปกติที่ commit อยู่ใน policy
 
-## Truthful status
+## สถานะต้องตรงกับความจริง
 
-Documentation must not claim a target or build is complete without test evidence.
+เอกสารต้องไม่ระบุว่า Target หรือ build เสร็จสมบูรณ์ หากยังไม่มีหลักฐานจากการทดสอบ
