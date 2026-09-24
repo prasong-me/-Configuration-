@@ -1,31 +1,31 @@
-# Apple Network Configuration Evidence
+# หลักฐานการตั้งค่าเครือข่ายของ Apple
 
-## Scope
+## ขอบเขต
 
-This evidence covers Apple platform networking capabilities relevant to the project. It does not claim that an arbitrary App Store application can consume every Apple configuration type.
+หลักฐานนี้ครอบคลุมความสามารถด้านเครือข่ายของแพลตฟอร์ม Apple ที่เกี่ยวข้องกับโครงการ ไม่ได้หมายความว่าแอปจาก App Store ทุกแอปจะสามารถรับการตั้งค่าของ Apple ได้ทุกประเภท
 
-## Verified facts
+## ข้อเท็จจริงที่ตรวจสอบแล้ว
 
-Apple documents encrypted DNS through the declarative configuration type `com.apple.configuration.network.dns-settings`. Local installs are supported for this configuration, subject to Apple's availability rules.
+Apple มีเอกสารเกี่ยวกับ DNS แบบเข้ารหัสผ่านประเภทการตั้งค่าแบบ declarative `com.apple.configuration.network.dns-settings` การติดตั้งภายในเครื่องรองรับสำหรับการตั้งค่านี้ โดยขึ้นอยู่กับเงื่อนไขด้านความพร้อมใช้งานของ Apple
 
-Source: https://developer.apple.com/documentation/devicemanagement/networkdnssettings
+แหล่งข้อมูล: https://developer.apple.com/documentation/devicemanagement/networkdnssettings
 
-Apple documents VPN plugin configuration through `com.apple.configuration.network.vpn.vpn-plugin`, with local enrollment available on supported iOS/iPadOS configurations.
+Apple มีเอกสารเกี่ยวกับการตั้งค่า VPN plugin ผ่าน `com.apple.configuration.network.vpn.vpn-plugin` โดยรองรับการลงทะเบียนภายในเครื่องบนการตั้งค่า iOS/iPadOS ที่รองรับ
 
-Source: https://developer.apple.com/documentation/devicemanagement/networkvpnvpnplugin
+แหล่งข้อมูล: https://developer.apple.com/documentation/devicemanagement/networkvpnvpnplugin
 
-Per-App VPN has additional MDM and app-management requirements; it is not equivalent to simply generating a profile file.
+Per-App VPN มีข้อกำหนดเพิ่มเติมด้าน MDM และการจัดการแอป จึงไม่เทียบเท่ากับการสร้างไฟล์โปรไฟล์เพียงอย่างเดียว
 
-Source: https://developer.apple.com/documentation/networkextension/netunnelprovidermanager
+แหล่งข้อมูล: https://developer.apple.com/documentation/networkextension/netunnelprovidermanager
 
-Apple's Network Extension framework is the supported API family for VPN applications.
+Network Extension framework ของ Apple เป็นชุด API ที่รองรับสำหรับแอปพลิเคชัน VPN
 
-Source: https://developer.apple.com/videos/play/wwdc2025/234/
+แหล่งข้อมูล: https://developer.apple.com/videos/play/wwdc2025/234/
 
-## Project rule
+## กฎของโครงการ
 
-These platform capabilities do not automatically become capabilities of a third-party App Store target. The target adapter must have separate evidence showing the target's accepted import/configuration format.
+ความสามารถระดับแพลตฟอร์มเหล่านี้ไม่ได้กลายเป็นความสามารถของ Target ที่เป็นแอปจากบุคคลที่สามโดยอัตโนมัติ Target Adapter ต้องมีหลักฐานแยกต่างหากว่า Target นั้นยอมรับรูปแบบการนำเข้าและการตั้งค่าที่เกี่ยวข้อง
 
-## Status
+## สถานะ
 
-No Apple target adapter is marked SUPPORTED yet.
+ยังไม่มี Apple Target Adapter ที่ทำเครื่องหมายเป็น SUPPORTED
