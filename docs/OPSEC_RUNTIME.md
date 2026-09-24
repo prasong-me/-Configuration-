@@ -1,25 +1,25 @@
-# OpSec Runtime
+# ความปลอดภัยเชิงปฏิบัติการและ Runtime
 
-## Purpose
+## วัตถุประสงค์
 
-Provide a common security model for sensitive values and runtime operations without coupling the core to a particular target.
+จัดเตรียมโมเดลความปลอดภัยร่วมสำหรับค่าที่มีความอ่อนไหวและการทำงานของ runtime โดยไม่ผูก core เข้ากับ Target ใด Target หนึ่ง
 
-## Secret classes
+## ประเภทข้อมูลลับ
 
 - PUBLIC
 - SENSITIVE
 - SECRET
 - LOCAL_ONLY
 
-## Rules
+## กฎ
 
-- Do not log SECRET or LOCAL_ONLY values.
-- Redact sensitive values in diagnostics.
-- Do not place secrets in Git-tracked examples.
-- Prefer browser/local execution for configuration that does not require a server.
-- Remote services must be explicit and documented.
-- Runtime actions must require the target's normal permission and user-consent mechanisms.
+- ห้ามบันทึกค่า SECRET หรือ LOCAL_ONLY ลงใน log
+- ต้องปกปิดค่าที่มีความอ่อนไหวใน diagnostics
+- ห้ามใส่ข้อมูลลับในตัวอย่างที่ติดตามด้วย Git
+- ควรประมวลผลภายในเบราว์เซอร์หรือเครื่องของผู้ใช้สำหรับการตั้งค่าที่ไม่จำเป็นต้องใช้เซิร์ฟเวอร์
+- บริการระยะไกลต้องระบุอย่างชัดเจนและมีเอกสารกำกับ
+- การทำงานของ runtime ต้องใช้กลไกสิทธิ์และการยินยอมของผู้ใช้ตามปกติของ Target
 
-## Runtime separation
+## การแยก Runtime
 
-Configuration generation and runtime enforcement are separate responsibilities. A generated artifact does not imply that it has been installed, activated, or granted system privileges.
+การสร้างการตั้งค่าและการบังคับใช้การตั้งค่าเป็นหน้าที่คนละส่วนกัน artifact ที่สร้างขึ้นไม่ได้หมายความว่าได้รับการติดตั้ง เปิดใช้งาน หรือได้รับสิทธิ์ระดับระบบแล้ว
