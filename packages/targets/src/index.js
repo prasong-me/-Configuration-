@@ -42,6 +42,7 @@ const manifests=new Map([
   ["quantumult-x",{id:"quantumult-x",version:"current-reference",status:"template-export",evidence:[
     {level:"REFERENCE",url:"https://github.com/crossutility/Quantumult-X"}
   ],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["Configuration template is available; exact runtime behavior must be tested in the installed app version."]}],
+  ["apple-mobileconfig",{id:"apple-mobileconfig",version:"current-profile",status:"generated",evidence:[],capabilities:{vpn:CapabilityState.UNKNOWN,dns:CapabilityState.SUPPORTED,routing:CapabilityState.UNKNOWN,"blocking.malware":CapabilityState.UNKNOWN,"blocking.trackers":CapabilityState.UNKNOWN},limitations:["Extension-backed capabilities may require a provider app or Network Extension on the device."]}],
   ["apple-dns-declaration",{id:"apple-dns-declaration",version:"current-declarative",status:"reference-export",evidence:[
     {level:"OFFICIAL",url:"https://developer.apple.com/documentation/devicemanagement/networkdnssettings"}
   ],capabilities:{
