@@ -1,13 +1,13 @@
 import { CapabilityState } from "../../capabilities/src/index.js";
 import { getTargetTestEvidence } from "./test-evidence.js";
 
-const UNKNOWN_CAPABILITIES={
+const UNKNOWN_CAPABILITIES=Object.freeze({
   vpn:CapabilityState.UNKNOWN,
   dns:CapabilityState.UNKNOWN,
   routing:CapabilityState.UNKNOWN,
   "blocking.malware":CapabilityState.UNKNOWN,
   "blocking.trackers":CapabilityState.UNKNOWN
-};
+});
 
 const manifests=new Map([
   ["example",{id:"example",version:"0.1",status:"reference-only",evidence:[],capabilities:{
@@ -19,11 +19,8 @@ const manifests=new Map([
     {level:"REAL_DEVICE",scope:"Surge 5.x",tests:15,status:"passed"},
     {level:"REAL_DEVICE",scope:"profile-generation",status:"passed"}
   ],capabilities:{
-    vpn:CapabilityState.SUPPORTED,
-    dns:CapabilityState.SUPPORTED,
-    routing:CapabilityState.SUPPORTED,
-    "blocking.malware":CapabilityState.SUPPORTED,
-    "blocking.trackers":CapabilityState.SUPPORTED
+    vpn:CapabilityState.SUPPORTED,dns:CapabilityState.SUPPORTED,routing:CapabilityState.SUPPORTED,
+    "blocking.malware":CapabilityState.SUPPORTED,"blocking.trackers":CapabilityState.SUPPORTED
   },limitations:["Proxy credentials/endpoints are intentionally not generated or embedded."]}],
   ["mihomo",{id:"mihomo",version:"current-reference",status:"template-export",evidence:[
     {level:"OFFICIAL",url:"https://wiki.metacubex.one/en/config/"}
@@ -47,10 +44,16 @@ const manifests=new Map([
   ],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["Configuration template is available; exact runtime behavior must be tested in the installed app version."]}],
   ["apple-dns-declaration",{id:"apple-dns-declaration",version:"current-declarative",status:"reference-export",evidence:[
     {level:"OFFICIAL",url:"https://developer.apple.com/documentation/devicemanagement/networkdnssettings"}
-  ],capabilities:{vpn:CapabilityState.UNKNOWN,dns:CapabilityState.SUPPORTED,routing:CapabilityState.UNKNOWN,"blocking.malware":CapabilityState.UNKNOWN,"blocking.trackers":CapabilityState.UNKNOWN},limitations:["This is the current declarative DNS configuration model, not a general-purpose proxy/VPN profile."]}],
+  ],capabilities:{
+    vpn:CapabilityState.UNKNOWN,dns:CapabilityState.SUPPORTED,routing:CapabilityState.UNKNOWN,
+    "blocking.malware":CapabilityState.UNKNOWN,"blocking.trackers":CapabilityState.UNKNOWN
+  },limitations:["This is the current declarative DNS configuration model, not a general-purpose proxy/VPN profile."]}],
   ["apple-mobileconfig-legacy",{id:"apple-mobileconfig-legacy",version:"legacy",status:"legacy-export",evidence:[
     {level:"OFFICIAL",url:"https://developer.apple.com/documentation/devicemanagement/dnssettings"}
-  ],capabilities:{vpn:CapabilityState.UNKNOWN,dns:CapabilityState.SUPPORTED,routing:CapabilityState.UNKNOWN,"blocking.malware":CapabilityState.UNKNOWN,"blocking.trackers":CapabilityState.UNKNOWN},limitations:["Legacy DNSSettings payload; Apple documents the declarative network DNS configuration as the replacement on newer OS versions."]}
+  ],capabilities:{
+    vpn:CapabilityState.UNKNOWN,dns:CapabilityState.SUPPORTED,routing:CapabilityState.UNKNOWN,
+    "blocking.malware":CapabilityState.UNKNOWN,"blocking.trackers":CapabilityState.UNKNOWN
+  },limitations:["Legacy DNSSettings payload; Apple documents the declarative network DNS configuration as the replacement on newer OS versions."]}]
 ]);
 
 export function getTargetTestRecord(targetId){
@@ -61,10 +64,12 @@ export function getTargetManifest(targetId){
   const manifest=manifests.get(targetId);
   return manifest ? structuredClone(manifest) : null;
 }
+
 export function listTargetManifests(){
   return [...manifests.values()].map(x=>structuredClone(x));
 }
+
 export function registerTargetManifest(manifest){
-  if(!manifest?.id||!manifest?.capabilities)throw new TypeError("Target manifest requires id and capabilities.");
+  if(!manifest?.id||!manifest?.capabilities) throw new TypeError("Target manifest requires id and capabilities.");
   manifests.set(manifest.id,structuredClone(manifest));
 }
