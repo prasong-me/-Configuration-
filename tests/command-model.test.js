@@ -4,6 +4,8 @@ import {
   ipAddress,
   ipNetwork,
   endpoint,
+  domainName,
+  port,
   ipCommand,
   configurationDocument
 } from "../packages/command-model/src/index.js";
@@ -58,9 +60,22 @@ test("IP command accepts semantic objects, not target-formatted strings",()=>{
       {address:"192.168.1.0",family:"ipv4",prefix:24},
       {address:"2001:db8::",family:"ipv6",prefix:64}
     ],
-    policy:"DIRECT"
+    action:{type:"direct"}
   });
   assert.equal(command.values[0].prefix,24);
   assert.equal(command.values[1].prefix,64);
   assert.equal(configurationDocument([command]).commands.length,1);
+});
+
+
+test("domain and port stay semantic",()=>{
+  assert.deepEqual(domainName({value:"Example.COM"}),{type:"domain",value:"example.com"});
+  assert.deepEqual(port({value:443}),{type:"port",value:443});
+});
+
+test("proxy credentials use a reference instead of embedding a password",()=>{
+  const {proxyCommand}=await import("../packages/command-model/src/index.js");
+  const value=proxyCommand({protocol:"https",server:"proxy.example.com",port:443,credentialRef:"user-credential"});
+  assert.equal(value.credentialRef,"user-credential");
+  assert.equal("password" in value,false);
 });
