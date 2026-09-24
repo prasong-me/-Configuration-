@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Configuration Knowledge</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;max-width:900px;margin:auto;padding:24px;line-height:1.65}
+code{background:#eee;padding:2px 5px;border-radius:4px}
+section{margin:24px 0}
+</style>
+</head>
+<body>
+<p><a href="./">← กลับหน้า Generator</a></p>
+<h1>Configuration Knowledge</h1>
+<p>หน้านี้อธิบายข้อมูลพื้นฐานที่ใช้ใน Configuration Platform โดยไม่ผูกกับ Target ใด Target หนึ่ง</p>
+<section><h2>IP Address</h2><p><code>IPv4</code> ใช้ 4 กลุ่มตัวเลขคั่นด้วยจุด เช่น <code>192.168.1.10</code> ส่วน <code>IPv6</code> ใช้กลุ่มฐานสิบหกคั่นด้วย <code>:</code> และสามารถย่อช่วงศูนย์ด้วย <code>::</code> เช่น <code>2001:db8::1</code></p></section>
+<section><h2>IP Prefix</h2><p>Prefix บอกความยาวของส่วนเครือข่าย เช่น IPv4 <code>192.168.1.0/24</code> มี prefix 24 และ IPv6 <code>2001:db8::/64</code> มี prefix 64 ใน Common Model เราเก็บ address และ prefix แยกกัน</p></section>
+<section><h2>Port</h2><p><code>Port</code> เป็นหมายเลขช่องทางบริการตั้งแต่ 1 ถึง 65535 ส่วน <code>Protocol</code> ระบุวิธีการสื่อสาร เช่น <code>TCP</code> และ <code>UDP</code> สองสิ่งนี้ไม่ใช่สิ่งเดียวกัน</p></section>
+<section><h2>DNS</h2><p><code>DNS</code> แปลงชื่อโดเมนเป็นข้อมูลที่ใช้เชื่อมต่อปลายทาง เช่น IPv4 หรือ IPv6 DNS อาจใช้ cleartext หรือ encrypted transport เช่น <code>HTTPS</code> และ <code>TLS</code> ตามความสามารถของ Target</p></section>
+<section><h2>Protocol Relationship</h2><p>Protocol แต่ละชนิดมีหน้าที่และข้อจำกัดต่างกัน การเลือก protocol จึงไม่ใช่การเปลี่ยนคำเรียกของ protocol อื่น และ Target แต่ละตัวอาจรองรับไม่เหมือนกัน</p></section>
+<section><h2>Apple MobileConfig</h2><p>Apple Configuration Profile สามารถบรรจุ payload หลายชนิด เช่น Web Clip และ DNS settings ได้ ส่วนความสามารถที่ต้องพึ่ง Network Extension หรือแอปของผู้ให้บริการอาจต้องมี component นั้นอยู่บนอุปกรณ์ก่อน ระบบจะสร้าง configuration และแจ้งคำเตือนตามค่าที่ผู้ใช้เลือก</p></section>
+</body>
+</html>
