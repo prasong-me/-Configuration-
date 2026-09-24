@@ -8,6 +8,7 @@ import {
   getExportArtifact
 } from "../../../packages/targets/src/exporters.js";
 import "./style.css";
+import {createIosWebClipMobileConfig} from "./mobileconfig.js";
 
 
 const translations={
@@ -231,6 +232,7 @@ function App(){
           <strong>Actions</strong>
           <a href="https://github.com/prasong-me/-Configuration-/actions" target="_blank" rel="noreferrer">เปิด GitHub Actions</a>
           <button type="button" onClick={()=>download("profile.json",JSON.stringify(policyForExport,null,2),"application/json")}>บันทึกโปรไฟล์</button>
+          <button type="button" onClick={()=>download("network-configuration-ios.mobileconfig",createIosWebClipMobileConfig({label:name}),"application/x-apple-aspen-config")}>ติดตั้งเว็บแอปบน iOS</button>
         </div>
 
         <h3>{tr.preflight}</h3>
