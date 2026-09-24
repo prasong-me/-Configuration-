@@ -11,7 +11,7 @@ test("target registry exposes target-specific serialization metadata",()=>{
 });
 
 test("common IP model keeps prefix structured",()=>{
-  const command=ipCommand({values:["192.168.1.0/24"],policy:"DIRECT"});
+  const command=ipCommand({values:[{address:"192.168.1.0",family:"ipv4",prefix:24}],policy:"DIRECT"});
   assert.equal(command.values[0].address,"192.168.1.0");
   assert.equal(command.values[0].prefix,24);
   assert.equal(configurationDocument([command]).commands.length,1);
