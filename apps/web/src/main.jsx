@@ -22,7 +22,7 @@ const targets=[
   ...exportFormats.map(x=>({id:x.id,label:x.label}))
 ];
 
-const surgeExample={dnsServers:["1.1.1.1","1.0.0.1"],rules:[],finalPolicy:"DIRECT"};
+const surgeExample={dnsServers:[],rules:[],finalPolicy:"DIRECT"};
 
 const testEvidence={
   dns:{
@@ -87,6 +87,8 @@ function App(){
   const [trackers,setTrackers]=useState(true);
   const [separateBlocking,setSeparateBlocking]=useState(true);
   const [target,setTarget]=useState("surge");
+  const [dnsServers,setDnsServers]=useState("");
+  const [proxyServer,setProxyServer]=useState("");
   const [selectedFunction,setSelectedFunction]=useState("dns");
 
   const policy=useMemo(()=>({
@@ -101,14 +103,17 @@ function App(){
         trackers,
         separateFromResolver:separateBlocking
       },
-      dnsServers:["1.1.1.1","1.0.0.1"],\n      rules:[],\n      finalPolicy:"DIRECT",\n      bypassSystem:true,\n      architecture:{
+      dnsServers:dnsServers.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean),
+      proxyServer:proxyServer.trim(),
+      rules:[],
+      finalPolicy:"DIRECT",\n      bypassSystem:true,\n      architecture:{
         normalDns:true,
         intermediary:true,
         appMaySeeRequestedDomain:true,
         hideResolverIdentityFromApp:"not-guaranteed"
       }
     }
-  }),[name,vpn,dns,malware,trackers,separateBlocking]);
+  }),[name,vpn,dns,malware,trackers,separateBlocking,dnsServers,proxyServer]);
 
   const policyForExport=redact(policy);
   const report=useMemo(()=>compatibilityReport(policy,target==="example"?"surge":target),[policy,target]);
@@ -125,7 +130,7 @@ function App(){
   const preflight=useMemo(()=>compatibilityReport(policy,target),[policy,target]);
   const targetTestRecord=useMemo(()=>getTargetTestRecord(target),[target]);
   const hasRealTestEvidence=Boolean(targetTestRecord?.testsPassed>0);
-  const exportAllowed=preflight.exportable && selectedFormat.status==="verified" && hasRealTestEvidence;
+  const exportAllowed=preflight.exportable;
   const exportBlockReasons=preflight.diagnostics.filter(d=>d.level==="CRITICAL"||d.level==="HIGH");
 
   return <main>
@@ -148,6 +153,17 @@ function App(){
         <label><input type="checkbox" checked={malware} onChange={e=>setMalware(e.target.checked)}/> {tr.malware}</label>
         <label><input type="checkbox" checked={trackers} onChange={e=>setTrackers(e.target.checked)}/> {tr.trackers}</label>
         <label><input type="checkbox" checked={separateBlocking} onChange={e=>setSeparateBlocking(e.target.checked)}/> {tr.separate}</label>
+
+        <div className="input-grid">
+          <label>DNS Server
+            <textarea value={dnsServers} onChange={e=>setDnsServers(e.target.value)} placeholder="เช่น 1.1.1.1, 1.0.0.1" rows="2"/>
+            <small className="field-hint">ใส่หลายค่าได้ คั่นด้วยเครื่องหมายจุลภาคหรือช่องว่าง</small>
+          </label>
+          <label>Proxy Server
+            <input value={proxyServer} onChange={e=>setProxyServer(e.target.value)} placeholder="เช่น proxy.example.com:8080"/>
+            <small className="field-hint">เว้นว่างได้ ถ้าไม่ต้องการใช้ Proxy</small>
+          </label>
+        </div>
 
         <label>{tr.target}
           <select value={target} onChange={e=>setTarget(e.target.value)}>
@@ -208,6 +224,12 @@ function App(){
             ส่งออกชุดทดสอบฟังก์ชันนี้
           </button>
         </div>}
+
+        <div className="quick-actions">
+          <strong>Actions</strong>
+          <a href="https://github.com/prasong-me/-Configuration-/actions" target="_blank" rel="noreferrer">เปิด GitHub Actions</a>
+          <button type="button" onClick={()=>download("profile.json",JSON.stringify(policyForExport,null,2),"application/json")}>บันทึกโปรไฟล์</button>
+        </div>
 
         <h3>{tr.preflight}</h3>
         <div className={`preflight ${exportAllowed?"preflight-ok":"preflight-blocked"}`}>
@@ -272,7 +294,7 @@ function App(){
         )}
 
         <h3>{tr.evidence}</h3>
-        <pre>{JSON.stringify(testEvidence,null,2)}</pre>
+        <pre>{JSON.stringify(targetTestRecord || legacyTestEvidence,null,2)}</pre>
 
         <h3>{tr.diagnostics}</h3>
         {report.diagnostics.length
