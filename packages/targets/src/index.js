@@ -1,4 +1,5 @@
 import { CapabilityState } from "../../capabilities/src/index.js";
+import { getTargetTestEvidence } from "./test-evidence.js";
 
 const UNKNOWN_CAPABILITIES={
   vpn:CapabilityState.UNKNOWN,
@@ -27,11 +28,13 @@ const manifests=new Map([
   ["mihomo",{id:"mihomo",version:"current-reference",status:"template-export",evidence:[
     {level:"OFFICIAL",url:"https://wiki.metacubex.one/en/config/"}
   ],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["YAML export template is available; target runtime behavior still requires verification."]}],
-  ["wireguard",{id:"wireguard",version:"standard-config",status:"template-export",evidence:[
-    {level:"OFFICIAL",url:"https://www.wireguard.com/"}
+  ["wireguard",{id:"wireguard",version:"standard-config",status:"partial-tested",evidence:[
+    {level:"OFFICIAL",url:"https://www.wireguard.com/"},
+    {level:"REAL_DEVICE",tests:1,status:"partial"}
   ],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["Standard syntax template is available; target-app import behavior still requires separate verification."]}],
-  ["shadowrocket",{id:"shadowrocket",version:"current-reference",status:"template-export",evidence:[
-    {level:"REFERENCE",url:"https://github.com/LOWERTOP/Shadowrocket/wiki"}
+  ["shadowrocket",{id:"shadowrocket",version:"current-reference",status:"partial-tested",evidence:[
+    {level:"REFERENCE",url:"https://github.com/LOWERTOP/Shadowrocket/wiki"},
+    {level:"REAL_DEVICE",tests:1,status:"partial"}
   ],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["Profile template is available; exact runtime behavior must be tested in the installed app version."]}],
   ["loon",{id:"loon",version:"current-reference",status:"template-export",evidence:[
     {level:"REFERENCE",url:"https://github.com/Loon0x00/LoonManual"}
@@ -49,6 +52,10 @@ const manifests=new Map([
     {level:"OFFICIAL",url:"https://developer.apple.com/documentation/devicemanagement/dnssettings"}
   ],capabilities:{vpn:CapabilityState.UNKNOWN,dns:CapabilityState.SUPPORTED,routing:CapabilityState.UNKNOWN,"blocking.malware":CapabilityState.UNKNOWN,"blocking.trackers":CapabilityState.UNKNOWN},limitations:["Legacy DNSSettings payload; Apple documents the declarative network DNS configuration as the replacement on newer OS versions."]}
 ]);
+
+export function getTargetTestRecord(targetId){
+  return getTargetTestEvidence(targetId);
+}
 
 export function getTargetManifest(targetId){
   const manifest=manifests.get(targetId);
