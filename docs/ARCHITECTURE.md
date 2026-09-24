@@ -1,12 +1,12 @@
-# Architecture
+# สถาปัตยกรรม
 
-## 1. Goal
+## 1. เป้าหมาย
 
-The platform separates user intent from target-specific configuration syntax.
+แพลตฟอร์มแยกความต้องการของผู้ใช้ออกจากไวยากรณ์การตั้งค่าเฉพาะ Target
 
-A user defines a canonical Policy. The system determines what each Target can support, compiles the supported semantics, reports limitations, validates the result, and serializes it into the target's native format.
+ผู้ใช้กำหนด Policy มาตรฐานกลาง ระบบตรวจสอบว่า Target แต่ละตัวรองรับสิ่งใด คอมไพล์ความหมายที่รองรับ รายงานข้อจำกัด ตรวจสอบผลลัพธ์ และแปลงเป็นรูปแบบ native ของ Target
 
-## 2. Pipeline
+## 2. กระบวนการ
 
 ```
 Canonical Policy
@@ -38,7 +38,7 @@ Serializer
 Target Configuration
 ```
 
-## 3. Import pipeline
+## 3. กระบวนการนำเข้า
 
 ```
 Target Configuration
@@ -56,47 +56,47 @@ Canonical Policy
 Validation / Diagnostics
 ```
 
-## 4. Capability states
+## 4. สถานะความสามารถ
 
-- **SUPPORTED** — target represents the requested feature directly.
-- **LIMITED** — target can represent only part of the requested semantics.
-- **TRANSFORMABLE** — equivalent semantics can be expressed through another supported mechanism.
-- **LOSSY** — conversion is possible but changes behavior or information.
-- **UNSUPPORTED** — target cannot represent the feature.
-- **UNKNOWN** — capability has not been verified.
+- **SUPPORTED** — Target แทนความสามารถที่ร้องขอได้โดยตรง
+- **LIMITED** — Target แทนความหมายที่ร้องขอได้เพียงบางส่วน
+- **TRANSFORMABLE** — สามารถแสดงความหมายเทียบเท่าผ่านกลไกอื่นที่รองรับ
+- **LOSSY** — แปลงได้ แต่ทำให้พฤติกรรมหรือข้อมูลเปลี่ยนไป
+- **UNSUPPORTED** — Target ไม่สามารถแทนความสามารถนั้นได้
+- **UNKNOWN** — ยังไม่มีการยืนยันความสามารถ
 
-The compiler must never silently convert an unsupported feature into a different behavior.
+คอมไพเลอร์ต้องไม่แปลงความสามารถที่ไม่รองรับเป็นพฤติกรรมอื่นโดยไม่แจ้งให้ทราบ
 
-## 5. Separation of responsibilities
+## 5. การแยกหน้าที่
 
 ### Policy
-Describes intent.
+อธิบายความต้องการ
 
 ### Compiler
-Maps intent to target semantics.
+แปลงความต้องการไปเป็นความหมายของ Target
 
 ### Adapter
-Owns target-specific knowledge.
+รับผิดชอบความรู้เฉพาะ Target
 
 ### Serializer
-Owns syntax.
+รับผิดชอบไวยากรณ์ของ Target
 
 ### Validator
-Verifies correctness.
+ตรวจสอบความถูกต้อง
 
 ### Runtime
-Actually applies the resulting configuration. Runtime behavior is outside the configuration compiler unless a supported native runtime is explicitly implemented.
+นำการตั้งค่าที่ได้ไปใช้งานจริง พฤติกรรมของ runtime อยู่นอกขอบเขตของคอมไพเลอร์การตั้งค่า เว้นแต่จะมี native runtime ที่รองรับโดยชัดเจน
 
-## 6. Security boundaries
+## 6. ขอบเขตความปลอดภัย
 
-The project must not bypass operating-system permissions, application permissions, signing requirements, entitlements, sandbox boundaries, or other platform security controls.
+โครงการต้องไม่ข้ามสิทธิ์ของระบบปฏิบัติการ สิทธิ์ของแอป ข้อกำหนดการลงลายเซ็น entitlements ขอบเขต sandbox หรือกลไกความปลอดภัยอื่นของแพลตฟอร์ม
 
-If a feature is unavailable to a target, the system reports that limitation and provides compatible alternatives where appropriate.
+หาก Target ไม่มีความสามารถ ระบบต้องรายงานข้อจำกัดนั้น และเสนอทางเลือกที่เข้ากันได้เมื่อเหมาะสม
 
-## 7. Privacy boundary
+## 7. ขอบเขตความเป็นส่วนตัว
 
-Sensitive values should remain local whenever possible. The architecture must avoid requiring server-side storage of private keys, credentials, tokens, or personal configuration.
+ค่าที่มีความอ่อนไหวควรอยู่ภายในเครื่องเมื่อทำได้ สถาปัตยกรรมต้องหลีกเลี่ยงการจัดเก็บ private key, credential, token หรือข้อมูลการตั้งค่าส่วนบุคคลไว้บนเซิร์ฟเวอร์โดยไม่จำเป็น
 
-## 8. Public/private implementation boundary
+## 8. ขอบเขตการเผยแพร่โค้ด
 
-The project may expose schemas, documentation, examples, validation contracts, and selected adapters publicly while retaining implementation components that the maintainer does not wish to publish. Public interfaces must remain documented and stable enough for users to understand generated artifacts.
+โครงการอาจเปิดเผย schema, เอกสาร, ตัวอย่าง, สัญญาการตรวจสอบ และ adapter บางส่วนต่อสาธารณะ ขณะที่ส่วนประกอบที่ผู้ดูแลไม่ต้องการเผยแพร่อาจยังคงเป็นส่วนตัว อินเทอร์เฟซสาธารณะต้องมีเอกสารกำกับและมีเสถียรภาพเพียงพอให้ผู้ใช้เข้าใจผลลัพธ์ที่สร้างขึ้น
