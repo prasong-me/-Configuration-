@@ -1,77 +1,77 @@
-# Export Formats
+# รูปแบบการส่งออก
 
-This document is the test matrix for target-specific exports.
+เอกสารนี้เป็นตารางทดสอบสำหรับผลลัพธ์การส่งออกที่เฉพาะกับ Target
 
-## Export targets
+## Target สำหรับการส่งออก
 
-| Target | File | Function | State |
+| Target | ไฟล์ | ฟังก์ชัน | สถานะ |
 |---|---|---|---|
-| Surge | .conf | exportSurge() | Template |
-| Mihomo / Clash-compatible | .yaml | exportMihomo() | Template |
-| WireGuard | .conf | exportWireGuard() | Template |
-| Shadowrocket | .conf | exportShadowrocket() | Template |
-| Loon | .conf | exportLoon() | Template |
-| Stash | .yaml | exportStash() | Template |
-| Quantumult X | .conf | exportQuantumultX() | Template |
-| Apple Network DNS Settings | .json | exportAppleDnsDeclaration() | Reference |
-| Apple DNSSettings legacy | .mobileconfig | exportAppleMobileConfigLegacy() | Legacy |
+| Surge | .conf | exportSurge() | แม่แบบ |
+| Mihomo / Clash-compatible | .yaml | exportMihomo() | แม่แบบ |
+| WireGuard | .conf | exportWireGuard() | แม่แบบ |
+| Shadowrocket | .conf | exportShadowrocket() | แม่แบบ |
+| Loon | .conf | exportLoon() | แม่แบบ |
+| Stash | .yaml | exportStash() | แม่แบบ |
+| Quantumult X | .conf | exportQuantumultX() | แม่แบบ |
+| Apple Network DNS Settings | .json | exportAppleDnsDeclaration() | ข้อมูลอ้างอิง |
+| Apple DNSSettings legacy | .mobileconfig | exportAppleMobileConfigLegacy() | รุ่นเก่า |
 
-## Test order
+## ลำดับการทดสอบ
 
-For each target:
+สำหรับแต่ละ Target:
 
-1. Export the file from the web application.
-2. Import or load it in the real target application/device.
-3. Test DNS.
-4. Test routing / VPN or TUN behavior where applicable.
-5. Test one blocking rule.
-6. Record the actual result.
-7. Return the exported artifact with secrets removed.
-8. Promote the target from template to a verified adapter only after the real-device result is reviewed.
+1. ส่งออกไฟล์จากเว็บแอปพลิเคชัน
+2. นำเข้าหรือโหลดไฟล์ในแอปหรืออุปกรณ์จริงของ Target
+3. ทดสอบ DNS
+4. ทดสอบการกำหนดเส้นทาง / VPN หรือ TUN ตามความเหมาะสม
+5. ทดสอบกฎการบล็อกหนึ่งรายการ
+6. บันทึกผลที่เกิดขึ้นจริง
+7. ส่งคืน artifact ที่ส่งออกโดยลบข้อมูลลับออก
+8. ยกระดับ Target จากแม่แบบเป็น adapter ที่ได้รับการยืนยันเมื่อมีการตรวจสอบผลจากอุปกรณ์จริงแล้วเท่านั้น
 
-## Format notes
+## หมายเหตุเกี่ยวกับรูปแบบ
 
 ### Surge
-Surge profiles use an INI-like format with sections such as [General], [Proxy], [Proxy Group], and [Rule].
+โปรไฟล์ Surge ใช้รูปแบบคล้าย INI โดยมี section เช่น [General], [Proxy], [Proxy Group] และ [Rule]
 
-Reference: https://manual.nssurge.com/profile/format.html
+แหล่งอ้างอิง: https://manual.nssurge.com/profile/format.html
 
 ### Mihomo
-Mihomo uses YAML. DNS is represented under dns, proxy nodes under proxies, proxy groups under proxy-groups, and routing rules under rules.
+Mihomo ใช้ YAML โดย DNS อยู่ภายใต้ dns, โหนดพร็อกซีอยู่ภายใต้ proxies, กลุ่มพร็อกซีอยู่ภายใต้ proxy-groups และกฎการกำหนดเส้นทางอยู่ภายใต้ rules
 
-Reference: https://wiki.metacubex.one/en/config/
+แหล่งอ้างอิง: https://wiki.metacubex.one/en/config/
 
 ### WireGuard
-The export uses the standard [Interface] / [Peer] structure. Private keys are deliberately placeholders.
+การส่งออกใช้โครงสร้างมาตรฐาน [Interface] / [Peer] โดย private key ตั้งใจให้เป็นเพียง placeholder
 
-Reference: https://www.wireguard.com/
+แหล่งอ้างอิง: https://www.wireguard.com/
 
 ### Shadowrocket
-The export uses the Shadowrocket .conf profile structure. The current test fixture keeps the DNS and rule sections minimal so each feature can be tested independently.
+การส่งออกใช้โครงสร้างโปรไฟล์ .conf ของ Shadowrocket fixture สำหรับการทดสอบปัจจุบันจะเก็บส่วน DNS และกฎให้น้อยที่สุด เพื่อให้ทดสอบแต่ละฟีเจอร์แยกกันได้
 
-Reference: https://github.com/LOWERTOP/Shadowrocket/wiki
+แหล่งอ้างอิง: https://github.com/LOWERTOP/Shadowrocket/wiki
 
 ### Loon
-The export uses Loon's section-based configuration format. DNS is configured in [General] and rules in [Rule].
+การส่งออกใช้รูปแบบการตั้งค่าแบบ section ของ Loon โดย DNS อยู่ใน [General] และกฎอยู่ใน [Rule]
 
-Reference: https://github.com/Loon0x00/LoonManual
+แหล่งอ้างอิง: https://github.com/Loon0x00/LoonManual
 
 ### Stash
-Stash configurations use YAML. DNS is under dns, and traffic rules are under rules.
+การตั้งค่า Stash ใช้ YAML โดย DNS อยู่ภายใต้ dns และกฎทราฟฟิกอยู่ภายใต้ rules
 
-Reference: https://stash.wiki/en/configuration/example-config
+แหล่งอ้างอิง: https://stash.wiki/en/configuration/example-config
 
 ### Quantumult X
-The export uses Quantumult X's section-based configuration. The minimal fixture includes [general], [dns], [policy], and [filter_local].
+การส่งออกใช้การตั้งค่าแบบ section ของ Quantumult X fixture ขั้นต่ำประกอบด้วย [general], [dns], [policy] และ [filter_local]
 
-Reference: https://github.com/crossutility/Quantumult-X
+แหล่งอ้างอิง: https://github.com/crossutility/Quantumult-X
 
 ### Apple Network DNS Settings
-The current Apple declarative model uses the com.apple.configuration.network.dns-settings declaration. This is exported separately from the legacy .mobileconfig DNS payload.
+โมเดล declarative ของ Apple ในปัจจุบันใช้ declaration `com.apple.configuration.network.dns-settings` และส่งออกแยกจาก payload DNS แบบ .mobileconfig รุ่นเก่า
 
-Reference: https://developer.apple.com/documentation/devicemanagement/networkdnssettings
+แหล่งอ้างอิง: https://developer.apple.com/documentation/devicemanagement/networkdnssettings
 
 ### Apple DNSSettings legacy
-The com.apple.dnsSettings.managed payload is retained only as a legacy compatibility fixture because Apple documents the declarative network DNS settings configuration as its replacement on newer OS versions.
+payload `com.apple.dnsSettings.managed` ยังคงไว้เป็น fixture สำหรับความเข้ากันได้กับระบบรุ่นเก่าเท่านั้น เนื่องจาก Apple ระบุว่า declarative network DNS settings เป็นรูปแบบทดแทนบนระบบปฏิบัติการรุ่นใหม่
 
-Reference: https://developer.apple.com/documentation/devicemanagement/dnssettings
+แหล่งอ้างอิง: https://developer.apple.com/documentation/devicemanagement/dnssettings
