@@ -1,19 +1,19 @@
-# Mihomo Target Evidence
+# หลักฐาน Target ของ Mihomo
 
-## Official evidence
+## หลักฐานทางการ
 
-Mihomo publishes a configuration reference covering inbounds, routing rules, outbounds, DNS, proxy groups and other configuration areas.
+Mihomo มีเอกสารอ้างอิงการตั้งค่าที่ครอบคลุม inbounds, routing rules, outbounds, DNS, proxy groups และส่วนการตั้งค่าอื่น ๆ
 
-Source: https://wiki.metacubex.one/en/config/
+แหล่งข้อมูล: https://wiki.metacubex.one/en/config/
 
-Mihomo documents TUN as a way to capture system traffic and support automatic routing, DNS hijacking and per-application routing.
+Mihomo ระบุ TUN เป็นวิธีรับทราฟฟิกของระบบและรองรับการกำหนดเส้นทางอัตโนมัติ การดัก DNS และการกำหนดเส้นทางแยกตามแอป
 
-Source: https://wiki.metacubex.one/en/config/inbound/
+แหล่งข้อมูล: https://wiki.metacubex.one/en/config/inbound/
 
-Mihomo warns that binding to `0.0.0.0` exposes a listener on every network interface.
+Mihomo เตือนว่าการ bind กับ `0.0.0.0` จะเปิด listener บนทุกอินเทอร์เฟซเครือข่าย
 
-Source: https://wiki.metacubex.one/en/config/inbound/
+แหล่งข้อมูล: https://wiki.metacubex.one/en/config/inbound/
 
-## Project status
+## สถานะของโครงการ
 
-No Mihomo serializer is marked complete yet. The implementation must be fixture-driven and versioned against the Mihomo configuration reference.
+ยังไม่มี Mihomo serializer ที่ทำเครื่องหมายว่าสมบูรณ์ การพัฒนาต้องใช้ fixture เป็นหลักและต้องผูกกับเวอร์ชันของเอกสารอ้างอิงการตั้งค่า Mihomo
