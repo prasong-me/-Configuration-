@@ -1,52 +1,52 @@
-# Configuration Platform
+# แพลตฟอร์มสร้างการตั้งค่า
 
-Target configuration generator for network/privacy applications.
+เครื่องมือสร้างการตั้งค่าสำหรับแอปพลิเคชันด้านเครือข่ายและความเป็นส่วนตัว โดยรองรับ Target หลายรูปแบบ
 
-## Architecture
+## สถาปัตยกรรม
 
-The platform is an intermediary configuration generator. It does not implement a VPN, proxy engine, or target-app import mechanism.
+แพลตฟอร์มนี้เป็นตัวกลางสำหรับสร้างการตั้งค่า ไม่ได้ทำหน้าที่เป็น VPN, เครื่องยนต์พร็อกซี หรือกลไกนำเข้าโปรไฟล์ของแอปเป้าหมาย
 
-The flow is:
+ลำดับการทำงานคือ:
 
-1. Select a target application.
-2. Create or edit a profile.
-3. Configure DNS, proxy, routing and blocking policy.
-4. Validate the configuration.
-5. Generate the target application's native configuration.
-6. Hand the result to the target application through a supported delivery mechanism such as iOS Share/Open In or a documented app link.
-7. The target application remains responsible for importing and executing the configuration.
+1. เลือกแอปพลิเคชันเป้าหมาย
+2. สร้างหรือแก้ไขโปรไฟล์
+3. กำหนด DNS, พร็อกซี, การกำหนดเส้นทาง และนโยบายการบล็อก
+4. ตรวจสอบการตั้งค่า
+5. สร้างการตั้งค่าในรูปแบบเฉพาะของแอปเป้าหมาย
+6. ส่งผลลัพธ์ให้แอปเป้าหมายผ่านช่องทางที่รองรับ เช่น iOS Share/Open In หรือ app link ที่มีเอกสารระบุไว้
+7. แอปเป้าหมายเป็นผู้รับผิดชอบการนำเข้าและการทำงานของการตั้งค่า
 
-## Test-result gate
+## หลักฐานการทดสอบ
 
-**A target configuration must have real test evidence before it can be presented as verified or exported as a verified target.**
+การตั้งค่าของ Target ต้องมีหลักฐานจากการทดสอบจริงก่อนจึงจะนำเสนอว่าได้รับการยืนยัน หรือส่งออกในฐานะ Target ที่ได้รับการยืนยันได้
 
-Official documentation alone establishes syntax/reference information. It does not establish runtime compatibility.
+เอกสารทางการเพียงอย่างเดียวใช้ยืนยันข้อมูลรูปแบบและข้อมูลอ้างอิงได้ แต่ไม่ใช่หลักฐานว่าทำงานร่วมกับระบบจริงได้
 
-The repository therefore records test results separately from target definitions. Partial observations are explicitly marked partial and must not be promoted to full verification.
+Repository จึงเก็บผลการทดสอบแยกจากคำจำกัดความของ Target ผลที่สังเกตได้เพียงบางส่วนต้องระบุว่าเป็น partial และห้ามเลื่อนสถานะเป็น verified โดยไม่มีหลักฐานเพียงพอ
 
-Current recorded results:
+ผลที่บันทึกไว้ในปัจจุบัน:
 
-- Surge 5.x: verified, 15 real-device tests plus profile-generation test.
-- Shadowrocket: partial, real-device DNS/runtime observation.
-- WireGuard: partial, real-device VPN-interface/routing observation.
-- Other targets: reference/template only until real testing is recorded.
+- Surge 5.x: verified, ทดสอบบนอุปกรณ์จริง 15 รายการ และมีการทดสอบการสร้างโปรไฟล์
+- Shadowrocket: partial, มีการสังเกตการทำงานของ DNS/runtime บนอุปกรณ์จริง
+- WireGuard: partial, มีการสังเกตอินเทอร์เฟซ VPN และการกำหนดเส้นทางบนอุปกรณ์จริง
+- Target อื่น ๆ: อยู่ในระดับ reference/template จนกว่าจะมีการบันทึกผลการทดสอบจริง
 
-When a new test result is received, add the exact observed result to the target evidence record first, then update the target status only when the evidence supports that status.
+เมื่อได้รับผลการทดสอบใหม่ ให้เพิ่มผลที่สังเกตได้จริงลงในบันทึกหลักฐานของ Target ก่อน แล้วจึงปรับสถานะเมื่อหลักฐานรองรับสถานะนั้น
 
-## Target-specific code
+## โค้ดเฉพาะ Target
 
-The web core should remain target-agnostic. Target-specific formats and behavior belong in target definitions/adapters/scripts.
+Web core ต้องไม่ผูกกับ Target รูปแบบและพฤติกรรมเฉพาะ Target ต้องอยู่ในคำจำกัดความ, adapter หรือสคริปต์ของ Target
 
-Do not spread target-specific branches through the main web UI.
+ห้ามกระจายเงื่อนไขเฉพาะ Target ไปทั่ว UI หลัก
 
-## Security
+## ความปลอดภัย
 
-Never commit private keys, passwords, tokens, certificates, or personal configuration data.
+ห้าม commit private key, password, token, certificate หรือข้อมูลการตั้งค่าส่วนบุคคล
 
-Remote sources should be treated as data. Do not execute arbitrary remote JavaScript.
+แหล่งข้อมูลระยะไกลต้องถือเป็นข้อมูล ห้ามเรียกใช้ JavaScript จากระยะไกลโดยพลการ
 
-## Testing
+## การทดสอบ
 
-Run `npm test` for core tests.
+ใช้ `npm test` สำหรับการทดสอบ core
 
-Run `npm --prefix apps/web install && npm --prefix apps/web run build` for the web build.
+ใช้ `npm --prefix apps/web install && npm --prefix apps/web run build` สำหรับการ build เว็บ
