@@ -147,6 +147,7 @@ function App(){
     <header>
       <div className="language-menu"><label>{tr.language}<select value={language} onChange={e=>setLanguage(e.target.value)}><option value="th">{tr.thai}</option><option value="en">{tr.english}</option></select></label></div>
       <h1>{tr.title}</h1>
+      <p><a href="./knowledge.html">Knowledge</a></p>
       <p>{tr.subtitle}</p>
     </header>
 
