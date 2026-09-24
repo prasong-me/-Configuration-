@@ -1,6 +1,6 @@
 import { compileSurge } from "../../surge-adapter/src/index.js";
 
-const dnsServers = ["1.1.1.1", "1.0.0.1"];
+const defaultPolicy = {finalPolicy:"DIRECT",bypassSystem:true};
 
 const functionGuides = {
   surge: [
@@ -146,18 +146,8 @@ export const exportFormats = [
   }
 ];
 
-function joinDns() {
-  return dnsServers.join(", ");
-}
-
 export function exportSurge(policyInput = {}) {
-  const input = policyInput?.policy ? policyInput : {
-    policy: {
-      dnsServers,
-      finalPolicy: "DIRECT",
-      bypassSystem: true
-    }
-  };
+  const input = policyInput?.policy ? policyInput : {policy:defaultPolicy};
   return compileSurge(input).content;
 }
 
