@@ -1,21 +1,21 @@
-# Security Architecture
+# สถาปัตยกรรมความปลอดภัย
 
-## Threat model scope
+## ขอบเขตของโมเดลภัยคุกคาม
 
-The project may process configuration containing network endpoints, routing rules, credentials, certificates, or other sensitive values.
+โครงการอาจประมวลผลการตั้งค่าที่มีปลายทางเครือข่าย กฎการกำหนดเส้นทาง credential certificate หรือข้อมูลที่มีความอ่อนไหวอื่น ๆ
 
-## Requirements
+## ข้อกำหนด
 
-- Never log secrets.
-- Never commit secrets.
-- Validate untrusted configuration before parsing.
-- Treat imported configuration as untrusted input.
-- Avoid arbitrary code execution from configuration files.
-- Keep target adapters isolated from one another.
-- Use deterministic compilation where practical.
-- Provide diagnostics rather than silently changing requested behavior.
-- Respect platform and application security boundaries.
+- ห้ามบันทึกข้อมูลลับลงใน log
+- ห้าม commit ข้อมูลลับ
+- ตรวจสอบการตั้งค่าที่ไม่น่าเชื่อถือก่อนนำไปแยกวิเคราะห์
+- ถือว่าการตั้งค่าที่นำเข้าเป็นข้อมูลที่ไม่น่าเชื่อถือ
+- หลีกเลี่ยงการเรียกใช้โค้ดโดยพลการจากไฟล์การตั้งค่า
+- แยก Target Adapter ออกจากกัน
+- ใช้การคอมไพล์ที่ให้ผลลัพธ์แน่นอนเมื่อทำได้
+- รายงาน diagnostics แทนการเปลี่ยนความต้องการที่ผู้ใช้ร้องขอโดยไม่แจ้ง
+- เคารพขอบเขตความปลอดภัยของแพลตฟอร์มและแอปพลิเคชัน
 
-## Reporting
+## การรายงาน
 
-Security vulnerabilities should be reported privately through the repository's configured GitHub security channel when available. Do not publish credentials, private keys, or exploit details in ordinary issues.
+ช่องโหว่ด้านความปลอดภัยควรรายงานเป็นการส่วนตัวผ่านช่องทาง GitHub Security ของ repository หากมี ห้ามเผยแพร่ credential, private key หรือรายละเอียดการโจมตีใน issue ทั่วไป
