@@ -73,7 +73,7 @@ test("domain and port stay semantic",()=>{
   assert.deepEqual(port({value:443}),{type:"port",value:443});
 });
 
-test("proxy credentials use a reference instead of embedding a password",()=>{
+test("proxy credentials use a reference instead of embedding a password",async()=>{
   const {proxyCommand}=await import("../packages/command-model/src/index.js");
   const value=proxyCommand({protocol:"https",server:"proxy.example.com",port:443,credentialRef:"user-credential"});
   assert.equal(value.credentialRef,"user-credential");
