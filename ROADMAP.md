@@ -1,71 +1,71 @@
-# Roadmap
+# แผนพัฒนา
 
-## Phase 0 — Foundation
-- [x] Define project direction
-- [x] Define core terminology
-- [x] Establish repository structure
-- [ ] Finalize public/private boundaries
-- [ ] Finalize project brand
+## ระยะที่ 0 — พื้นฐาน
+- [x] กำหนดทิศทางโครงการ
+- [x] กำหนดคำศัพท์หลัก
+- [x] วางโครงสร้าง Repository
+- [ ] กำหนดขอบเขตส่วนที่เปิดเผยและส่วนที่เป็นส่วนตัวให้เสร็จสมบูรณ์
+- [ ] กำหนดแบรนด์ของโครงการให้เสร็จสมบูรณ์
 
-## Phase 1 — Canonical Policy Model
-- [ ] Define policy schema
-- [ ] Define profile schema
-- [ ] Define target schema
-- [ ] Define capability schema
-- [ ] Define diagnostic model
-- [ ] Define bundle manifest
+## ระยะที่ 1 — โมเดลนโยบายมาตรฐานกลาง
+- [ ] กำหนดโครงสร้างนโยบาย
+- [ ] กำหนดโครงสร้างโปรไฟล์
+- [ ] กำหนดโครงสร้าง Target
+- [ ] กำหนดโครงสร้างความสามารถ
+- [ ] กำหนดโมเดลการวินิจฉัย
+- [ ] กำหนดรายการข้อมูลกำกับของชุดผลลัพธ์
 
-## Phase 2 — Capability Engine
-- [ ] Capability registry
-- [ ] Supported / limited / transformable / lossy / unsupported states
-- [ ] Feature negotiation
-- [ ] Capability diagnostics
+## ระยะที่ 2 — เครื่องยนต์ความสามารถ
+- [ ] ทะเบียนความสามารถ
+- [ ] สถานะ รองรับ / จำกัด / แปลงได้ / สูญเสียข้อมูล / ไม่รองรับ
+- [ ] การเจรจาความสามารถ
+- [ ] การวินิจฉัยความสามารถ
 
-## Phase 3 — Compiler
-- [ ] Normalization
-- [ ] Semantic mapping
-- [ ] Compilation pipeline
-- [ ] Deterministic output
-- [ ] Compile reports
+## ระยะที่ 3 — คอมไพเลอร์
+- [ ] การทำข้อมูลให้เป็นรูปแบบมาตรฐาน
+- [ ] การแมปเชิงความหมาย
+- [ ] กระบวนการคอมไพล์
+- [ ] ผลลัพธ์ที่กำหนดแน่นอน
+- [ ] รายงานการคอมไพล์
 
-## Phase 4 — Target Adapters
+## ระยะที่ 4 — Target Adapter
 - [ ] iOS MobileConfig
 - [ ] Surge
 - [ ] Mihomo / Clash-compatible
 - [ ] WireGuard
-- [ ] Native/runtime adapters
+- [ ] adapter สำหรับระบบปฏิบัติการและ runtime แบบ native
 
-## Phase 5 — Import
-- [ ] Target parsers
-- [ ] Canonical conversion
-- [ ] Import diagnostics
-- [ ] Round-trip tests
+## ระยะที่ 5 — การนำเข้า
+- [ ] ตัวแยกวิเคราะห์ของ Target
+- [ ] การแปลงเป็นรูปแบบมาตรฐานกลาง
+- [ ] การวินิจฉัยการนำเข้า
+- [ ] การทดสอบไป-กลับ
 
-## Phase 6 — Web Application
-- [ ] Policy builder
-- [ ] Target selection
-- [ ] Capability preview
-- [ ] Configuration preview
-- [ ] Export
-- [ ] Bundle generation
+## ระยะที่ 6 — เว็บแอปพลิเคชัน
+- [ ] ตัวสร้างนโยบาย
+- [ ] การเลือก Target
+- [ ] การแสดงความสามารถที่รองรับ
+- [ ] ตัวอย่างการตั้งค่า
+- [ ] การส่งออก
+- [ ] การสร้างชุดผลลัพธ์
 
-## Phase 7 — Security and Privacy
-- [ ] Local-first processing
-- [ ] Secret handling
-- [ ] Privacy model
-- [ ] Threat model
-- [ ] Third-party attribution system
+## ระยะที่ 7 — ความปลอดภัยและความเป็นส่วนตัว
+- [ ] ประมวลผลภายในเครื่องเป็นหลัก
+- [ ] การจัดการข้อมูลลับ
+- [ ] โมเดลความเป็นส่วนตัว
+- [ ] โมเดลภัยคุกคาม
+- [ ] ระบบระบุแหล่งข้อมูลจากบุคคลที่สาม
 
-## Phase 8 — Compatibility Lab
-- [ ] Syntax tests
-- [ ] Schema tests
-- [ ] Semantic tests
-- [ ] Target compatibility fixtures
-- [ ] Regression suite
+## ระยะที่ 8 — ห้องทดสอบความเข้ากันได้
+- [ ] การทดสอบรูปแบบไวยากรณ์
+- [ ] การทดสอบโครงสร้างข้อมูล
+- [ ] การทดสอบความหมาย
+- [ ] ชุดข้อมูลทดสอบความเข้ากันได้กับ Target
+- [ ] ชุดทดสอบถดถอย
 
-## Phase 9 — Public Release
-- [ ] Documentation
-- [ ] Contribution guide
-- [ ] Security policy
-- [ ] Release automation
-- [ ] Versioned schemas
+## ระยะที่ 9 — เผยแพร่สู่สาธารณะ
+- [ ] เอกสาร
+- [ ] คู่มือการมีส่วนร่วม
+- [ ] นโยบายความปลอดภัย
+- [ ] ระบบอัตโนมัติสำหรับการเผยแพร่
+- [ ] โครงสร้างข้อมูลที่มีเวอร์ชัน
