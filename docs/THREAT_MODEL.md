@@ -1,33 +1,33 @@
-# Threat Model
+# โมเดลภัยคุกคาม
 
-## Scope
+## ขอบเขต
 
-The platform may handle network configuration, routing, DNS settings, proxy settings, credentials, certificates, and external rule sources.
+แพลตฟอร์มอาจจัดการการตั้งค่าเครือข่าย การกำหนดเส้นทาง DNS พร็อกซี credential certificate และแหล่งกฎจากภายนอก
 
-## Assets
+## ทรัพย์สินที่ต้องปกป้อง
 
-- user configuration
-- credentials and private keys
-- generated configuration artifacts
-- provider metadata
-- runtime state
-- audit records
+- การตั้งค่าของผู้ใช้
+- credential และ private key
+- artifact การตั้งค่าที่สร้างขึ้น
+- ข้อมูลกำกับของ provider
+- สถานะ runtime
+- บันทึกการตรวจสอบ
 
-## Threat categories
+## ประเภทภัยคุกคาม
 
-1. Secret leakage
-2. Malicious or malformed imported configuration
-3. Untrusted remote provider data
-4. Target capability mismatch
-5. Unsafe transformation
-6. Sensitive information in logs
-7. Supply-chain or dependency compromise
-8. Unauthorized runtime changes
+1. ข้อมูลลับรั่วไหล
+2. การตั้งค่าที่นำเข้าซึ่งเป็นอันตรายหรือมีรูปแบบผิด
+3. ข้อมูลจาก provider ระยะไกลที่ไม่น่าเชื่อถือ
+4. ความไม่ตรงกันของความสามารถของ Target
+5. การแปลงข้อมูลที่ไม่ปลอดภัย
+6. ข้อมูลที่มีความอ่อนไหวอยู่ใน log
+7. การโจมตีห่วงโซ่อุปทานหรือ dependency
+8. การเปลี่ยน runtime โดยไม่ได้รับอนุญาต
 
-## Security boundary
+## ขอบเขตความปลอดภัย
 
-The platform must not bypass platform permissions, application permissions, signing, entitlements, sandboxing, or other security controls.
+แพลตฟอร์มต้องไม่ข้ามสิทธิ์ของแพลตฟอร์ม สิทธิ์ของแอป การลงลายเซ็น entitlements sandbox หรือกลไกความปลอดภัยอื่น
 
-## Trust model
+## โมเดลความน่าเชื่อถือ
 
-Imported files and remote provider data are untrusted until validated. Generated artifacts must be treated as user-controlled output that requires review before installation or activation.
+ไฟล์ที่นำเข้าและข้อมูลจาก provider ระยะไกลถือว่าไม่น่าเชื่อถือจนกว่าจะผ่านการตรวจสอบ artifact ที่สร้างขึ้นต้องถือเป็นผลลัพธ์ที่ผู้ใช้ควบคุมและควรตรวจสอบก่อนติดตั้งหรือเปิดใช้งาน
