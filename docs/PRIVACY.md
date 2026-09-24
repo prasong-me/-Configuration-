@@ -1,32 +1,32 @@
-# Privacy Model
+# โมเดลความเป็นส่วนตัว
 
-## Principles
+## หลักการ
 
-- Local-first processing where practical.
-- Data minimization.
-- No secret collection by default.
-- No hidden transmission of configuration data.
-- Explicit disclosure when a feature requires a remote service.
-- User control over generated and exported artifacts.
+- ประมวลผลภายในเครื่องเป็นหลักเมื่อทำได้
+- เก็บข้อมูลเท่าที่จำเป็น
+- ไม่เก็บข้อมูลลับเป็นค่าเริ่มต้น
+- ไม่มีการส่งข้อมูลการตั้งค่าโดยซ่อนเร้น
+- ต้องแจ้งอย่างชัดเจนเมื่อฟีเจอร์ต้องใช้บริการระยะไกล
+- ผู้ใช้ควบคุม artifact ที่สร้างและส่งออก
 
-## Sensitive material
+## ข้อมูลที่มีความอ่อนไหว
 
-Examples include:
+ตัวอย่างเช่น:
 
-- private keys
-- passwords
-- proxy credentials
-- VPN credentials
-- API tokens
-- certificates and private certificate material
-- personal configuration data
+- private key
+- password
+- credential ของพร็อกซี
+- credential ของ VPN
+- API token
+- certificate และข้อมูลส่วนตัวของ certificate
+- ข้อมูลการตั้งค่าส่วนบุคคล
 
-Sensitive material should not be committed to this repository.
+ข้อมูลที่มีความอ่อนไหวไม่ควร commit ลงใน repository นี้
 
-## Web application
+## เว็บแอปพลิเคชัน
 
-A future Web App should prefer browser-side generation for configuration that can be safely compiled locally. Server-side compilation should be optional and should not require secrets unless explicitly needed.
+Web App ในอนาคตควรเลือกสร้างการตั้งค่าภายในเบราว์เซอร์สำหรับกรณีที่สามารถคอมไพล์ภายในเครื่องได้อย่างปลอดภัย การคอมไพล์ฝั่งเซิร์ฟเวอร์ควรเป็นตัวเลือก และไม่ควรต้องใช้ข้อมูลลับเว้นแต่จำเป็นอย่างชัดเจน
 
-## Third-party providers
+## ผู้ให้บริการบุคคลที่สาม
 
-Remote rule lists, DNS providers, or other data sources must be identified, and their terms and licenses must be respected.
+รายการกฎจากระยะไกล ผู้ให้บริการ DNS หรือแหล่งข้อมูลอื่นต้องระบุแหล่งที่มา และต้องเคารพเงื่อนไขการใช้งานและใบอนุญาต
