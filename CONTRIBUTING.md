@@ -1,14 +1,14 @@
-# Contributing
+# การมีส่วนร่วม
 
-Contributions are welcome when they preserve the project's architecture and security principles.
+ยินดีรับการมีส่วนร่วมที่ยังคงรักษาสถาปัตยกรรมและหลักความปลอดภัยของโครงการ
 
-Before contributing:
+ก่อนมีส่วนร่วม:
 
-1. Read the architecture and terminology documents.
-2. Keep target-specific logic inside target adapters.
-3. Do not copy third-party code or data without attribution and license review.
-4. Do not add secrets or personal configuration.
-5. Add tests for behavior changes.
-6. Document compatibility limitations.
+1. อ่านเอกสารสถาปัตยกรรมและคำศัพท์
+2. เก็บ logic เฉพาะ Target ไว้ภายใน Target Adapter
+3. ห้ามคัดลอกโค้ดหรือข้อมูลจากบุคคลที่สามโดยไม่ตรวจสอบการระบุแหล่งที่มาและใบอนุญาต
+4. ห้ามเพิ่มข้อมูลลับหรือข้อมูลการตั้งค่าส่วนบุคคล
+5. เพิ่มการทดสอบสำหรับการเปลี่ยนแปลงพฤติกรรม
+6. บันทึกข้อจำกัดด้านความเข้ากันได้
 
-Pull requests should explain the intended semantic behavior, supported targets, limitations, and test coverage.
+Pull Request ควรอธิบายพฤติกรรมเชิงความหมายที่ต้องการ Target ที่รองรับ ข้อจำกัด และขอบเขตการทดสอบ
