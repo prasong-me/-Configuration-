@@ -1,35 +1,74 @@
 import React,{useMemo,useState} from "react";
 import {createRoot} from "react-dom/client";
 import {compatibilityReport,redact} from "../../../packages/core/src/index.js";
-import {
-  exportFormats,
-  getExportArtifact,
-  getExportWarnings
-} from "../../../packages/targets/src/exporters.js";
+import {exportFormats,getExportArtifact,getExportWarnings} from "../../../packages/targets/src/exporters.js";
 import "./style.css";
-import {createIosWebClipMobileConfig} from "./mobileconfig.js";
 import {recommendedDnsServices} from "../../../packages/catalog/src/recommended-dns.js";
 
-
+const primaryTargets=["apple-mobileconfig","surge","shadowrocket","quantumult-x","wireguard","loon","stash","mihomo"];
 const translations={
   th:{
-    language:"ภาษา",thai:"ไทย",english:"English",title:"Network Configuration",subtitle:"จัดการ DNS, VPN, Routing และนโยบายบล็อกแยกจากกัน พร้อมส่งออกไฟล์ตามรูปแบบของแต่ละแอป",profile:"ตั้งค่าโปรไฟล์",profileName:"ชื่อโปรไฟล์",vpn:"VPN / ตัวกลาง",dns:"DNS ปกติ",malware:"บล็อก Malware",trackers:"บล็อก Tracker",separate:"แยกระบบบล็อกออกจาก DNS",target:"Target",configGuide:"กำหนดค่าและแนวทางการส่งคอนฟิก",guideIntro:"เลือกแอป → เลือกฟังก์ชัน → ดูจุดกำหนดค่าของ target",appTarget:"แอปเป้าหมาย",configPoint:"จุดกำหนดค่า",preflight:"ตรวจสอบก่อนส่งออก",preflightOk:"ผ่านการตรวจสอบเชิงโครงสร้าง",preflightBlocked:"หยุดการส่งออกอัตโนมัติ",noBlocking:"ไม่มี diagnostic ระดับที่บล็อกการส่งออก",preflightNote:"ปุ่มส่งออก target จะเปิดเมื่อโครงสร้างและ adapter ของ target/function ผ่านการตรวจสอบ",fullExport:"ส่งออกโปรไฟล์เต็ม",exportPolicy:"Export Policy",format:"รูปแบบไฟล์ที่เลือก",download:"Download",support:"ผลการรองรับ",diagnostics:"Diagnostics",noDiagnostics:"ไม่พบ Diagnostics",generatedPolicy:"Policy ที่สร้าง"},
+    title:"Configuration Platform",
+    subtitle:"สร้างไฟล์ตั้งค่าเครือข่าย แล้วเลือกวิธีนำไปติดตั้งหรือเปิดด้วยแอปที่ต้องการ",
+    step1:"1. ตั้งค่าพื้นฐาน",step2:"2. เลือกปลายทาง",step3:"3. ส่งออก",
+    profileName:"ชื่อโปรไฟล์",dns:"DNS",dnsHint:"เลือกบริการที่แนะนำ หรือกรอก DNS เอง",
+    dnsPreset:"บริการ DNS",chooseDns:"เลือกบริการฟรี",proxy:"Proxy Server",
+    target:"ปลายทางที่ต้องการใช้",targetHint:"เลือกสิ่งที่คุณจะนำไฟล์ไปใช้งาน",
+    export:"ส่งออก",apple:"ติดตั้งบน iPhone / iPad",appleDesc:"สร้าง .mobileconfig สำหรับติดตั้งผ่าน iOS Settings",
+    downloadProfile:"ดาวน์โหลดโปรไฟล์ iOS",installSteps:"หลังดาวน์โหลด ให้เปิด Settings > Profile Downloaded > Install",
+    appExport:"ส่งไฟล์เข้าแอป",appDesc:"ใช้ปุ่มแชร์ของเครื่องเพื่อส่งไฟล์เข้าแอปที่รองรับ",
+    share:"ส่งไฟล์ไปยังแอป",download:"ดาวน์โหลดไฟล์",fallback:"ถ้าแอปไม่ปรากฏในเมนูแชร์ ให้ดาวน์โหลดไฟล์แล้วนำเข้าในแอปด้วยเมนู Import",
+    warning:"ข้อควรทราบ",advanced:"ตั้งค่าเพิ่มเติม",vpn:"เปิดใช้ VPN / Routing",malware:"บล็อก Malware",trackers:"บล็อก Tracker",
+    help:"วิธีใช้งาน",helpText:"ไม่ต้องรู้รูปแบบไฟล์เอง ระบบจะสร้างไฟล์ตามปลายทางที่เลือก",
+    ready:"พร้อมส่งออก",notReady:"ต้องแก้ข้อมูลก่อนส่งออก",knowledge:"คู่มือ",
+    language:"ภาษา",thai:"ไทย",english:"English"
+  },
   en:{
-    language:"Language",thai:"ไทย",english:"English",title:"Network Configuration",subtitle:"Manage DNS, VPN, Routing and separate blocking policies, with exports tailored to each app.",profile:"Profile settings",profileName:"Profile name",vpn:"VPN / Intermediary",dns:"Normal DNS",malware:"Block Malware",trackers:"Block Trackers",separate:"Separate blocking from DNS",target:"Target",configGuide:"Configuration guidance",guideIntro:"Select an app → select a function → review the target configuration point.",appTarget:"Target app",configPoint:"Configuration point",preflight:"Pre-export check",preflightOk:"Structural checks passed",preflightBlocked:"Export automatically blocked",noBlocking:"No blocking-level diagnostics",preflightNote:"Target export is enabled when the target/function passes structural and adapter checks.",fullExport:"Full profile export",exportPolicy:"Export Policy",format:"Selected file format",download:"Download",support:"Support status",diagnostics:"Diagnostics",noDiagnostics:"No diagnostics",generatedPolicy:"Generated Policy"}
+    title:"Configuration Platform",
+    subtitle:"Build a network configuration, then choose how to install or send it to your app.",
+    step1:"1. Basic settings",step2:"2. Choose destination",step3:"3. Export",
+    profileName:"Profile name",dns:"DNS",dnsHint:"Choose a recommended service or enter DNS manually.",
+    dnsPreset:"DNS service",chooseDns:"Choose a free service",proxy:"Proxy Server",
+    target:"Destination",targetHint:"Choose where you will use the generated file.",
+    export:"Export",apple:"Install on iPhone / iPad",appleDesc:"Create a .mobileconfig for installation through iOS Settings.",
+    downloadProfile:"Download iOS profile",installSteps:"After downloading: Settings > Profile Downloaded > Install",
+    appExport:"Send file to app",appDesc:"Use the device share sheet to send the file to a compatible app.",
+    share:"Send to app",download:"Download file",fallback:"If the app is not shown in Share, download the file and use Import inside the app.",
+    warning:"Important",advanced:"More settings",vpn:"Enable VPN / Routing",malware:"Block Malware",trackers:"Block Trackers",
+    help:"How it works",helpText:"You do not need to know the file format. The platform builds it for the selected destination.",
+    ready:"Ready to export",notReady:"Fix the settings before exporting",knowledge:"Guide",
+    language:"Language",thai:"ไทย",english:"English"
+  }
 };
 
-const targets=[
-  {id:"example",label:translations.th.reference},
-  ...exportFormats.map(x=>({id:x.id,label:x.label}))
-];
-
-function download(name,text,mime){
+function makeBlob(name,text,mime){
+  return new File([text],name,{type:mime});
+}
+function downloadFile(name,text,mime){
   const blob=new Blob([text],{type:mime});
+  const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
+  a.href=url;
   a.download=name;
+  document.body.appendChild(a);
   a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),0);
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
+function installIosProfile(text,name){
+  const blob=new Blob([text],{type:"application/x-apple-aspen-config"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.rel="noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
+}
+async function shareFile(file){
+  if(!navigator.share || !navigator.canShare || !navigator.canShare({files:[file]})) return false;
+  try{await navigator.share({files:[file],title:file.name});return true}catch(error){if(error?.name==="AbortError") return true;return false;}
 }
 
 function App(){
@@ -38,246 +77,148 @@ function App(){
   const [name,setName]=useState("My Privacy Profile");
   const [vpn,setVpn]=useState(false);
   const [dns,setDns]=useState(true);
-  const [malware,setMalware]=useState(true);
-  const [trackers,setTrackers]=useState(true);
-  const [separateBlocking,setSeparateBlocking]=useState(true);
-  const [target,setTarget]=useState("surge");
+  const [malware,setMalware]=useState(false);
+  const [trackers,setTrackers]=useState(false);
   const [dnsServers,setDnsServers]=useState("");
   const [proxyServer,setProxyServer]=useState("");
   const [dnsServerUrl,setDnsServerUrl]=useState("");
   const [dnsServerName,setDnsServerName]=useState("");
   const [dnsPreset,setDnsPreset]=useState("");
-  const [selectedFunction,setSelectedFunction]=useState("dns");
+  const [target,setTarget]=useState("apple-mobileconfig");
+  const [message,setMessage]=useState("");
 
-  const policy=useMemo(()=>({
-    version:"0.3",
-    policy:{
-      name,
-      vpn,
-      dns,
-      routing:!!vpn,
-      blocking:{
-        malware,
-        trackers,
-        separateFromResolver:separateBlocking
-      },
-      dnsServers:dnsServers.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean),
-      proxyServer:proxyServer.trim(),
-      dnsProtocol:"HTTPS",
-      dnsServerUrl:dnsServerUrl.trim(),
-      dnsServerName:dnsServerName.trim(),
-      dnsDomains:[],
-      webAppUrl:window.location.href,
-      rules:[],
-      finalPolicy:"DIRECT",
-      bypassSystem:true,
-      architecture:{
-        normalDns:true,
-        intermediary:true,
-        appMaySeeRequestedDomain:true,
-        hideResolverIdentityFromApp:"not-guaranteed"
-      }
-    }
-  }),[name,vpn,dns,malware,trackers,separateBlocking,dnsServers,proxyServer,dnsServerUrl,dnsServerName]);
+  const policy=useMemo(()=>({version:"0.4",policy:{
+    name,vpn,dns,routing:vpn,
+    blocking:{malware,trackers,separateFromResolver:true},
+    dnsServers:dnsServers.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean),
+    proxyServer:proxyServer.trim(),
+    dnsProtocol:"HTTPS",
+    dnsServerUrl:dnsServerUrl.trim(),
+    dnsServerName:dnsServerName.trim(),
+    dnsDomains:[],rules:[],finalPolicy:"DIRECT",bypassSystem:true
+  }}),[name,vpn,dns,malware,trackers,dnsServers,proxyServer,dnsServerUrl,dnsServerName]);
 
   const policyForExport=redact(policy);
-  const report=useMemo(()=>compatibilityReport(policy,target==="example"?"surge":target),[policy,target]);
-
-
   const selectedFormat=exportFormats.find(x=>x.id===target)||exportFormats[0];
-  const selectedArtifact=getExportArtifact(selectedFormat.id,policyForExport);
-  const functions=selectedFormat.functions||[];
-  const activeFunction=functions.find(x=>x.id===selectedFunction)||functions[0];
-  const preflight=useMemo(()=>compatibilityReport(policy,target),[policy,target]);
-  const exportAllowed=preflight.exportable;
-  const exportBlockReasons=preflight.diagnostics.filter(d=>d.level==="CRITICAL"||d.level==="HIGH");
-  const exportWarnings=getExportWarnings(selectedFormat.id,policyForExport);
+  const artifact=getExportArtifact(selectedFormat.id,policyForExport);
+  const warnings=getExportWarnings(selectedFormat.id,policyForExport);
+  const report=useMemo(()=>compatibilityReport(policy,target),[policy,target]);
+  const blocking=report.diagnostics.filter(x=>x.level==="CRITICAL"||x.level==="HIGH");
+  const exportReady=Boolean(artifact)&&blocking.length===0;
+  const isApple=target==="apple-mobileconfig";
+
+  const selectTarget=id=>{setTarget(id);setMessage("");};
+
+  const doDownload=()=>{
+    downloadFile(`${selectedFormat.id}-config${selectedFormat.extension}`,artifact,selectedFormat.mime);
+    setMessage("ดาวน์โหลดไฟล์แล้ว");
+  };
+
+  const doShare=async()=>{
+    const file=makeBlob(`${selectedFormat.id}-config${selectedFormat.extension}`,artifact,selectedFormat.mime);
+    const shared=await shareFile(file);
+    if(shared){setMessage("เปิดเมนูแชร์แล้ว เลือกแอปปลายทางได้เลย");return;}
+    doDownload();
+    setMessage("อุปกรณ์นี้ไม่รองรับการส่งไฟล์เข้าแอปโดยตรง จึงดาวน์โหลดไฟล์แทน");
+  };
+
+  const primaryFormats=primaryTargets.map(id=>exportFormats.find(x=>x.id===id)).filter(Boolean);
 
   return <main>
-    <header>
-      <div className="language-menu"><label>{tr.language}<select value={language} onChange={e=>setLanguage(e.target.value)}><option value="th">{tr.thai}</option><option value="en">{tr.english}</option></select></label></div>
+    <header className="hero">
+      <div className="language-menu">
+        <label>{tr.language}<select value={language} onChange={e=>setLanguage(e.target.value)}>
+          <option value="th">{tr.thai}</option><option value="en">{tr.english}</option>
+        </select></label>
+      </div>
+      <div className="hero-badge">Configuration Compiler</div>
       <h1>{tr.title}</h1>
-      <p><a href="./knowledge.html">Knowledge</a></p>
       <p>{tr.subtitle}</p>
+      <a href="./knowledge.html">{tr.knowledge}</a>
     </header>
 
-    <nav className="mobile-export-menu" aria-label="เมนูการตั้งค่าและส่งออก">
-      <a href="#profile-settings" className="mobile-menu-item"><span>⚙️</span><strong>ตั้งค่า</strong></a>
-      <a href="#target-settings" className="mobile-menu-item"><span>🎯</span><strong>Target</strong></a>
-      <a href="#export-settings" className="mobile-menu-item active"><span>📤</span><strong>ส่งออก</strong></a>
+    <nav className="mobile-nav" aria-label="เมนูหลัก">
+      <a href="#basic"><span>1</span>{tr.step1.replace(/^1\. /,"")}</a>
+      <a href="#destination"><span>2</span>{tr.step2.replace(/^2\. /,"")}</a>
+      <a href="#export"><span>3</span>{tr.step3.replace(/^3\. /,"")}</a>
     </nav>
 
-    <section className="mobile-export-panel" id="export-settings">
-      <div>
-        <small>ส่งออกการตั้งค่า</small>
-        <strong>{selectedFormat.label}</strong>
-        <span>{selectedFormat.extension} · {selectedFormat.status}</span>
-      </div>
-      <select aria-label="รูปแบบไฟล์ส่งออก" value={target} onChange={e=>setTarget(e.target.value)}>
-        {exportFormats.map(t=><option value={t.id} key={t.id}>{t.label}</option>)}
-      </select>
-      <button type="button" disabled={!exportAllowed} onClick={()=>{
-        const artifact=getExportArtifact(selectedFormat.id,policyForExport);
-        download(selectedFormat.id+"-config"+selectedFormat.extension,artifact,selectedFormat.mime);
-      }}>ส่งออกการตั้งค่า</button>
+    <section className="card" id="basic">
+      <div className="section-title"><div><span className="step">1</span><div><h2>{tr.step1.replace(/^1\. /,"")}</h2><p>{tr.helpText}</p></div></div></div>
+      <label>{tr.profileName}
+        <input value={name} onChange={e=>setName(e.target.value)} placeholder="เช่น My DNS Profile"/>
+      </label>
+      <label>{tr.dns}
+        <textarea value={dnsServers} onChange={e=>setDnsServers(e.target.value)} rows="2" placeholder="1.1.1.1&#10;1.0.0.1"/>
+        <small>{tr.dnsHint}</small>
+      </label>
+      <label>{tr.dnsPreset}
+        <select value={dnsPreset} onChange={e=>{
+          const id=e.target.value;setDnsPreset(id);
+          const preset=recommendedDnsServices.find(x=>x.id===id);if(!preset)return;
+          setDnsServers([...preset.ipv4,...preset.ipv6].join("\n"));
+          setDnsServerUrl(preset.doh||"");setDnsServerName(preset.dot||"");
+        }}>
+          <option value="">{tr.chooseDns}</option>
+          {recommendedDnsServices.map(x=><option key={x.id} value={x.id}>{x.provider} · {x.description}</option>)}
+        </select>
+      </label>
+      <details>
+        <summary>{tr.advanced}</summary>
+        <div className="advanced-grid">
+          <label>{tr.proxy}<input value={proxyServer} onChange={e=>setProxyServer(e.target.value)} placeholder="proxy.example.com:8080"/></label>
+          <label>Encrypted DNS URL<input value={dnsServerUrl} onChange={e=>setDnsServerUrl(e.target.value)} placeholder="https://dns.example.com/dns-query"/></label>
+          <label>DNS-over-TLS Server Name<input value={dnsServerName} onChange={e=>setDnsServerName(e.target.value)} placeholder="dns.quad9.net"/></label>
+        </div>
+        <label className="check"><input type="checkbox" checked={vpn} onChange={e=>setVpn(e.target.checked)}/>{tr.vpn}</label>
+        <label className="check"><input type="checkbox" checked={malware} onChange={e=>setMalware(e.target.checked)}/>{tr.malware}</label>
+        <label className="check"><input type="checkbox" checked={trackers} onChange={e=>setTrackers(e.target.checked)}/>{tr.trackers}</label>
+      </details>
     </section>
 
-    <section className="grid">
-      <div className="card" id="profile-settings">
-        <h2>{tr.profile}</h2>
-
-        <label>{tr.profileName}
-          <input value={name} onChange={e=>setName(e.target.value)}/>
-        </label>
-
-        <label><input type="checkbox" checked={vpn} onChange={e=>setVpn(e.target.checked)}/> {tr.vpn}</label>
-        <label><input type="checkbox" checked={dns} onChange={e=>setDns(e.target.checked)}/> {tr.dns}</label>
-        <label><input type="checkbox" checked={malware} onChange={e=>setMalware(e.target.checked)}/> {tr.malware}</label>
-        <label><input type="checkbox" checked={trackers} onChange={e=>setTrackers(e.target.checked)}/> {tr.trackers}</label>
-        <label><input type="checkbox" checked={separateBlocking} onChange={e=>setSeparateBlocking(e.target.checked)}/> {tr.separate}</label>
-
-        <div className="recommendation-note">
-          <strong>รายการฟรีที่แนะนำ</strong>
-          <p>ระบบมีค่า DNS สาธารณะที่ตรวจสอบจากเอกสารผู้ให้บริการไว้แล้ว ไม่ต้องเดา IP หรือ hostname เอง</p>
-          <ul>
-            {recommendedDnsServices.map(x=><li key={x.id}><strong>{x.provider}</strong>: {x.ipv4.join(", ")} · DoH: {x.doh}</li>)}
-          </ul>
-        </div>
-
-        <div className="input-grid">
-          <label>DNS Server
-            <textarea value={dnsServers} onChange={e=>setDnsServers(e.target.value)} placeholder="เช่น 1.1.1.1, 1.0.0.1" rows="2"/>
-            <small className="field-hint">ใส่หลายค่าได้ คั่นด้วยเครื่องหมายจุลภาคหรือช่องว่าง</small>
-          </label>
-          <label>DNS ที่แนะนำ
-            <select value={dnsPreset} onChange={e=>{
-              const id=e.target.value;
-              setDnsPreset(id);
-              const preset=recommendedDnsServices.find(x=>x.id===id);
-              if(!preset) return;
-              setDnsServers([...preset.ipv4,...preset.ipv6].join("\n"));
-              setDnsServerUrl(preset.doh);
-              setDnsServerName(preset.dot);
-            }}>
-              <option value="">เลือกบริการฟรี</option>
-              {recommendedDnsServices.map(x=><option value={x.id} key={x.id}>{x.provider} · {x.description}</option>)}
-            </select>
-            <small className="field-hint">เลือกแล้วระบบใส่ IPv4, IPv6, DoH และ DoT hostname ให้เอง</small>
-          </label>
-          <label>Encrypted DNS URL
-            <input value={dnsServerUrl} onChange={e=>setDnsServerUrl(e.target.value)} placeholder="เช่น https://dns.example.com/dns-query"/>
-            <small className="field-hint">ใช้เมื่อเลือก DNS-over-HTTPS สำหรับ Apple</small>
-          </label>
-          <label>DNS-over-TLS Server Name
-            <input value={dnsServerName} onChange={e=>setDnsServerName(e.target.value)} placeholder="เช่น dns.quad9.net"/>
-            <small className="field-hint">ใช้เมื่อ Target รองรับ DNS-over-TLS</small>
-          </label>
-          <label>Proxy Server
-            <input value={proxyServer} onChange={e=>setProxyServer(e.target.value)} placeholder="เช่น proxy.example.com:8080"/>
-            <small className="field-hint">เว้นว่างได้ ถ้าไม่ต้องการใช้ Proxy</small>
-          </label>
-        </div>
-
-        <div id="target-settings"></div>
-        <label>{tr.target}
-          <select value={target} onChange={e=>setTarget(e.target.value)}>
-            {targets.map(t=><option value={t.id} key={t.id}>{t.label}</option>)}
-          </select>
-        </label>
-
-        <h3>{tr.configGuide}</h3>
-        <p className="muted">{tr.guideIntro}</p>
-
-        <label>{tr.appTarget}
-          <select value={target} onChange={e=>{
-            setTarget(e.target.value);
-            setSelectedFunction("dns");
-          }}>
-            {exportFormats.map(t=><option value={t.id} key={t.id}>{t.label}</option>)}
-          </select>
-        </label>
-
-        <div className="function-list">
-          {functions.map(fn=>
-            <button
-              className={activeFunction?.id===fn.id?"function-button active":"function-button"}
-              key={fn.id}
-              onClick={()=>setSelectedFunction(fn.id)}
-            >
-              {fn.title}
-            </button>
-          )}
-        </div>
-
-        {activeFunction&&<div className="guide-panel">
-          <div className="export-head"><strong>{activeFunction.title}</strong></div>
-          <div className="guide-row">
-            <span>{tr.configPoint}</span>
-            <code>{activeFunction.config}</code>
-          </div>
-        </div>}
-
-        {exportWarnings.length>0&&<div className="preflight preflight-warning"><strong>คำเตือนก่อนใช้งาน</strong><ul>{exportWarnings.map((w,i)=><li key={i}>{w.code}: {w.message}</li>)}</ul></div>}
-
-        <div className="quick-actions">
-          <strong>Actions</strong>
-          <a href="https://github.com/prasong-me/-Configuration-/actions" target="_blank" rel="noreferrer">เปิด GitHub Actions</a>
-          <button type="button" onClick={()=>download("profile.json",JSON.stringify(policyForExport,null,2),"application/json")}>บันทึกโปรไฟล์</button>
-          <button type="button" onClick={()=>download("network-configuration-ios.mobileconfig",createIosWebClipMobileConfig({label:name}),"application/x-apple-aspen-config")}>ติดตั้งเว็บแอปบน iOS</button>
-        </div>
-
-        <h3>{tr.preflight}</h3>
-        <div className={`preflight ${exportAllowed?"preflight-ok":"preflight-blocked"}`}>
-          <strong>{exportAllowed?tr.preflightOk:tr.preflightBlocked}</strong>
-          {exportBlockReasons.length>0
-            ? <ul>{exportBlockReasons.map((d,i)=><li key={i}>{d.code}: {d.message}</li>)}</ul>
-            : <p>{tr.noBlocking}</p>}
-          <small>{tr.preflightNote}</small>
-        </div>
-
-        <h3>{tr.fullExport}</h3>
-        <div className="export-item">
-          <div className="export-head">
-            <strong>{selectedFormat.label}</strong>
-            <span className={`badge badge-${selectedFormat.status}`}>{selectedFormat.status}</span>
-          </div>
-          <small>{selectedFormat.extension} — {selectedFormat.description}</small>
-          <button disabled={!exportAllowed} onClick={()=>{
-            const artifact=getExportArtifact(selectedFormat.id,policyForExport);
-            download(`${selectedFormat.id}-config${selectedFormat.extension}`,artifact,selectedFormat.mime);
-          }}>
-            Export {selectedFormat.label}
-          </button>
-        </div>
-
-        <button onClick={()=>download("policy.json",JSON.stringify(policyForExport,null,2),"application/json")} disabled={!exportAllowed}>
-          Export Policy
-        </button>
-      </div>
-
-      <div className="card">
-        <h2>{tr.format}</h2>
-        <div className="export-head">
-          <strong>{selectedFormat.label}</strong>
-          <span className={`badge badge-${selectedFormat.status}`}>{selectedFormat.status}</span>
-        </div>
-        <p>{selectedFormat.description}</p>
-        <pre>{selectedArtifact}</pre>
-        <button disabled={!exportAllowed} onClick={()=>download(`${selectedFormat.id}-config${selectedFormat.extension}`,selectedArtifact,selectedFormat.mime)}>
-          Download {selectedFormat.label}
-        </button>
-        <h3>{tr.support}</h3>
-        {Object.entries(report.capabilities).map(([f,x])=>
-          <div className="row" key={f}>
-            <span>{f}</span><strong>{x.requested?x.state:"NOT_REQUESTED"}</strong>
-          </div>
-        )}
-
-        <h3>{tr.generatedPolicy}</h3>
-        <pre>{JSON.stringify(policy,null,2)}</pre>
+    <section className="card" id="destination">
+      <div className="section-title"><div><span className="step">2</span><div><h2>{tr.step2.replace(/^2\. /,"")}</h2><p>{tr.targetHint}</p></div></div></div>
+      <div className="target-grid">
+        {primaryFormats.map(format=><button key={format.id} type="button" className={target===format.id?"target-card selected":"target-card"} onClick={()=>selectTarget(format.id)}>
+          <strong>{format.label}</strong><span>{format.extension}</span><small>{format.description}</small>
+        </button>)}
       </div>
     </section>
-  </main>
+
+    <section className="card export-card" id="export">
+      <div className="section-title"><div><span className="step">3</span><div><h2>{tr.step3.replace(/^3\. /,"")}</h2><p>{selectedFormat.label} · {selectedFormat.extension}</p></div></div></div>
+
+      <div className={exportReady?"status ready":"status not-ready"}><strong>{exportReady?tr.ready:tr.notReady}</strong>
+        {!exportReady&&<ul>{blocking.map((x,i)=><li key={i}>{x.message}</li>)}</ul>}
+      </div>
+
+      {isApple ? <div className="install-box">
+        <h3>{tr.apple}</h3>
+        <p>{tr.appleDesc}</p>
+        <button className="primary-action" type="button" disabled={!artifact} onClick={()=>installIosProfile(artifact, name)}>
+          {tr.downloadProfile}
+        </button>
+        <ol><li>{tr.downloadProfile}</li><li>{tr.installSteps}</li></ol>
+        <small>iOS ไม่ติดตั้งโปรไฟล์แบบเงียบจากหน้าเว็บ ผู้ใช้ต้องยืนยันใน Settings ตามขั้นตอนของ Apple</small>
+      </div> : <div className="install-box">
+        <h3>{tr.appExport}: {selectedFormat.label}</h3>
+        <p>{tr.appDesc}</p>
+        <button className="primary-action" type="button" disabled={!artifact} onClick={doShare}>{tr.share}</button>
+        <button className="secondary-action" type="button" disabled={!artifact} onClick={doDownload}>{tr.download}</button>
+        <p className="fallback">{tr.fallback}</p>
+      </div>}
+
+      {warnings.length>0&&<div className="warning"><strong>{tr.warning}</strong><ul>{warnings.map((w,i)=><li key={i}>{w.message}</li>)}</ul></div>}
+      {message&&<div className="message" role="status">{message}</div>}
+
+      <details className="technical-details">
+        <summary>รายละเอียดทางเทคนิค</summary>
+        <pre>{artifact}</pre>
+        <h3>Capability</h3>
+        {Object.entries(report.capabilities).map(([key,value])=><div className="row" key={key}><span>{key}</span><strong>{value.requested?value.state:"ไม่เลือก"}</strong></div>)}
+      </details>
+    </section>
+  </main>;
 }
 
 createRoot(document.getElementById("root")).render(<App/>);
