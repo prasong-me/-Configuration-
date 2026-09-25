@@ -1,5 +1,123 @@
 export const recommendedDnsServices=Object.freeze([
   {
+    id:"google-public-dns",
+    provider:"Google Public DNS",
+    free:true,
+    description:"Free global resolver without intentional content filtering.",
+    ipv4:["8.8.8.8","8.8.4.4"],
+    ipv6:["2001:4860:4860::8888","2001:4860:4860::8844"],
+    doh:"https://dns.google/dns-query",
+    dot:"dns.google",
+    dotPort:853,
+    source:"https://developers.google.com/speed/public-dns"
+  },
+  {
+    id:"adguard-default",
+    provider:"AdGuard DNS Default",
+    free:true,
+    description:"Blocks ads and trackers.",
+    ipv4:["94.140.14.14","94.140.15.15"],
+    ipv6:["2a10:50c0::ad1:ff","2a10:50c0::ad2:ff"],
+    source:"https://adguard-dns.io/en/public-dns.html"
+  },
+  {
+    id:"adguard-nonfiltering",
+    provider:"AdGuard DNS Non-filtering",
+    free:true,
+    description:"Public resolver without AdGuard content filtering.",
+    ipv4:["94.140.14.140","94.140.14.141"],
+    ipv6:["2a10:50c0::1:ff","2a10:50c0::2:ff"],
+    source:"https://adguard-dns.io/en/public-dns.html"
+  },
+  {
+    id:"adguard-family",
+    provider:"AdGuard DNS Family",
+    free:true,
+    description:"Blocks ads, trackers and adult content with Safe Search where supported.",
+    ipv4:["94.140.14.15","94.140.15.16"],
+    ipv6:["2a10:50c0::bad1:ff","2a10:50c0::bad2:ff"],
+    source:"https://adguard-dns.io/en/public-dns.html"
+  },
+  {
+    id:"controld-free",
+    provider:"Control D Free DNS",
+    free:true,
+    description:"Free public resolver profiles with optional malware, ads and social filtering.",
+    ipv4:["76.76.2.0"],
+    doh:"https://freedns.controld.com/p0",
+    dot:"p0.freedns.controld.com",
+    dotPort:853,
+    source:"https://controld.com/free-dns"
+  },
+  {
+    id:"controld-malware",
+    provider:"Control D Free Malware",
+    free:true,
+    description:"Free profile for malware blocking.",
+    ipv4:["76.76.2.1"],
+    doh:"https://freedns.controld.com/p1",
+    dot:"p1.freedns.controld.com",
+    dotPort:853,
+    source:"https://controld.com/free-dns"
+  },
+  {
+    id:"dns-sb",
+    provider:"DNS.SB",
+    free:true,
+    description:"Free public DNS with DNSSEC and encrypted DNS.",
+    ipv4:["185.222.222.222","45.11.45.11"],
+    ipv6:["2a09::","2a11::"],
+    doh:"https://doh.dns.sb/dns-query",
+    dot:"dot.sb",
+    dotPort:853,
+    source:"https://adguard-dns.io/kb/general/dns-providers/"
+  },
+  {
+    id:"libredns",
+    provider:"LibreDNS",
+    free:true,
+    description:"Free public encrypted DNS operated by LibreOps.",
+    ipv4:["88.198.92.222"],
+    doh:"https://doh.libredns.gr/dns-query",
+    dot:"dot.libredns.gr",
+    dotPort:853,
+    source:"https://libredns.gr/"
+  },
+  {
+    id:"bebasdns",
+    provider:"BebasDNS",
+    free:true,
+    description:"Free neutral Indonesian public resolver with filtered and unfiltered endpoints.",
+    doh:"https://dns.bebasid.com/dns-query",
+    dot:"dns.bebasid.com",
+    dotPort:853,
+    source:"https://github.com/AdguardTeam/KnowledgeBaseDNS"
+  },
+  {
+    id:"hurricane-electric",
+    provider:"Hurricane Electric Public Recursor",
+    free:true,
+    description:"Free anycast public recursive DNS resolver.",
+    ipv4:["74.82.42.42"],
+    ipv6:["2001:470:20::2"],
+    doh:"https://ordns.he.net/dns-query",
+    dot:"ordns.he.net",
+    dotPort:853,
+    source:"https://adguard-dns.io/kb/general/dns-providers/"
+  },
+  {
+    id:"open-name-server",
+    provider:"OpenNameServer",
+    free:true,
+    description:"Independent free public resolver with DNSSEC, DoH and DoT.",
+    ipv4:["217.160.70.42","213.202.211.221","81.169.136.222","185.181.61.24"],
+    ipv6:["2a01:239:2fd:b700::1","2001:4ba0:cafe:3d2::1","2a01:238:4231:5200::1","2a03:94e0:1804::1"],
+    doh:"https://ns.opennameserver.org/dns-query",
+    dot:"ns.opennameserver.org",
+    dotPort:853,
+    source:"https://opennameserver.org/"
+  },
+  {
     id:"cloudflare-standard",
     provider:"Cloudflare 1.1.1.1",
     free:true,
