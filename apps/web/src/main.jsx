@@ -155,8 +155,30 @@ function App(){
       <p>{tr.subtitle}</p>
     </header>
 
+    <nav className="mobile-export-menu" aria-label="เมนูการตั้งค่าและส่งออก">
+      <a href="#profile-settings" className="mobile-menu-item"><span>⚙️</span><strong>ตั้งค่า</strong></a>
+      <a href="#target-settings" className="mobile-menu-item"><span>🎯</span><strong>Target</strong></a>
+      <a href="#export-settings" className="mobile-menu-item active"><span>📤</span><strong>ส่งออก</strong></a>
+      <a href="#test-settings" className="mobile-menu-item"><span>🧪</span><strong>ทดสอบ</strong></a>
+    </nav>
+
+    <section className="mobile-export-panel" id="export-settings">
+      <div>
+        <small>ส่งออกการตั้งค่า</small>
+        <strong>{selectedFormat.label}</strong>
+        <span>{selectedFormat.extension} · {selectedFormat.status}</span>
+      </div>
+      <select aria-label="รูปแบบไฟล์ส่งออก" value={target} onChange={e=>setTarget(e.target.value)}>
+        {exportFormats.map(t=><option value={t.id} key={t.id}>{t.label}</option>)}
+      </select>
+      <button type="button" disabled={!exportAllowed} onClick={()=>{
+        const artifact=getExportArtifact(selectedFormat.id,policyForExport);
+        download(selectedFormat.id+"-config"+selectedFormat.extension,artifact,selectedFormat.mime);
+      }}>ส่งออกการตั้งค่า</button>
+    </section>
+
     <section className="grid">
-      <div className="card">
+      <div className="card" id="profile-settings">
         <h2>{tr.profile}</h2>
 
         <label>{tr.profileName}
@@ -211,6 +233,7 @@ function App(){
           </label>
         </div>
 
+        <div id="target-settings"></div>
         <label>{tr.target}
           <select value={target} onChange={e=>setTarget(e.target.value)}>
             {targets.map(t=><option value={t.id} key={t.id}>{t.label}</option>)}
@@ -335,6 +358,7 @@ function App(){
           }
         </>}
 
+        <div id="test-settings"></div>
         <h3>{tr.support}</h3>
         {Object.entries(report.capabilities).map(([f,x])=>
           <div className="row" key={f}>
