@@ -1,3 +1,5 @@
+import { WEBCLIP_ICON_BASE64 } from "./webclip-icon.js";
+
 const xmlEscape=value=>String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;");
 
 const uuid=()=>crypto.randomUUID();
@@ -42,10 +44,8 @@ function validHttpsUrl(value){
 }
 
 function webClipIcon(policy){
-  if(isNonEmptyString(policy.webAppIconData)){
-    return dataValue(policy.webAppIconData);
-  }
-  return null;
+  if(isNonEmptyString(policy.webAppIconData)) return dataValue(policy.webAppIconData);
+  return dataValue(WEBCLIP_ICON_BASE64);
 }
 
 export function compileAppleMobileConfig(input={}){
@@ -56,71 +56,39 @@ export function compileAppleMobileConfig(input={}){
 
   if(Array.isArray(policy.dnsServers)&&policy.dnsServers.length){
     const protocol=String(policy.dnsProtocol||"").toUpperCase();
-    const dns={
-      DNSProtocol:protocol,
-      ServerAddresses:policy.dnsServers
-    };
+    const dns={DNSProtocol:protocol,ServerAddresses:policy.dnsServers};
     let valid=true;
 
     if(protocol!=="HTTPS"&&protocol!=="TLS"){
       valid=false;
       warnings.push({code:"APPLE_DNS_PROTOCOL_REQUIRED",message:"Apple DNS Settings ต้องระบุ DNS-over-HTTPS (HTTPS) หรือ DNS-over-TLS (TLS)"});
     }
-
     if(protocol==="HTTPS"){
-      if(validHttpsUrl(policy.dnsServerUrl)){
-        dns.ServerURL=policy.dnsServerUrl;
-      }else{
-        valid=false;
-        warnings.push({code:"APPLE_DNS_SERVER_URL_REQUIRED",message:"DNS-over-HTTPS ต้องมี Server URL ที่ใช้ https://"});
-      }
+      if(validHttpsUrl(policy.dnsServerUrl)) dns.ServerURL=policy.dnsServerUrl;
+      else { valid=false; warnings.push({code:"APPLE_DNS_SERVER_URL_REQUIRED",message:"DNS-over-HTTPS ต้องมี Server URL ที่ใช้ https://"}); }
     }
-
     if(protocol==="TLS"){
-      if(isNonEmptyString(policy.dnsServerName)){
-        dns.ServerName=policy.dnsServerName.trim();
-      }else{
-        valid=false;
-        warnings.push({code:"APPLE_DNS_SERVER_NAME_REQUIRED",message:"DNS-over-TLS ต้องมี ServerName เช่น dns.quad9.net"});
-      }
+      if(isNonEmptyString(policy.dnsServerName)) dns.ServerName=policy.dnsServerName.trim();
+      else { valid=false; warnings.push({code:"APPLE_DNS_SERVER_NAME_REQUIRED",message:"DNS-over-TLS ต้องมี ServerName เช่น dns.quad9.net"}); }
     }
-
     if(Array.isArray(policy.dnsDomains)&&policy.dnsDomains.length) dns.SupplementalMatchDomains=policy.dnsDomains;
     if(typeof policy.dnsAllowFailover==="boolean") dns.AllowFailover=policy.dnsAllowFailover;
     if(isNonEmptyString(policy.dnsPayloadCertificateUUID)) dns.PayloadCertificateUUID=policy.dnsPayloadCertificateUUID.trim();
 
     if(valid){
-      payloads.push(payload(
-        "com.apple.dnsSettings.managed",
-        "com.configurationplatform.dns."+uuid(),
-        name+" DNS Settings",
-        {DNSSettings:dns}
-      ));
+      payloads.push(payload("com.apple.dnsSettings.managed","com.configurationplatform.dns."+uuid(),name+" DNS Settings",{DNSSettings:dns}));
     }
   }
 
   if(isNonEmptyString(policy.webAppUrl)){
-    const icon=webClipIcon(policy);
-    if(icon){
-      payloads.push(payload(
-        "com.apple.webClip.managed",
-        "com.configurationplatform.webclip."+uuid(),
-        name+" Web App",
-        {
-          URL:policy.webAppUrl.trim(),
-          Label:name,
-          Icon:icon,
-          FullScreen:true,
-          IsRemovable:true,
-          Precomposed:true
-        }
-      ));
-    }else{
-      warnings.push({
-        code:"APPLE_WEBCLIP_ICON_REQUIRED",
-        message:"Web Clip สำหรับ iOS ต้องมี Icon เป็นข้อมูล image ที่ฝังใน payload ก่อนส่งออกเป็น MobileConfig"
-      });
-    }
+    payloads.push(payload("com.apple.webClip.managed","com.configurationplatform.webclip."+uuid(),name+" Web App",{
+      URL:policy.webAppUrl.trim(),
+      Label:name,
+      Icon:webClipIcon(policy),
+      FullScreen:true,
+      IsRemovable:true,
+      Precomposed:true
+    }));
   }
 
   if(policy.vpn){
@@ -132,15 +100,10 @@ export function compileAppleMobileConfig(input={}){
     }
   }
 
-  const profile=payload(
-    "Configuration",
-    "com.configurationplatform.profile."+uuid(),
-    name,
-    {
-      PayloadContent:payloads,
-      PayloadRemovalDisallowed:false
-    }
-  );
+  const profile=payload("Configuration","com.configurationplatform.profile."+uuid(),name,{
+    PayloadContent:payloads,
+    PayloadRemovalDisallowed:false
+  });
 
   return {
     content:`<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple Inc.//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n${plistValue(profile)}\n</plist>\n`,
@@ -154,10 +117,7 @@ export function compileAppleDeclarativeDns(input={}){
   const policy=input?.policy??input;
   const name=isNonEmptyString(policy.name)?policy.name.trim():"Network Configuration";
   const protocol=String(policy.dnsProtocol||"HTTPS").toUpperCase();
-  const dns={
-    DNSProtocol:protocol,
-    ServerAddresses:Array.isArray(policy.dnsServers)?policy.dnsServers:[]
-  };
+  const dns={DNSProtocol:protocol,ServerAddresses:Array.isArray(policy.dnsServers)?policy.dnsServers:[]};
 
   if(protocol==="HTTPS"&&policy.dnsServerUrl) dns.ServerURL=policy.dnsServerUrl;
   if(protocol==="TLS"&&policy.dnsServerName) dns.ServerName=policy.dnsServerName;
