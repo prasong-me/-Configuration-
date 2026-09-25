@@ -10,6 +10,7 @@ import {
 } from "../../../packages/targets/src/exporters.js";
 import "./style.css";
 import {createIosWebClipMobileConfig} from "./mobileconfig.js";
+import {recommendedDnsServices} from "../../../packages/catalog/src/recommended-dns.js";
 
 
 const translations={
@@ -92,6 +93,8 @@ function App(){
   const [dnsServers,setDnsServers]=useState("");
   const [proxyServer,setProxyServer]=useState("");
   const [dnsServerUrl,setDnsServerUrl]=useState("");
+  const [dnsServerName,setDnsServerName]=useState("");
+  const [dnsPreset,setDnsPreset]=useState("");
   const [selectedFunction,setSelectedFunction]=useState("dns");
 
   const policy=useMemo(()=>({
@@ -110,6 +113,7 @@ function App(){
       proxyServer:proxyServer.trim(),
       dnsProtocol:"HTTPS",
       dnsServerUrl:dnsServerUrl.trim(),
+      dnsServerName:dnsServerName.trim(),
       dnsDomains:[],
       webAppUrl:window.location.href,
       rules:[],
@@ -122,7 +126,7 @@ function App(){
         hideResolverIdentityFromApp:"not-guaranteed"
       }
     }
-  }),[name,vpn,dns,malware,trackers,separateBlocking,dnsServers,proxyServer,dnsServerUrl]);
+  }),[name,vpn,dns,malware,trackers,separateBlocking,dnsServers,proxyServer,dnsServerUrl,dnsServerName]);
 
   const policyForExport=redact(policy);
   const report=useMemo(()=>compatibilityReport(policy,target==="example"?"surge":target),[policy,target]);
@@ -165,14 +169,41 @@ function App(){
         <label><input type="checkbox" checked={trackers} onChange={e=>setTrackers(e.target.checked)}/> {tr.trackers}</label>
         <label><input type="checkbox" checked={separateBlocking} onChange={e=>setSeparateBlocking(e.target.checked)}/> {tr.separate}</label>
 
+        <div className="recommendation-note">
+          <strong>รายการฟรีที่แนะนำ</strong>
+          <p>ระบบมีค่า DNS สาธารณะที่ตรวจสอบจากเอกสารผู้ให้บริการไว้แล้ว ไม่ต้องเดา IP หรือ hostname เอง</p>
+          <ul>
+            {recommendedDnsServices.map(x=><li key={x.id}><strong>{x.provider}</strong>: {x.ipv4.join(", ")} · DoH: {x.doh}</li>)}
+          </ul>
+        </div>
+
         <div className="input-grid">
           <label>DNS Server
             <textarea value={dnsServers} onChange={e=>setDnsServers(e.target.value)} placeholder="เช่น 1.1.1.1, 1.0.0.1" rows="2"/>
             <small className="field-hint">ใส่หลายค่าได้ คั่นด้วยเครื่องหมายจุลภาคหรือช่องว่าง</small>
           </label>
+          <label>DNS ที่แนะนำ
+            <select value={dnsPreset} onChange={e=>{
+              const id=e.target.value;
+              setDnsPreset(id);
+              const preset=recommendedDnsServices.find(x=>x.id===id);
+              if(!preset) return;
+              setDnsServers([...preset.ipv4,...preset.ipv6].join("\n"));
+              setDnsServerUrl(preset.doh);
+              setDnsServerName(preset.dot);
+            }}>
+              <option value="">เลือกบริการฟรี</option>
+              {recommendedDnsServices.map(x=><option value={x.id} key={x.id}>{x.provider} · {x.description}</option>)}
+            </select>
+            <small className="field-hint">เลือกแล้วระบบใส่ IPv4, IPv6, DoH และ DoT hostname ให้เอง</small>
+          </label>
           <label>Encrypted DNS URL
             <input value={dnsServerUrl} onChange={e=>setDnsServerUrl(e.target.value)} placeholder="เช่น https://dns.example.com/dns-query"/>
             <small className="field-hint">ใช้เมื่อเลือก DNS-over-HTTPS สำหรับ Apple</small>
+          </label>
+          <label>DNS-over-TLS Server Name
+            <input value={dnsServerName} onChange={e=>setDnsServerName(e.target.value)} placeholder="เช่น dns.quad9.net"/>
+            <small className="field-hint">ใช้เมื่อ Target รองรับ DNS-over-TLS</small>
           </label>
           <label>Proxy Server
             <input value={proxyServer} onChange={e=>setProxyServer(e.target.value)} placeholder="เช่น proxy.example.com:8080"/>
