@@ -103,7 +103,10 @@ function App(){
   const artifact=getExportArtifact(selectedFormat.id,policyForExport);
   const warnings=getExportWarnings(selectedFormat.id,policyForExport);
   const report=useMemo(()=>compatibilityReport(policy,target),[policy,target]);
-  const blocking=report.diagnostics.filter(x=>x.level==="CRITICAL"||x.level==="HIGH");
+  const blocking=report.diagnostics.filter(x=>
+    (x.level==="CRITICAL"||x.level==="HIGH") && x.code!=="CAPABILITY_UNKNOWN"
+  );
+  const capabilityWarnings=report.diagnostics.filter(x=>x.code==="CAPABILITY_UNKNOWN");
   const exportReady=Boolean(artifact)&&blocking.length===0;
   const isApple=target==="apple-mobileconfig";
 
@@ -208,7 +211,7 @@ function App(){
         <p className="fallback">{tr.fallback}</p>
       </div>}
 
-      {warnings.length>0&&<div className="warning"><strong>{tr.warning}</strong><ul>{warnings.map((w,i)=><li key={i}>{w.message}</li>)}</ul></div>}
+      {(warnings.length>0||capabilityWarnings.length>0)&&<div className="warning"><strong>{tr.warning}</strong><ul>{warnings.map((w,i)=><li key={i}>{w.message}</li>)}{capabilityWarnings.map((w,i)=><li key={"cap-"+i}>{w.message}</li>)}</ul></div>}
       {message&&<div className="message" role="status">{message}</div>}
 
       <details className="technical-details">
