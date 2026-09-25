@@ -13,9 +13,9 @@ import {recommendedDnsServices} from "../../../packages/catalog/src/recommended-
 
 const translations={
   th:{
-    language:"ภาษา",thai:"ไทย",english:"English",title:"Network Configuration",subtitle:"จัดการ DNS, VPN, Routing และนโยบายบล็อกแยกจากกัน พร้อมส่งออกไฟล์ตามรูปแบบของแต่ละแอป",profile:"ตั้งค่าโปรไฟล์",profileName:"ชื่อโปรไฟล์",vpn:"VPN / ตัวกลาง",dns:"DNS ปกติ",malware:"บล็อก Malware",trackers:"บล็อก Tracker",separate:"แยกระบบบล็อกออกจาก DNS",target:"Target",configGuide:"กำหนดค่าและแนวทางส่งคอนฟิก",guideIntro:"เลือกแอป → เลือกฟังก์ชัน → ดูจุดกำหนดค่า → ทำตามขั้นตอนทดสอบจริงทีละฟังก์ชัน",appTarget:"แอปเป้าหมาย",configPoint:"จุดกำหนดค่า"preflight:"ตรวจสอบก่อนส่งออก",preflightOk:"ผ่านการตรวจสอบเชิงโครงสร้าง",preflightBlocked:"หยุดการส่งออกอัตโนมัติ",noBlocking:"ไม่มี diagnostic ระดับที่บล็อกการส่งออก",preflightNote:"ปุ่มส่งออก target จะเปิดก็ต่อเมื่อ target/function นั้นผ่านการตรวจ syntax + adapter + evidence จริงแล้ว",fullExport:"ส่งออกโปรไฟล์เต็ม",exportPolicy:"Export Policy",exportEvidence:"Export ผลการทดสอบที่บันทึกไว้",format:"รูปแบบไฟล์ที่เลือก",download:"Download",surgePack:"Surge test pack",surgeNote:"ทดสอบทีละความสามารถบนเครื่องจริง; ชุดนี้ไม่ฝัง Private Key, credential หรือ certificate",downloadFixture:"Download fixture",support:"ผลการรองรับ",evidence:"ข้อมูลจากการทดสอบ",diagnostics:"Diagnostics",noDiagnostics:"ไม่พบ Diagnostics",generatedPolicy:"Policy ที่สร้าง",reference:"อ้างอิง / Core test"},
+    language:"ภาษา",thai:"ไทย",english:"English",title:"Network Configuration",subtitle:"จัดการ DNS, VPN, Routing และนโยบายบล็อกแยกจากกัน พร้อมส่งออกไฟล์ตามรูปแบบของแต่ละแอป",profile:"ตั้งค่าโปรไฟล์",profileName:"ชื่อโปรไฟล์",vpn:"VPN / ตัวกลาง",dns:"DNS ปกติ",malware:"บล็อก Malware",trackers:"บล็อก Tracker",separate:"แยกระบบบล็อกออกจาก DNS",target:"Target",configGuide:"กำหนดค่าและแนวทางส่งคอนฟิก",guideIntro:"เลือกแอป → เลือกฟังก์ชัน → ดูจุดกำหนดค่าของ target",appTarget:"แอปเป้าหมาย",configPoint:"จุดกำหนดค่า",preflight:"ตรวจสอบก่อนส่งออก",preflightOk:"ผ่านการตรวจสอบเชิงโครงสร้าง",preflightBlocked:"หยุดการส่งออกอัตโนมัติ",noBlocking:"ไม่มี diagnostic ระดับที่บล็อกการส่งออก",preflightNote:"ปุ่มส่งออก target จะเปิดก็ต่อเมื่อ target/function นั้นผ่านการตรวจ syntax + adapter + evidence จริงแล้ว",fullExport:"ส่งออกโปรไฟล์เต็ม",exportPolicy:"Export Policy",format:"รูปแบบไฟล์ที่เลือก",download:"Download",support:"ผลการรองรับ",diagnostics:"Diagnostics",noDiagnostics:"ไม่พบ Diagnostics",generatedPolicy:"Policy ที่สร้าง"},
   en:{
-    language:"Language",thai:"ไทย",english:"English",title:"Network Configuration",subtitle:"Manage DNS, VPN, Routing and separate blocking policies, with exports tailored to each app.",profile:"Profile settings",profileName:"Profile name",vpn:"VPN / Intermediary",dns:"Normal DNS",malware:"Block Malware",trackers:"Block Trackers",separate:"Separate blocking from DNS",target:"Target",configGuide:"Configuration and test guidance",guideIntro:"Select an app → select a function → review the configuration point → test one function at a time on the real app.",appTarget:"Target app",configPoint:"Configuration point"preflight:"Pre-export check",preflightOk:"Structural checks passed",preflightBlocked:"Export automatically blocked",noBlocking:"No blocking-level diagnostics",preflightNote:"Target export is enabled only when the target/function has recorded real test evidence.",fullExport:"Full profile export",exportPolicy:"Export Policy",exportEvidence:"Export recorded test evidence",format:"Selected file format",download:"Download",surgePack:"Surge test pack",surgeNote:"Test each capability on the real device; this pack contains no private key, credential or certificate.",downloadFixture:"Download fixture",support:"Support status",evidence:"Test evidence",diagnostics:"Diagnostics",noDiagnostics:"No diagnostics",generatedPolicy:"Generated Policy",reference:"Reference / Core test"}
+    language:"Language",thai:"ไทย",english:"English",title:"Network Configuration",subtitle:"Manage DNS, VPN, Routing and separate blocking policies, with exports tailored to each app.",profile:"Profile settings",profileName:"Profile name",vpn:"VPN / Intermediary",dns:"Normal DNS",malware:"Block Malware",trackers:"Block Trackers",separate:"Separate blocking from DNS",target:"Target",configGuide:"Configuration and test guidance",guideIntro:"Select an app → select a function → review the target configuration point.",appTarget:"Target app",configPoint:"Configuration point",preflight:"Pre-export check",preflightOk:"Structural checks passed",preflightBlocked:"Export automatically blocked",noBlocking:"No blocking-level diagnostics",preflightNote:"Target export is enabled only when the target/function has recorded real test evidence.",fullExport:"Full profile export",exportPolicy:"Export Policy",exportEvidence:"Export recorded test evidence",format:"Selected file format",download:"Download",surgePack:"Surge test pack",surgeNote:"Test each capability on the real device; this pack contains no private key, credential or certificate.",downloadFixture:"Download fixture",support:"Support status",evidence:"Test evidence",diagnostics:"Diagnostics",noDiagnostics:"No diagnostics",generatedPolicy:"Generated Policy",reference:"Reference / Core test"}
 };
 
 const targets=[
@@ -210,33 +210,11 @@ function App(){
         </div>
 
         {activeFunction&&<div className="guide-panel">
-          <div className="export-head">
-            <strong>{activeFunction.title}</strong>
-            <span className="badge badge-template">TEST</span>
-          </div>
+          <div className="export-head"><strong>{activeFunction.title}</strong></div>
           <div className="guide-row">
             <span>{tr.configPoint}</span>
             <code>{activeFunction.config}</code>
           </div>
-          <div className="guide-row">
-            <span>{tr.testMethod}</span>
-            <p>{activeFunction.test}</p>
-          </div>
-          <button disabled={!exportAllowed} onClick={()=>{
-            const guide={
-              target:selectedFormat.label,
-              function:activeFunction,
-              artifact:getExportArtifact(selectedFormat.id,policyForExport),
-              note:"ใช้เป็นชุดอ้างอิงสำหรับทดสอบฟังก์ชันนี้บนแอปจริง; ห้ามถือว่าเป็นผลยืนยันจนกว่าจะทดสอบจริง"
-            };
-            download(
-              `${selectedFormat.id}-${activeFunction.id}-test.json`,
-              JSON.stringify(guide,null,2),
-              "application/json"
-            );
-          }}>
-            ส่งออกชุดทดสอบฟังก์ชันนี้
-          </button>
         </div>}
 
         {exportWarnings.length>0&&<div className="preflight preflight-warning"><strong>คำเตือนก่อนใช้งาน</strong><ul>{exportWarnings.map((w,i)=><li key={i}>{w.code}: {w.message}</li>)}</ul></div>}
@@ -288,11 +266,6 @@ function App(){
         <button disabled={!exportAllowed} onClick={()=>download(`${selectedFormat.id}-config${selectedFormat.extension}`,selectedArtifact,selectedFormat.mime)}>
           Download {selectedFormat.label}
         </button>
-
-        {target==="surge"&&<>
-        </>}
-
-        <div id="test-settings"></div>
         <h3>{tr.support}</h3>
         {Object.entries(report.capabilities).map(([f,x])=>
           <div className="row" key={f}>
