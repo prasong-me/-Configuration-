@@ -55,16 +55,8 @@ function downloadFile(name,text,mime){
   a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),3000);
 }
-function installIosProfile(text,name){
-  const blob=new Blob([text],{type:"application/x-apple-aspen-config"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;
-  a.rel="noopener";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),30000);
+function downloadIosProfile(text){
+  downloadFile("configuration-profile.mobileconfig",text,"application/x-apple-aspen-config");
 }
 async function shareFile(file){
   if(!navigator.share || !navigator.canShare || !navigator.canShare({files:[file]})) return false;
@@ -79,7 +71,8 @@ function App(){
   const [dns,setDns]=useState(true);
   const [malware,setMalware]=useState(false);
   const [trackers,setTrackers]=useState(false);
-  const [dnsServers,setDnsServers]=useState("");
+  const [dnsServers,setDnsServers]=useState("1.1.1.1\n1.0.0.1");
+  const [dnsProtocol,setDnsProtocol]=useState("HTTPS");
   const [proxyServer,setProxyServer]=useState("");
   const [dnsServerUrl,setDnsServerUrl]=useState("");
   const [dnsServerName,setDnsServerName]=useState("");
@@ -90,13 +83,13 @@ function App(){
   const policy=useMemo(()=>({version:"0.4",policy:{
     name,vpn,dns,routing:vpn,
     blocking:{malware,trackers,separateFromResolver:true},
-    dnsServers:dnsServers.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean),
+    dnsServers:dns ? dnsServers.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean) : [],
     proxyServer:proxyServer.trim(),
-    dnsProtocol:"HTTPS",
+    dnsProtocol,
     dnsServerUrl:dnsServerUrl.trim(),
     dnsServerName:dnsServerName.trim(),
     dnsDomains:[],rules:[],finalPolicy:"DIRECT",bypassSystem:true
-  }}),[name,vpn,dns,malware,trackers,dnsServers,proxyServer,dnsServerUrl,dnsServerName]);
+  }}),[name,vpn,dns,dnsProtocol,malware,trackers,dnsServers,proxyServer,dnsServerUrl,dnsServerName]);
 
   const policyForExport=redact(policy);
   const selectedFormat=exportFormats.find(x=>x.id===target)||exportFormats[0];
@@ -155,12 +148,19 @@ function App(){
         <textarea value={dnsServers} onChange={e=>setDnsServers(e.target.value)} rows="2" placeholder="1.1.1.1&#10;1.0.0.1"/>
         <small>{tr.dnsHint}</small>
       </label>
+      <label>DNS transport
+        <select value={dnsProtocol} onChange={e=>setDnsProtocol(e.target.value)}>
+          <option value="HTTPS">DNS-over-HTTPS (HTTPS)</option>
+          <option value="TLS">DNS-over-TLS (TLS)</option>
+        </select>
+      </label>
       <label>{tr.dnsPreset}
         <select value={dnsPreset} onChange={e=>{
           const id=e.target.value;setDnsPreset(id);
           const preset=recommendedDnsServices.find(x=>x.id===id);if(!preset)return;
           setDnsServers([...preset.ipv4,...preset.ipv6].join("\n"));
-          setDnsServerUrl(preset.doh||"");setDnsServerName(preset.dot||"");
+          if(preset.doh){setDnsProtocol("HTTPS");setDnsServerUrl(preset.doh);}
+          else if(preset.dot){setDnsProtocol("TLS");setDnsServerName(preset.dot);setDnsServerUrl("");}
         }}>
           <option value="">{tr.chooseDns}</option>
           {recommendedDnsServices.map(x=><option key={x.id} value={x.id}>{x.provider} · {x.description}</option>)}
@@ -198,7 +198,7 @@ function App(){
       {isApple ? <div className="install-box">
         <h3>{tr.apple}</h3>
         <p>{tr.appleDesc}</p>
-        <button className="primary-action" type="button" disabled={!artifact} onClick={()=>installIosProfile(artifact, name)}>
+        <button className="primary-action" type="button" disabled={!artifact} onClick={()=>{downloadIosProfile(artifact);setMessage("ดาวน์โหลดโปรไฟล์แล้ว ไปที่ Settings > Profile Downloaded > Install");}}>
           {tr.downloadProfile}
         </button>
         <ol><li>{tr.downloadProfile}</li><li>{tr.installSteps}</li></ol>
