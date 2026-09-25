@@ -1,5 +1,3 @@
-import { WEBCLIP_ICON_BASE64 } from "./webclip-icon.js";
-
 const xmlEscape=value=>String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;");
 
 const uuid=()=>crypto.randomUUID();
@@ -15,10 +13,6 @@ function plistValue(value,indent="      "){
   if(Array.isArray(value)) return `<array>\n${value.map(x=>indent+"  "+plistValue(x,indent+"  ")).join("\n")}\n${indent}</array>`;
   if(value&&typeof value==="object") return `<dict>\n${Object.entries(value).map(([k,v])=>indent+"  <key>"+xmlEscape(k)+"</key>"+plistValue(v,indent+"  ")).join("\n")}\n${indent}</dict>`;
   return "<string>"+xmlEscape(value??"")+"</string>";
-}
-
-function dataValue(base64){
-  return {__plistData:true,base64:String(base64).replace(/\s+/g,"")};
 }
 
 function payload(type,identifier,displayName,body){
@@ -44,8 +38,14 @@ function validHttpsUrl(value){
 }
 
 function webClipIcon(policy){
-  if(isNonEmptyString(policy.webAppIconData)) return dataValue(policy.webAppIconData);
-  return dataValue(WEBCLIP_ICON_BASE64);
+  const iconUrl=policy.webAppIconUrl;
+  if(!isNonEmptyString(iconUrl)) return null;
+  try{
+    const url=new URL(iconUrl.trim());
+    return url.protocol==="https:"?url.toString():null;
+  }catch{
+    return null;
+  }
 }
 
 export function compileAppleMobileConfig(input={}){
@@ -81,14 +81,17 @@ export function compileAppleMobileConfig(input={}){
   }
 
   if(isNonEmptyString(policy.webAppUrl)){
-    payloads.push(payload("com.apple.webClip.managed","com.configurationplatform.webclip."+uuid(),name+" Web App",{
+    const webClip={
       URL:policy.webAppUrl.trim(),
       Label:name,
-      Icon:webClipIcon(policy),
       FullScreen:true,
       IsRemovable:true,
       Precomposed:true
-    }));
+    };
+    const icon=webClipIcon(policy);
+    if(icon) webClip.Icon=icon;
+    else if(policy.webAppIconUrl||policy.webAppIconData) warnings.push({code:"APPLE_WEBCLIP_ICON_URL_INVALID",message:"Web Clip Icon ต้องเป็น URL แบบ HTTPS; ระบบจะสร้าง Web Clip โดยไม่ใส่ Icon หาก URL ไม่ถูกต้อง"});
+    payloads.push(payload("com.apple.webClip.managed","com.configurationplatform.webclip."+uuid(),name+" Web App",webClip));
   }
 
   if(policy.vpn){
