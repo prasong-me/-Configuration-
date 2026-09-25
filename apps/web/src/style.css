@@ -48,3 +48,37 @@ pre{max-width:100%;min-width:0;white-space:pre-wrap;overflow-wrap:anywhere;word-
 .quick-actions button{margin:0;min-height:42px}.badge{flex-shrink:0}
 @media(max-width:600px){main{padding:calc(9px + env(safe-area-inset-top)) calc(9px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(9px + env(safe-area-inset-left))}.input-grid,.quick-actions{grid-template-columns:1fr}.quick-actions a,.quick-actions button{width:100%}.header{padding:14px}}
 @media(max-width:380px){main{padding-left:7px;padding-right:7px}header{padding:12px}.card{padding:11px}pre{font-size:10px}}
+
+/* Mobile export navigation */
+.mobile-export-menu{display:none}
+.mobile-export-panel{display:none}
+@media(max-width:699px){
+  html{scroll-behavior:smooth}
+  .mobile-export-menu{
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;
+    position:sticky;top:calc(env(safe-area-inset-top) + 6px);z-index:20;
+    margin:10px 0;padding:6px;border:1px solid #e1e5ef;border-radius:16px;
+    background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(16px);
+    backdrop-filter:blur(16px);box-shadow:0 8px 22px rgba(35,45,75,.10)
+  }
+  .mobile-menu-item{
+    min-width:0;min-height:52px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:1px;padding:5px 3px;
+    border-radius:11px;color:#586273;text-decoration:none;font-size:11px;line-height:1.2
+  }
+  .mobile-menu-item span{font-size:17px;line-height:1.1}
+  .mobile-menu-item strong{font-size:11px;white-space:nowrap}
+  .mobile-menu-item.active{background:#eef0ff;color:#4f46e5}
+  .mobile-export-panel{
+    display:grid;grid-template-columns:minmax(0,1fr);gap:9px;margin:0 0 12px;padding:13px;
+    border:1px solid #dfe3ef;border-radius:16px;background:#fff;
+    box-shadow:0 6px 20px rgba(35,45,75,.07)
+  }
+  .mobile-export-panel>div{display:flex;flex-direction:column;min-width:0}
+  .mobile-export-panel small{color:#687482;font-size:12px}
+  .mobile-export-panel strong{font-size:18px;overflow-wrap:anywhere}
+  .mobile-export-panel span{color:#687482;font-size:12px}
+  .mobile-export-panel select,.mobile-export-panel button{margin:0}
+  .mobile-export-panel button{min-height:50px}
+}
+@media(min-width:700px){.mobile-export-menu,.mobile-export-panel{display:none}}
