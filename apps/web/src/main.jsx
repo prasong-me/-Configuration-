@@ -88,6 +88,7 @@ function App(){
     dnsProtocol,
     dnsServerUrl:dnsServerUrl.trim(),
     dnsServerName:dnsServerName.trim(),
+    webAppUrl:window.location.href.split("#")[0],
     dnsDomains:[],rules:[],finalPolicy:"DIRECT",bypassSystem:true
   }}),[name,vpn,dns,dnsProtocol,malware,trackers,dnsServers,proxyServer,dnsServerUrl,dnsServerName]);
 
