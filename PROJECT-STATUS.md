@@ -153,3 +153,11 @@ README ถูก sync สถานะเป็น commit 4e286ea8d2ee654c19b6f69
 - ไม่บอกว่า Target ใช้งานจริงได้เพียงเพราะ exporter สร้างไฟล์ได้
 - ไม่บังคับ certificate เป็น dependency ทุก configuration
 - ไม่เอา benchmark มาปนกับหน้า Configuration หลักโดยไม่จำเป็น
+
+## DNS Controller runtime
+
+Core now contains a dedicated DnsController at packages/core/src/dns-controller.js.
+
+It executes ordered processing stages, stops on BLOCK or RESPOND, continues after PASS, then selects enabled resolver profiles in order. Resolver transport is injected so the Core does not confuse a remote resolver with a filtering stage. The controller records a trace for diagnostics and testing.
+
+The Core controller and its flow tests are implemented. A real network transport/listener and device-level DNS interception remain separate runtime and target tasks and are not marked complete.
