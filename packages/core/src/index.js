@@ -48,6 +48,13 @@ export function normalizePolicy(input) {
       .sort((a,b)=>a.order-b.order);
   }
   normalized.dnsPipeline=normalizeDnsPipeline(policy);
+  if(policy.dnsResolution && typeof policy.dnsResolution==="object"){
+    const mode=policy.dnsResolution.mode==="failover" ? "failover" : "sequential";
+    const requiredProfiles=Number.isInteger(policy.dnsResolution.requiredProfiles)&&policy.dnsResolution.requiredProfiles>0
+      ? policy.dnsResolution.requiredProfiles
+      : null;
+    normalized.dnsResolution={mode,requiredProfiles};
+  }
   if(typeof policy.proxyServer==="string"&&policy.proxyServer.trim()){
     normalized.proxyServer=policy.proxyServer.trim();
   }
