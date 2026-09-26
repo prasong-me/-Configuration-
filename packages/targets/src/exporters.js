@@ -11,6 +11,7 @@ const defaultPolicy = {
   name:"Configuration Standard",
   dns:true,
   dnsProfiles:defaultDnsProfiles,
+  dnsResolution:{mode:"sequential",requiredProfiles:3},
   dnsServers:defaultDnsProfiles[0].servers,
   dnsProtocol:"HTTPS",
   dnsServerUrl:defaultDnsProfiles[0].endpoint,
