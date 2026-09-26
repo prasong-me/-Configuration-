@@ -28,6 +28,23 @@ export function normalizePolicy(input) {
       .filter(x=>typeof x==="string"&&x.trim())
       .map(x=>x.trim());
   }
+  if(Array.isArray(policy.dnsProfiles)){
+    normalized.dnsProfiles=policy.dnsProfiles
+      .filter(profile=>profile&&typeof profile==="object")
+      .map((profile,index)=>({
+        id:typeof profile.id==="string"&&profile.id.trim()?profile.id.trim():`dns-profile-${index+1}`,
+        name:typeof profile.name==="string"&&profile.name.trim()?profile.name.trim():`DNS Profile ${index+1}`,
+        provider:typeof profile.provider==="string"?profile.provider.trim():"",
+        protocol:typeof profile.protocol==="string"&&profile.protocol.trim()?profile.protocol.trim():"DoH",
+        servers:Array.isArray(profile.servers)?profile.servers.filter(x=>typeof x==="string"&&x.trim()).map(x=>x.trim()):[],
+        endpoint:typeof profile.endpoint==="string"?profile.endpoint.trim():"",
+        role:typeof profile.role==="string"&&profile.role.trim()?profile.role.trim():"resolver",
+        enabled:profile.enabled!==false,
+        order:Number.isFinite(profile.order)?profile.order:index+1,
+        rules:Array.isArray(profile.rules)?structuredClone(profile.rules):[]
+      }))
+      .sort((a,b)=>a.order-b.order);
+  }
   normalized.dnsPipeline=normalizeDnsPipeline(policy);
   if(typeof policy.proxyServer==="string"&&policy.proxyServer.trim()){
     normalized.proxyServer=policy.proxyServer.trim();
