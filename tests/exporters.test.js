@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { getExportArtifact } from "../packages/targets/src/exporters.js";
+import { compileAppleDeclarativeDns, mapAppleDnsSettings, mapAppleLegacyDnsSettings } from "../packages/apple-adapter/src/index.js";
 
 const profiles = [
   {id:"p1",name:"Privacy",provider:"Cloudflare",protocol:"DoH",servers:["1.1.1.1","1.0.0.1"],endpoint:"https://cloudflare-dns.com/dns-query",role:"resolver",enabled:true,order:1},
@@ -42,4 +43,29 @@ test("Shadowrocket export uses real line breaks and all enabled DNS servers",()=
   assert.ok(artifact.includes("\n[Rule]\n"));
   for(const p of profiles) for(const server of p.servers) assert.ok(artifact.includes(server));
   assert.ok(artifact.includes("DOMAIN-SUFFIX,example.com, DIRECT"));
+});
+
+
+test("Apple declarative and legacy DNS mappings preserve common semantics while keeping version-specific fields",()=>{
+  const profile={protocol:"DoH",servers:["1.1.1.1","1.0.0.1"],endpoint:"https://cloudflare-dns.com/dns-query",domains:["example.com"],allowFailover:true,certificateUUID:"cert-1",identityAssetReference:"asset-1"};
+  const declarative=mapAppleDnsSettings(profile,"declarative");
+  const legacy=mapAppleLegacyDnsSettings(profile);
+  assert.deepEqual(declarative.DNSProtocol,legacy.DNSProtocol);
+  assert.deepEqual(declarative.ServerAddresses,legacy.ServerAddresses);
+  assert.equal(declarative.ServerURL,legacy.ServerURL);
+  assert.deepEqual(declarative.SupplementalMatchDomains,legacy.SupplementalMatchDomains);
+  assert.equal(declarative.AllowFailover,legacy.AllowFailover);
+  assert.equal(declarative.IdentityAssetReference,"asset-1");
+  assert.equal(declarative.PayloadCertificateUUID,undefined);
+  assert.equal(legacy.PayloadCertificateUUID,"cert-1");
+  assert.equal(legacy.IdentityAssetReference,undefined);
+});
+
+test("Apple declarative DNS export uses the declarative NetworkDNSSettings shape",()=>{
+  const artifact=compileAppleDeclarativeDns({name:"Declarative DNS",dnsProtocol:"HTTPS",dnsServers:["1.1.1.1"],dnsServerUrl:"https://cloudflare-dns.com/dns-query",dnsAllowFailover:false});
+  assert.equal(artifact.Type,"com.apple.configuration.network.dns-settings");
+  assert.equal(artifact.Payload.DNSSettings.DNSProtocol,"HTTPS");
+  assert.equal(artifact.Payload.DNSSettings.ServerURL,"https://cloudflare-dns.com/dns-query");
+  assert.equal(artifact.Payload.DNSSettings.AllowFailover,false);
+  assert.equal(artifact.Payload.DNSSettings.PayloadCertificateUUID,undefined);
 });
