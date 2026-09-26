@@ -3,8 +3,8 @@ import { compileAppleMobileConfig, compileAppleDeclarativeDns } from "../../appl
 
 const defaultDnsProfiles = [
   {id:"privacy-dns",name:"Privacy DNS",provider:"Cloudflare",protocol:"DoH",ipv4Servers:["1.1.1.1","1.0.0.1"],ipv6Servers:["2606:4700:4700::1111","2606:4700:4700::1001"],servers:["1.1.1.1","1.0.0.1","2606:4700:4700::1111","2606:4700:4700::1001"],endpoint:"https://cloudflare-dns.com/dns-query",role:"resolver",enabled:true,order:1},
-  {id:"security-dns",name:"Security DNS",provider:"Quad9",protocol:"DoH",ipv4Servers:["9.9.9.9","149.112.112.112"],ipv6Servers:["2620:fe::fe","2620:fe::9"],servers:["9.9.9.9","149.112.112.112","2620:fe::fe","2620:fe::9"],endpoint:"https://dns.quad9.net/dns-query",role:"resolver",enabled:true,order:2},
-  {id:"backup-dns",name:"Backup DNS",provider:"Google Public DNS",protocol:"DoH",ipv4Servers:["8.8.8.8","8.8.4.4"],ipv6Servers:["2001:4860:4860::8888","2001:4860:4860::8844"],servers:["8.8.8.8","8.8.4.4","2001:4860:4860::8888","2001:4860:4860::8844"],endpoint:"https://dns.google/dns-query",role:"resolver",enabled:true,order:3}
+  {id:"security-dns",name:"NextDNS",provider:"NextDNS",protocol:"DoH",addressMode:"hostname",servers:["dns.nextdns.io"],ipv4Servers:[],ipv6Servers:[],endpoint:"https://dns.nextdns.io",serverName:"dns.nextdns.io",role:"resolver",enabled:true,order:2},
+  {id:"backup-dns",name:"AdGuard DNS",provider:"AdGuard",protocol:"DoH",addressMode:"hostname",servers:["dns.adguard-dns.com"],ipv4Servers:[],ipv6Servers:[],endpoint:"https://dns.adguard-dns.com/dns-query",serverName:"dns.adguard-dns.com",role:"resolver",enabled:true,order:3}
 ];
 
 const defaultPolicy = {
