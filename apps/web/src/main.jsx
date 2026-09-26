@@ -1,6 +1,6 @@
 import React,{useMemo,useState} from "react";
 import {createRoot} from "react-dom/client";
-import {compatibilityReport,redact} from "../../../packages/core/src/index.js";
+import {compatibilityReport} from "../../../packages/core/src/index.js";
 import {exportFormats,getExportArtifact,getExportWarnings} from "../../../packages/targets/src/exporters.js";
 import "./style.css";
 import {recommendedDnsServices} from "../../../packages/catalog/src/recommended-dns.js";
