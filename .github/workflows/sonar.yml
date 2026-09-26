@@ -12,7 +12,9 @@ jobs:
   sonar:
     name: SonarQube analysis
     runs-on: ubuntu-latest
-    if: ${{ secrets.SONAR_TOKEN != '' }}
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -21,7 +23,9 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
-      - uses: SonarSource/sonarqube-scan-action@v6
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      - name: Run SonarQube
+        if: ${{ env.SONAR_TOKEN != '' }}
+        uses: SonarSource/sonarqube-scan-action@v6
+      - name: Report configuration state
+        if: ${{ env.SONAR_TOKEN == '' }}
+        run: echo "SONAR_TOKEN is not configured; SonarQube scan skipped."
