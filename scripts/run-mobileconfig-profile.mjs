@@ -28,14 +28,13 @@ const artifact = getExportArtifact("apple-mobileconfig", {
   wifiSSID: "CI-Test-WiFi",
   wifiPassword: "test-password",
   wifiHidden: false,
-  vpnProtocol: "ikev2",
-  vpnRemoteAddress: "vpn.example.com",
-  vpnRemoteIdentifier: "vpn.example.com",
-  vpnLocalIdentifier: "ci@example.com",
-  vpnAuthenticationMethod: "SharedSecret",
-  vpnSharedSecret: "ci-shared-secret",
-  proxyServer: "proxy.example.com:8080",
-  vpnName: "CI IKEv2",
+  vpnProtocol: "l2tp",
+  vpnRemoteAddress: "219.100.37.123",
+  vpnAuthName: "vpn",
+  vpnAuthPassword: "vpn",
+  vpnSharedSecret: "vpn",
+  vpnName: "VPN Gate L2TP Test",
+  proxyServer: "103.237.102.191:11111",
   wifiName: "CI Wi-Fi"
 });
 
@@ -65,6 +64,10 @@ with open(sys.argv[1], "rb") as f:
     webClipURL: payload.URL || null,
     wifiSSID: payload.SSID_STR || null,
     vpnType: payload.VPNType || null,
+    vpnRemoteAddress: payload.PPP?.CommRemoteAddress || payload.IKEv2?.RemoteAddress || null,
+    vpnAuthName: payload.PPP?.AuthName || payload.IKEv2?.AuthName || null,
+    vpnHasSharedSecret: Boolean(payload.IPSec?.SharedSecret || payload.IKEv2?.SharedSecret),
+    vpnOverridePrimary: payload.IPv4?.OverridePrimary ?? null,
     proxyServer: payload.ProxyServer || null,
     proxyPort: payload.ProxyServerPort || null
   }));
