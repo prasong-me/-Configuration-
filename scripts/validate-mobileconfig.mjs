@@ -29,6 +29,7 @@ const artifact=getExportArtifact("apple-mobileconfig",{
   dnsProfiles:profiles,
   applePayloads:{dns:true,webclip:true,wifi:true,vpn:true,globalProxy:true},
   webAppUrl:"https://example.com/",
+  webAppIconUrl:"https://example.com/icon.png",
   wifiSSID:"CI-Test-WiFi",
   wifiPassword:"test-password",
   wifiHidden:false,
@@ -38,7 +39,9 @@ const artifact=getExportArtifact("apple-mobileconfig",{
   vpnLocalIdentifier:"ci@example.com",
   vpnAuthenticationMethod:"SharedSecret",
   vpnSharedSecret:"ci-shared-secret",
-  proxyServer:"proxy.example.com:8080"
+  proxyServer:"proxy.example.com:8080",
+  vpnName:"CI IKEv2",
+  wifiName:"CI Wi-Fi"
 });
 
 const dir=mkdtempSync(join(tmpdir(),"configuration-mobileconfig-"));
