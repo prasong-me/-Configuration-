@@ -139,3 +139,23 @@ test("DNS profiles have no artificial three-profile limit and retain editable fi
   assert.equal(p.policy.dnsProfiles[5].role,"security");
   assert.deepEqual(p.policy.dnsProfiles.map(x=>x.order),[1,2,3,4,5,6]);
 });
+
+
+test("compatibility diagnostics classify supported, unknown and unsupported capabilities",()=>{
+  const supported=compatibilityReport({vpn:true},"surge");
+  assert.equal(supported.compatibility.vpn.level,"OK");
+  assert.equal(supported.compatibility.vpn.state,"SUPPORTED");
+
+  const unknown=compatibilityReport({vpn:true},"mihomo");
+  assert.equal(unknown.compatibility.vpn.level,"WARNING");
+  assert.equal(unknown.compatibility.vpn.state,"UNKNOWN");
+
+  const unsupportedTarget={id:"test-unsupported",version:"1",status:"test",capabilities:{
+    vpn:"UNSUPPORTED",dns:"SUPPORTED",routing:"SUPPORTED","blocking.malware":"SUPPORTED","blocking.trackers":"SUPPORTED"
+  }};
+  const {registerTargetManifest}=await import("../packages/targets/src/index.js");
+  registerTargetManifest(unsupportedTarget);
+  const unsupported=compatibilityReport({vpn:true},"test-unsupported");
+  assert.equal(unsupported.compatibility.vpn.level,"UNSUPPORTED");
+  assert.equal(unsupported.compatibility.vpn.state,"UNSUPPORTED");
+});
