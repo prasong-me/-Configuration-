@@ -35,11 +35,18 @@ function selectResolvers(resolvers, policy = {}) {
       ? policy.dnsProfiles
       : [];
 
-  return source
+  const selected = source
     .map(normalizeResolver)
     .filter(Boolean)
     .filter(resolver => resolver.enabled)
     .sort((a, b) => a.order - b.order);
+
+  const requiredProfiles = Number.isInteger(policy.dnsResolution?.requiredProfiles) &&
+    policy.dnsResolution.requiredProfiles > 0
+    ? policy.dnsResolution.requiredProfiles
+    : null;
+
+  return requiredProfiles ? selected.slice(0, requiredProfiles) : selected;
 }
 
 function runResolver(query, resolver, transports) {
@@ -111,37 +118,82 @@ export class DnsController {
       return { ok: false, result: DnsStageResult.ERROR, trace };
     }
 
-    for (const resolver of resolvers) {
+    const mode = options.mode === "failover" ||
+      options.policy?.dnsResolution?.mode === "failover"
+      ? "failover"
+      : "sequential";
+
+    let previousResponse;
+    for (let index = 0; index < resolvers.length; index += 1) {
+      const resolver = resolvers[index];
+      const resolverRequest = previousResponse
+        ? { ...request, upstreamResponse: previousResponse }
+        : request;
       const outcome = await Promise.resolve(
-        runResolver(request, resolver, this.transports),
+        runResolver(resolverRequest, resolver, this.transports),
       );
 
       trace.push({
         result: outcome.result,
         resolverId: resolver.id,
+        order: resolver.order,
+        mode,
         detail: outcome,
       });
-
-      if (outcome.result === DnsStageResult.RESPOND) {
-        return { ok: true, result: DnsStageResult.RESPOND, response: outcome.response, trace };
-      }
-
-      if (outcome.result === DnsStageResult.FORWARD ||
-          outcome.result === DnsStageResult.PASS) {
-        return { ok: true, result: DnsStageResult.FORWARD, response: outcome.response, trace };
-      }
 
       if (outcome.result === DnsStageResult.BLOCK) {
         return { ok: true, result: DnsStageResult.BLOCK, response: outcome.response, trace };
       }
 
-      if (outcome.result !== DnsStageResult.ERROR) {
-        trace.push({
+      if (outcome.result === DnsStageResult.ERROR) {
+        if (mode === "failover") continue;
+        return {
+          ok: false,
           result: DnsStageResult.ERROR,
-          reason: "INVALID_RESOLVER_RESULT",
-          resolverId: resolver.id,
-        });
-        return { ok: false, result: DnsStageResult.ERROR, trace };
+          reason: "DNS_CHAIN_STAGE_FAILED",
+          failedResolverId: resolver.id,
+          trace,
+        };
+      }
+
+      if (mode === "failover") {
+        if (outcome.result === DnsStageResult.RESPOND) {
+          return { ok: true, result: DnsStageResult.RESPOND, response: outcome.response, trace };
+        }
+        if (outcome.result === DnsStageResult.FORWARD ||
+            outcome.result === DnsStageResult.PASS) {
+          return { ok: true, result: DnsStageResult.FORWARD, response: outcome.response, trace };
+        }
+      } else {
+        if (outcome.result !== DnsStageResult.RESPOND &&
+            outcome.result !== DnsStageResult.FORWARD &&
+            outcome.result !== DnsStageResult.PASS) {
+          trace.push({
+            result: DnsStageResult.ERROR,
+            reason: "INVALID_RESOLVER_RESULT",
+            resolverId: resolver.id,
+          });
+          return { ok: false, result: DnsStageResult.ERROR, trace };
+        }
+        previousResponse = outcome.response;
+      }
+    }
+
+    if (mode === "sequential") {
+      const last = trace.filter(item => item.resolverId).at(-1);
+      if (last && (
+        last.result === DnsStageResult.RESPOND ||
+        last.result === DnsStageResult.FORWARD ||
+        last.result === DnsStageResult.PASS
+      )) {
+        return {
+          ok: true,
+          result: last.result === DnsStageResult.RESPOND
+            ? DnsStageResult.RESPOND
+            : DnsStageResult.FORWARD,
+          response: previousResponse,
+          trace,
+        };
       }
     }
 
