@@ -15,6 +15,16 @@ Browser page-load time is not DNS latency. It includes DNS, connection setup, TL
 
 The `navigation` fields are therefore recorded separately. Later we can add a dedicated resolver-level test driver so the project does not confuse web load time with DNS resolver time.
 
+## Latest test configuration
+
+Recorded from the current iOS/Surge test work on 2026-09-26:
+
+- Test resolver pair: `1.1.1.1`, `1.0.0.1`
+- DNS transport in the configuration UI: DNS-over-HTTPS (HTTPS)
+- Router DNS observed separately: `94.140.14.15`, `94.140.14.16`
+- The test pair intentionally does not use the router's `94.140.14.15/.16` addresses.
+- This is configuration/evidence metadata, not a claim that one resolver is faster or better than another.
+
 ## Planned drivers
 
 The controller protocol is intentionally browser-neutral. Future drivers can implement the same result shape for other iOS browsers that support User Scripts or automation.
