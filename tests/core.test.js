@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { normalizePolicy, compatibilityReport, compile, processDnsQuery } from "../packages/core/src/index.js";
 import { listTargetManifests } from "../packages/targets/src/index.js";
 
-test("normalizePolicy creates canonical shape",()=>{assert.deepEqual(normalizePolicy({vpn:true,blocking:{trackers:true}}),{version:"0.1",policy:{vpn:true,dns:false,routing:false,blocking:{malware:false,trackers:true}}});});
+test("normalizePolicy creates canonical shape",()=>{assert.deepEqual(normalizePolicy({vpn:true,blocking:{trackers:true}}),{version:"0.1",policy:{vpn:true,dns:false,routing:false,blocking:{malware:false,trackers:true},dnsPipeline:[]}});});
 test("unknown targets cannot export",()=>{const r=compatibilityReport({vpn:true},"does-not-exist");assert.equal(r.exportable,false);assert.ok(r.diagnostics.some(x=>x.code==="TARGET_UNKNOWN"));});
 test("verified Surge VPN capability does not create an unknown-capability block",()=>{const r=compatibilityReport({vpn:true},"surge");assert.equal(r.exportable,true);assert.equal(r.capabilities.vpn.state,"SUPPORTED");});
 test("unknown capabilities remain blocking",()=>{const r=compatibilityReport({vpn:true},"mihomo");assert.equal(r.exportable,false);assert.equal(r.capabilities.vpn.state,"UNKNOWN");assert.ok(r.diagnostics.some(x=>x.code==="CAPABILITY_UNKNOWN"));});
