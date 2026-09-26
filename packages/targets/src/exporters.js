@@ -239,6 +239,42 @@ export function getExportArtifact(targetId,policyInput={}) {
   return "";
 }
 
+export function getExportMetadata(targetId,policyInput={}) {
+  const policy=normalizeTargetPolicy(policyInput?.policy??policyInput);
+  if(targetId==="apple-mobileconfig"){
+    return {
+      targetId,
+      format:"apple-mobileconfig",
+      dnsMode:"legacy-managed-profile",
+      profileType:"Configuration",
+      payloadType:"com.apple.dnsSettings.managed",
+      signing:{required:false,availableVia:"scripts/sign-mobileconfig.mjs"},
+      deviceVerification:"required"
+    };
+  }
+  if(targetId==="apple-dns-declaration"){
+    return {
+      targetId,
+      format:"apple-declarative-dns",
+      dnsMode:"declarative",
+      declarationType:"com.apple.configuration.network.dns-settings",
+      deviceVerification:"required"
+    };
+  }
+  if(targetId==="apple-mobileconfig-legacy"){
+    return {
+      targetId,
+      format:"apple-mobileconfig",
+      dnsMode:"legacy-managed-profile",
+      profileType:"Configuration",
+      payloadType:"com.apple.dnsSettings.managed",
+      compatibilityOnly:true,
+      deviceVerification:"required"
+    };
+  }
+  return {targetId,format:"target-export",deviceVerification:"required"};
+}
+
 export function getExportWarnings(targetId,policyInput={}) {
   if(targetId==="apple-mobileconfig") {
     const policy=normalizeTargetPolicy(policyInput?.policy??policyInput);
