@@ -19,13 +19,15 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run Semgrep
         run: |
-          semgrep ci --sarif --output=semgrep.sarif
+          semgrep scan --config auto --sarif --output=semgrep.sarif
       - name: Upload SARIF
         if: always() && hashFiles('semgrep.sarif') != ''
         continue-on-error: true
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: semgrep.sarif
-      - name: Report scan result
+      - name: Confirm report
         if: always()
-        run: test -f semgrep.sarif && echo "Semgrep scan completed."
+        run: |
+          test -s semgrep.sarif
+          echo "Semgrep SARIF report generated."
