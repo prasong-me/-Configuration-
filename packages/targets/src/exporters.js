@@ -19,7 +19,11 @@ const defaultPolicy = {
   rules:[{match:"*.*",action:"DIRECT"}],
   finalPolicy:"DIRECT",
   bypassSystem:true,
-  webEntry:{name:"Configuration Platform",url:"https://prasong-me.github.io/-Configuration-/",enabled:true}
+  webEntry:{name:"Configuration Platform",url:"https://prasong-me.github.io/-Configuration-/",enabled:true},
+  blocklists:[
+    {id:"oisd-small",provider:"OISD Small",source:"https://small.oisd.nl/domainswild2",format:"domains",enabled:true},
+    {id:"hagezi-pro",provider:"HaGeZi Pro",source:"https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.txt",format:"adblock",enabled:true}
+  ]
 };
 
 function getDnsProfiles(policy={}) {
