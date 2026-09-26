@@ -78,7 +78,7 @@ export function compileAppleMobileConfig(input={}){
     if(protocol==="HTTPS"){const u=entry.serverUrl||policy.dnsServerUrl;if(validHttpsUrl(u))dns.ServerURL=String(u).trim();else{valid=false;warnings.push({code:"APPLE_DNS_SERVER_URL_REQUIRED",message:"DNS-over-HTTPS ต้องมี ServerURL แบบ https://"});}}
     if(protocol==="TLS"){const n=entry.serverName||policy.dnsServerName;if(isNonEmptyString(n))dns.ServerName=String(n).trim();else{valid=false;warnings.push({code:"APPLE_DNS_SERVER_NAME_REQUIRED",message:"DNS-over-TLS ต้องมี ServerName"});}}
     if(Array.isArray(entry.domains)&&entry.domains.length)dns.SupplementalMatchDomains=entry.domains.filter(isNonEmptyString);
-    if(valid)payloads.push(payload("com.apple.dnsSettings.managed","com.configurationplatform.dns."+uuid(),entry.name||name+" DNS Settings",{DNSSettings:dns}));
+    if(valid)payloads.push(payload("com.apple.dnsSettings.managed","com.configurationplatform.dns."+(isNonEmptyString(entry.id)?entry.id:uuid()),entry.name||name+" DNS Settings",{DNSSettings:dns}));
   }
 
   if((policy.applePayloads?.webclip!==false)&&isNonEmptyString(policy.webAppUrl)){
