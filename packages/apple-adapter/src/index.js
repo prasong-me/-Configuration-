@@ -165,9 +165,3 @@ export function mapAppleDnsSettings(profile={},mode="declarative"){
 
 export function mapAppleLegacyDnsSettings(profile={}){ return mapAppleDnsSettings(profile,"legacy"); }
 
-export function compileAppleDeclarativeDns(input={}){
-  const policy=input?.policy??input;
-  const name=isNonEmptyString(policy.name)?policy.name.trim():"Network Configuration";
-  const profile={protocol:policy.dnsProtocol,servers:policy.dnsServers,endpoint:policy.dnsServerUrl,serverName:policy.dnsServerName,domains:policy.dnsDomains,allowFailover:policy.dnsAllowFailover};
-  return {Type:"com.apple.configuration.network.dns-settings",Identifier:uuid(),ServerToken:uuid(),Payload:{VisibleName:name,DNSSettings:mapAppleDnsSettings(profile,"declarative")}};
-}
