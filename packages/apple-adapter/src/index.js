@@ -117,16 +117,30 @@ export function compileAppleMobileConfig(input={}){
   };
 }
 
+export function mapAppleDnsSettings(profile={},mode="declarative"){
+  const protocol=String(profile.protocol||"HTTPS").toUpperCase().replace("DOH","HTTPS").replace("DOT","TLS");
+  const settings={
+    DNSProtocol:protocol,
+    ServerAddresses:Array.isArray(profile.servers)?profile.servers.filter(isNonEmptyString):[]
+  };
+  if(protocol==="HTTPS"&&isNonEmptyString(profile.endpoint)) settings.ServerURL=String(profile.endpoint).trim();
+  if(protocol==="TLS"&&isNonEmptyString(profile.serverName)) settings.ServerName=String(profile.serverName).trim();
+  if(Array.isArray(profile.domains)&&profile.domains.length) settings.SupplementalMatchDomains=profile.domains.filter(isNonEmptyString);
+  if(typeof profile.allowFailover==="boolean") settings.AllowFailover=profile.allowFailover;
+  if(mode==="legacy"&&isNonEmptyString(profile.certificateUUID)) settings.PayloadCertificateUUID=profile.certificateUUID;
+  if(mode==="declarative"&&isNonEmptyString(profile.identityAssetReference)) settings.IdentityAssetReference=profile.identityAssetReference;
+  return settings;
+}
+
+export function mapAppleLegacyDnsSettings(profile={}){
+  return mapAppleDnsSettings(profile,"legacy");
+}
+
 export function compileAppleDeclarativeDns(input={}){
   const policy=input?.policy??input;
   const name=isNonEmptyString(policy.name)?policy.name.trim():"Network Configuration";
-  const protocol=String(policy.dnsProtocol||"HTTPS").toUpperCase();
-  const dns={DNSProtocol:protocol,ServerAddresses:Array.isArray(policy.dnsServers)?policy.dnsServers:[]};
-
-  if(protocol==="HTTPS"&&policy.dnsServerUrl) dns.ServerURL=policy.dnsServerUrl;
-  if(protocol==="TLS"&&policy.dnsServerName) dns.ServerName=policy.dnsServerName;
-  if(Array.isArray(policy.dnsDomains)&&policy.dnsDomains.length) dns.SupplementalMatchDomains=policy.dnsDomains;
-  if(typeof policy.dnsAllowFailover==="boolean") dns.AllowFailover=policy.dnsAllowFailover;
+  const profile={protocol:policy.dnsProtocol,servers:policy.dnsServers,endpoint:policy.dnsServerUrl,serverName:policy.dnsServerName,domains:policy.dnsDomains,allowFailover:policy.dnsAllowFailover,identityAssetReference:policy.identityAssetReference};
+  const dns=mapAppleDnsSettings(profile,"declarative");
 
   return {
     Type:"com.apple.configuration.network.dns-settings",
