@@ -194,7 +194,12 @@ export const exportFormats = [
 
 export function getExportArtifact(targetId,policyInput={}) {
   const policy=policyInput?.policy??policyInput;
-  if(targetId==="apple-mobileconfig") {\n    const applePolicy={...policyInput,policy:{...(policyInput?.policy??policyInput),dnsPayloads:getDnsProfiles(policy).map(profile=>({\n      id:profile.id,name:profile.name,servers:profile.servers,protocol:profile.protocol,serverUrl:profile.endpoint,serverName:profile.serverName,domains:profile.domains\n    }))}};\n    return compileAppleMobileConfig(applePolicy).content;\n  }
+  if(targetId==="apple-mobileconfig") {
+    const applePolicy={...policyInput,policy:{...(policyInput?.policy??policyInput),dnsPayloads:getDnsProfiles(policy).map(profile=>({
+      id:profile.id,name:profile.name,servers:profile.servers,protocol:profile.protocol,serverUrl:profile.endpoint,serverName:profile.serverName,domains:profile.domains
+    }))}};
+    return compileAppleMobileConfig(applePolicy).content;
+  }
   if(targetId==="apple-dns-declaration") return JSON.stringify(compileAppleDeclarativeDns(policyInput),null,2);
   if(targetId==="surge") return exportSurge(policyInput);
   if(targetId==="wireguard") return "[Interface]\nDNS = "+(policy.dnsServers||[]).join(", ")+"\n\n# Configuration Platform Web App\n# "+(policy.webAppUrl||"")+"\n";
