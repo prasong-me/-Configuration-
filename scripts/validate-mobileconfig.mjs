@@ -32,31 +32,29 @@ const xml = join(dir, "profile.xml");
 writeFileSync(file, artifact, "utf8");
 
 const python = [
-  "import plistlib,sys; p=plistlib.load(open(sys.argv[1],'rb'))",
-  "assert p['PayloadType']=='Configuration'",
-  "payloads=p['PayloadContent']",
-  "print('DEBUG payloadCount=',len(payloads),'types=',[x['PayloadType'] for x in payloads])",
-  "assert len(payloads)==7",
-  "dns=[x for x in payloads if x['PayloadType']=='com.apple.dnsSettings.managed']",
-  "assert len(dns)==3",
-  "assert [x['DNSSettings']['ServerAddresses'] for x in dns]==[['1.1.1.1','1.0.0.1'],['9.9.9.9','149.112.112.112'],['8.8.8.8','8.8.4.4']]",
-  "vpn=[x for x in payloads if x['PayloadType']=='com.apple.vpn.managed'][0]",
-  "assert vpn['VPNType']=='L2TP'",
-  "assert vpn['PPP']['CommRemoteAddress']=='219.100.37.123'",
-  "assert vpn['PPP']['AuthName']=='vpn'",
-  "assert vpn['IPSec']['SharedSecret']=='vpn'",
-  "proxy=[x for x in payloads if x['PayloadType']=='com.apple.proxy.http.global'][0]",
-  "assert proxy['ProxyServer']=='103.237.102.191'",
-  "assert proxy['ProxyServerPort']==11111",
-  "print('MobileConfig validation passed: 7 payloads, 3 DNS profiles, L2TP VPN, Global HTTP Proxy')"
+  "import plistlib,json,sys; print(json.dumps(plistlib.load(open(sys.argv[1],'rb'))))"
 ].join(";");
 
 try {
   const p = spawnSync("plutil", ["-convert","xml1","-o",xml,file], {encoding:"utf8"});
   if (p.status !== 0) throw new Error(p.stderr || "plutil validation failed");
   const py = spawnSync("python3", ["-c",python,xml], {encoding:"utf8"});
-  if (py.status !== 0) throw new Error(py.stderr || py.stdout || "plist assertions failed");
-  console.log(py.stdout.trim());
+  if (py.status !== 0) throw new Error(py.stderr || py.stdout || "plist parse failed");
+  const plist = JSON.parse(py.stdout);
+  const payloads = plist.PayloadContent || [];
+  if (plist.PayloadType !== "Configuration") throw new Error("top-level PayloadType mismatch");
+  if (payloads.length !== 7) throw new Error("payloadCount="+payloads.length+" types="+JSON.stringify(payloads.map(x=>x.PayloadType)));
+  const dns = payloads.filter(x=>x.PayloadType==="com.apple.dnsSettings.managed");
+  if (dns.length !== 3) throw new Error("dnsPayloadCount="+dns.length);
+  const dnsServers = dns.map(x=>x.DNSSettings?.ServerAddresses);
+  const expectedDns = [["1.1.1.1","1.0.0.1"],["9.9.9.9","149.112.112.112"],["8.8.8.8","8.8.4.4"]];
+  if (JSON.stringify(dnsServers)!==JSON.stringify(expectedDns)) throw new Error("dnsServers="+JSON.stringify(dnsServers));
+  const vpn = payloads.find(x=>x.PayloadType==="com.apple.vpn.managed");
+  if (!vpn || vpn.VPNType!=="L2TP") throw new Error("VPN payload mismatch: "+JSON.stringify(vpn));
+  if (vpn.PPP?.CommRemoteAddress!=="219.100.37.123" || vpn.PPP?.AuthName!=="vpn" || vpn.IPSec?.SharedSecret!=="vpn") throw new Error("L2TP fields mismatch: "+JSON.stringify(vpn));
+  const proxy = payloads.find(x=>x.PayloadType==="com.apple.proxy.http.global");
+  if (!proxy || proxy.ProxyServer!=="103.237.102.191" || proxy.ProxyServerPort!==11111) throw new Error("proxy mismatch: "+JSON.stringify(proxy));
+  console.log("MobileConfig validation passed: 7 payloads, 3 DNS profiles, L2TP VPN, Global HTTP Proxy");
 } finally {
   rmSync(dir,{recursive:true,force:true});
 }
