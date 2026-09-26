@@ -72,3 +72,50 @@ test("generic web entry is preserved in normalized policy",()=>{
   assert.equal(p.policy.webEntry.name,"Configuration Web");
   assert.equal(p.policy.webEntry.url,"https://example.com");
 });
+
+
+test("DNS controller stops on a stage BLOCK before resolving", async ()=>{
+  let resolverCalled=false;
+  const controller = new (await import("../packages/core/src/index.js")).DnsController({
+    handlers:{security:()=>({result:"BLOCK"})},
+    transports:{default:()=>{resolverCalled=true;return {result:"RESPOND"}}}
+  });
+  const result=await controller.resolve("blocked.example",{
+    pipeline:[{id:"security",provider:"Quad9",order:1}],
+    resolvers:[{id:"fallback",provider:"Cloudflare",order:1}]
+  });
+  assert.equal(result.result,"BLOCK");
+  assert.equal(resolverCalled,false);
+});
+
+test("DNS controller continues after PASS and uses the first successful resolver", async ()=>{
+  const calls=[];
+  const controller = new (await import("../packages/core/src/index.js")).DnsController({
+    handlers:{filter:()=>({result:"PASS"})},
+    transports:{
+      first:()=>{calls.push("first");return {result:"ERROR"}},
+      second:()=>{calls.push("second");return {result:"RESPOND",response:{answer:["1.2.3.4"]}}}
+    }
+  });
+  const result=await controller.resolve("example.com",{
+    pipeline:[{id:"filter",provider:"Filter",order:1}],
+    resolvers:[
+      {id:"first",order:1},
+      {id:"second",order:2}
+    ]
+  });
+  assert.equal(result.result,"RESPOND");
+  assert.deepEqual(calls,["first","second"]);
+  assert.deepEqual(result.response.answer,["1.2.3.4"]);
+});
+
+test("DNS controller does not treat resolver failure as filter-stage PASS", async ()=>{
+  const controller = new (await import("../packages/core/src/index.js")).DnsController({
+    transports:{default:()=>({result:"ERROR"})}
+  });
+  const result=await controller.resolve("example.com",{
+    resolvers:[{id:"resolver-a",order:1}]
+  });
+  assert.equal(result.ok,false);
+  assert.equal(result.reason,"ALL_RESOLVERS_FAILED");
+});
