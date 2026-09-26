@@ -20,7 +20,7 @@ function App(){
   const [name,setName]=useState("My Privacy Profile"); const [vpn,setVpn]=useState(false); const [dns,setDns]=useState(true);
   const [malware,setMalware]=useState(false); const [trackers,setTrackers]=useState(false);
   const [dnsServers,setDnsServers]=useState("1.1.1.1\n1.0.0.1"); const [dnsProtocol,setDnsProtocol]=useState("HTTPS");
-  const [proxyServer,setProxyServer]=useState(""); const [dnsServerUrl,setDnsServerUrl]=useState(""); const [dnsServerName,setDnsServerName]=useState("");
+  const [proxyServer,setProxyServer]=useState(""); const [dnsServerUrl,setDnsServerUrl]=useState("https://cloudflare-dns.com/dns-query"); const [dnsServerName,setDnsServerName]=useState("");
   const [dnsPreset,setDnsPreset]=useState(""); const [target,setTarget]=useState("apple-mobileconfig"); const [message,setMessage]=useState("");
   const [applePayloads,setApplePayloads]=useState({dns:true,webclip:true,wifi:false,vpn:false,globalProxy:false});
   const [wifiSSID,setWifiSSID]=useState(""); const [wifiPassword,setWifiPassword]=useState(""); const [wifiHidden,setWifiHidden]=useState(false);
