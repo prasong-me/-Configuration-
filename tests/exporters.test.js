@@ -15,6 +15,7 @@ test("Apple MobileConfig exports every enabled DNS profile without collapsing to
   for(const p of profiles){
     assert.ok(artifact.includes(p.servers[0]));
     assert.ok(artifact.includes(p.endpoint));
+    assert.ok(artifact.includes(`com.configurationplatform.dns.${p.id}`));
   }
 });
 
