@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getExportArtifact } from "../packages/targets/src/exporters.js";
+import { getExportArtifact, getExportMetadata } from "../packages/targets/src/exporters.js";
 import { compileAppleDeclarativeDns, mapAppleDnsSettings, mapAppleLegacyDnsSettings, getAppleSigningRequirement } from "../packages/apple-adapter/src/index.js";
 
 const profiles = [
@@ -80,4 +80,16 @@ test("Apple certificate/signing is required only for explicit managed deployment
   assert.equal(mdm.required,true);
   assert.equal(declarative.required,false);
   assert.equal(legacy.required,false);
+});
+
+
+test("Apple export metadata identifies declarative versus legacy DNS paths",()=>{
+  const mobile=getExportMetadata("apple-mobileconfig");
+  const declarative=getExportMetadata("apple-dns-declaration");
+  const legacy=getExportMetadata("apple-mobileconfig-legacy");
+  assert.equal(mobile.dnsMode,"legacy-managed-profile");
+  assert.equal(mobile.payloadType,"com.apple.dnsSettings.managed");
+  assert.equal(declarative.dnsMode,"declarative");
+  assert.equal(declarative.declarationType,"com.apple.configuration.network.dns-settings");
+  assert.equal(legacy.compatibilityOnly,true);
 });
