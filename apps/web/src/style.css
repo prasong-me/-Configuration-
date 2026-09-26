@@ -74,3 +74,13 @@ pre{max-width:100%;padding:13px;border-radius:11px;background:#111827;color:#f3f
   .target-grid{grid-template-columns:1fr}
   .target-card{min-height:100px}
 }
+
+.ready-made-card{border:1px solid rgba(0,0,0,.12)}
+.ready-made-config{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;padding:18px;border:1px solid rgba(0,0,0,.1);border-radius:14px;margin-top:14px;background:rgba(255,255,255,.6)}
+.ready-made-config h3{margin:0 0 6px}
+.ready-made-config p{margin:0 0 10px}
+.ready-made-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.ready-made-meta span{font-size:.82rem;padding:5px 8px;border-radius:999px;background:rgba(0,0,0,.06)}
+.ready-made-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.ready-made-actions button{white-space:nowrap}
+@media (max-width:720px){.ready-made-config{grid-template-columns:1fr}.ready-made-actions{justify-content:flex-start}}
