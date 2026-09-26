@@ -2,6 +2,23 @@
 
 เครื่องมือสร้างการตั้งค่าสำหรับแอปพลิเคชันด้านเครือข่ายและความเป็นส่วนตัว โดยรองรับ Target หลายรูปแบบ
 
+## สถานะงานล่าสุด
+
+สถานะนี้ใช้เป็นบันทึกกลางให้ตรงกับการทำงานที่ตกลงกันในแชทและกับโค้ดใน repository
+
+- Core รองรับ `dnsProfiles[]` หลายชุด โดยไม่ล็อกจำนวนใน data model
+- แต่ละ DNS profile มีชื่อของตัวเอง, provider, protocol, คู่/ชุด server, endpoint, role, enabled และ order
+- คู่ DNS ของ provider เดียวกันถือเป็น profile เดียว ไม่ใช่ DNS คนละ stage
+- มี DNS pipeline แยกต่างหากสำหรับกรณีที่ต้องการ processing semantics แบบ PASS / RESPOND / BLOCK / FORWARD / ERROR
+- UI ปัจจุบันแสดง DNS profiles ที่ตั้งต้นไว้ 3 ชุด: Privacy DNS / Cloudflare, Security DNS / Quad9 และ Backup DNS / Google Public DNS
+- UI รองรับการแก้ชื่อ, provider preset, protocol, role, server และ endpoint ของแต่ละ profile แต่ยังต้องเพิ่มการเพิ่ม/ลบ profile แบบอิสระเพื่อให้ตรงกับความสามารถของ core อย่างสมบูรณ์
+- Target exporters เริ่มเก็บและนำ DNS profiles ไปใช้โดยไม่ลดรูปเหลือ DNS profile เดียว แต่ความสามารถในการแสดงหลาย profile ต้องตรวจสอบแยกตาม Target เพราะแต่ละ format อาจแทนความหมายได้ไม่เท่ากัน
+- Generic `webEntry` อยู่ใน core และให้ Target adapter เป็นผู้แปลงรูปแบบ
+- Apple มีทั้ง MobileConfig และ declarative DNS reference/exporter; legacy DNS payload ถูกแยกสถานะไว้ ไม่ถือเป็นรูปแบบสมัยใหม่โดยอัตโนมัติ
+- Wizard แบบลำดับขั้นที่วางแผนไว้คือ DNS → Wi-Fi → VPN → Proxy → Web App → Review/Export พร้อมปุ่มข้ามขั้นตอน ปัจจุบันยังไม่ถือว่าเสร็จสมบูรณ์ใน UI
+- Certificates/signing ยังไม่ถูกบังคับเป็น dependency กลาง และจะทำเมื่อ target ต้องใช้จริง
+- การยืนยันว่า Target ใดใช้งานได้จริงต้องอาศัยหลักฐานการทดสอบจริง ไม่เลื่อนสถานะเป็น verified จากการมี exporter เพียงอย่างเดียว
+
 ## สถาปัตยกรรม
 
 แพลตฟอร์มนี้เป็นตัวกลางสำหรับสร้างการตั้งค่า ไม่ได้ทำหน้าที่เป็น VPN, เครื่องยนต์พร็อกซี หรือกลไกนำเข้าโปรไฟล์ของแอปเป้าหมาย
@@ -50,7 +67,6 @@ Web core ต้องไม่ผูกกับ Target รูปแบบแล
 ใช้ `npm test` สำหรับการทดสอบ core
 
 ใช้ `npm --prefix apps/web install && npm --prefix apps/web run build` สำหรับการ build เว็บ
-
 
 ## DNS Processing Model
 
