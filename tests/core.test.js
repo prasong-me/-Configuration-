@@ -11,6 +11,21 @@ test("verified reference capability can report exportability",()=>{const r=compa
 test("compile refuses missing adapter",()=>{const r=compile({vpn:true},"example",null);assert.equal(r.ok,false);assert.equal(r.report.exportable,false);assert.ok(r.report.diagnostics.some(x=>x.code==="ADAPTER_UNAVAILABLE"));});
 test("target registry exposes evidence records",()=>{const surge=listTargetManifests().find(x=>x.id==="surge");assert.equal(surge.status,"verified");assert.equal(surge.evidence[0].level,"OFFICIAL");});
 
+test("normalizePolicy preserves multiple named DNS profiles and resolver pairs",()=>{
+  const p=normalizePolicy({
+    dns:true,
+    dnsProfiles:[
+      {id:"privacy",name:"Privacy DNS",provider:"Cloudflare",protocol:"DoH",servers:["1.1.1.1","1.0.0.1"],endpoint:"https://cloudflare-dns.com/dns-query",order:1},
+      {id:"security",name:"Security DNS",provider:"Quad9",protocol:"DoH",servers:["9.9.9.9","149.112.112.112"],endpoint:"https://dns.quad9.net/dns-query",order:2},
+      {id:"backup",name:"Backup DNS",provider:"Google Public DNS",protocol:"DoH",servers:["8.8.8.8","8.8.4.4"],endpoint:"https://dns.google/dns-query",order:3}
+    ]
+  });
+  assert.equal(p.policy.dnsProfiles.length,3);
+  assert.deepEqual(p.policy.dnsProfiles.map(x=>x.name),["Privacy DNS","Security DNS","Backup DNS"]);
+  assert.deepEqual(p.policy.dnsProfiles[0].servers,["1.1.1.1","1.0.0.1"]);
+  assert.deepEqual(p.policy.dnsProfiles[1].servers,["9.9.9.9","149.112.112.112"]);
+});
+
 test("DNS pipeline preserves provider, protocol, role and order",()=>{
   const p=normalizePolicy({
     dns:true,
