@@ -32,8 +32,7 @@ const xml = join(dir, "profile.xml");
 writeFileSync(file, artifact, "utf8");
 
 const python = [
-  "import plistlib,sys",
-  "with open(sys.argv[1],'rb') as f: p=plistlib.load(f)",
+  "import plistlib,sys; p=plistlib.load(open(sys.argv[1],'rb'))",
   "assert p['PayloadType']=='Configuration'",
   "payloads=p['PayloadContent']",
   "assert len(payloads)==7",
