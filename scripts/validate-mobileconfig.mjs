@@ -27,7 +27,18 @@ const artifact=getExportArtifact("apple-mobileconfig",{
   name:"CI MobileConfig",
   dns:true,
   dnsProfiles:profiles,
-  applePayloads:{dns:true,webclip:false,wifi:false,vpn:false,globalProxy:false}
+  applePayloads:{dns:true,webclip:true,wifi:true,vpn:true,globalProxy:true},
+  webAppUrl:"https://example.com/",
+  wifiSSID:"CI-Test-WiFi",
+  wifiPassword:"test-password",
+  wifiHidden:false,
+  vpnProtocol:"ikev2",
+  vpnRemoteAddress:"vpn.example.com",
+  vpnRemoteIdentifier:"vpn.example.com",
+  vpnLocalIdentifier:"ci@example.com",
+  vpnAuthenticationMethod:"SharedSecret",
+  vpnSharedSecret:"ci-shared-secret",
+  proxyServer:"proxy.example.com:8080"
 });
 
 const dir=mkdtempSync(join(tmpdir(),"configuration-mobileconfig-"));
@@ -52,6 +63,11 @@ print(json.dumps(value))
 
   const dnsPayloads=parsed.PayloadContent.filter(p=>p.PayloadType==="com.apple.dnsSettings.managed");
   assert(dnsPayloads.length===3,`Expected 3 enabled DNS payloads, got ${dnsPayloads.length}`);
+  const payloadTypes=parsed.PayloadContent.map(p=>p.PayloadType);
+  for(const type of ["com.apple.dnsSettings.managed","com.apple.webClip.managed","com.apple.wifi.managed","com.apple.vpn.managed","com.apple.proxy.http.global"]){
+    assert(payloadTypes.includes(type),`Expected MobileConfig payload type ${type}`);
+  }
+  assert(parsed.PayloadContent.length===7,`Expected all enabled payloads: 3 DNS + WebClip + Wi-Fi + VPN + Global Proxy, got ${parsed.PayloadContent.length}`);
 
   const expected=profiles.filter(p=>p.enabled!==false);
   for(const profile of expected){
