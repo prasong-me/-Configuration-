@@ -168,9 +168,15 @@ export function getExportArtifact(targetId,policyInput={}) {
   if(targetId==="surge") return exportSurge(policyInput);
   if(targetId==="wireguard") return "[Interface]\nDNS = "+(policy.dnsServers||[]).join(", ")+"\n\n# Configuration Platform Web App\n# "+(policy.webAppUrl||"")+"\n";
   if(targetId==="mihomo"||targetId==="stash") return "# Configuration Platform Web App: "+(policy.webAppUrl||"")+"\n"+JSON.stringify({dns:{nameserver:policy.dnsServers||[]},rules:policy.rules||[]},null,2);
-  if(targetId==="shadowrocket") return "[General]\ndns-server = "+(policy.dnsServers||[]).join(", ")+"\n\n# Configuration Platform Web App: "+(policy.webAppUrl||"")+"\n";
+  if(targetId==="shadowrocket"){
+  const rules=(policy.rules||[]).map(r=>[r.match||r.domain||r.host,r.action||policy.routingAction||"DIRECT"].filter(Boolean).join(", ")).join("\\n");
+  return "[General]\\ndns-server = "+(policy.dnsServers||[]).join(", ")+"\\n\\n[Rule]\\n"+rules+"\\n\\n";
+}
   if(targetId==="loon") return "[General]\n# Configuration Platform Web App: "+(policy.webAppUrl||"")+"\n";
-  if(targetId==="quantumult-x") return "[dns]\nserver = "+(policy.dnsServers||[]).join(", ")+"\n\n# Configuration Platform Web App: "+(policy.webAppUrl||"")+"\n";
+  if(targetId==="quantumult-x"){
+  const rules=(policy.rules||[]).map(r=>[r.match||r.domain||r.host,r.action||policy.routingAction||"direct"].filter(Boolean).join(", ")).join("\\n");
+  return "[dns]\\nserver = "+(policy.dnsServers||[]).join(", ")+"\\n\\n[filter_local]\\n"+rules+"\\n";
+}
   return "";
 }
 
