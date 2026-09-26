@@ -48,11 +48,26 @@ function webClipIcon(policy){
   }
 }
 
+export function getAppleSigningRequirement(targetId,options={}){
+  if(targetId==="apple-dns-declaration") return {required:false,reason:"Declarative DNS is a declaration model; certificate identity is only needed when the selected DNS service explicitly requires one."};
+  if(targetId==="apple-mobileconfig-legacy") return {required:false,reason:"Legacy DNSSettings can be manually installed without profile signing; certificate identity is a separate DNS resolver authentication concern."};
+  if(targetId==="apple-mobileconfig"){
+    const mode=String(options.installMode||"manual").toLowerCase();
+    if(mode==="mdm"||mode==="enrollment"||options.requireSigning===true){
+      return {required:true,reason:"The requested deployment path requires a signed profile or enrollment identity."};
+    }
+    return {required:false,reason:"Manual configuration profile generation does not require the adapter to create a signing identity."};
+  }
+  return {required:false,reason:"This target is not an Apple configuration profile signing target."};
+}
+
 export function compileAppleMobileConfig(input={}){
   const policy=input?.policy??input;
   const name=isNonEmptyString(policy.name)?policy.name.trim():"Network Configuration";
   const payloads=[];
   const warnings=[];
+  const signing=getAppleSigningRequirement("apple-mobileconfig",policy);
+  if(signing.required && !isNonEmptyString(policy.signingCertificate)) warnings.push({code:"APPLE_PROFILE_SIGNING_REQUIRED",message:signing.reason});
 
   const dnsEnabled=policy.applePayloads?.dns!==false;
   const dnsEntries=dnsEnabled?(Array.isArray(policy.dnsPayloads)&&policy.dnsPayloads.length?policy.dnsPayloads:(Array.isArray(policy.dnsServers)&&policy.dnsServers.length?[{servers:policy.dnsServers,protocol:policy.dnsProtocol,serverUrl:policy.dnsServerUrl,serverName:policy.dnsServerName,domains:policy.dnsDomains}]:[])):[];
