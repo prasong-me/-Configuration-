@@ -141,7 +141,7 @@ test("DNS profiles have no artificial three-profile limit and retain editable fi
 });
 
 
-test("compatibility diagnostics classify supported, unknown and unsupported capabilities",()=>{
+test("compatibility diagnostics classify supported, unknown and unsupported capabilities",async ()=>{
   const supported=compatibilityReport({vpn:true},"surge");
   assert.equal(supported.compatibility.vpn.level,"OK");
   assert.equal(supported.compatibility.vpn.state,"SUPPORTED");
