@@ -1,0 +1,32 @@
+name: MobileConfig Run Profile
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "packages/apple-adapter/**"
+      - "packages/targets/**"
+      - "scripts/run-mobileconfig-profile.mjs"
+      - "scripts/validate-mobileconfig.mjs"
+      - ".github/workflows/mobileconfig-profile.yml"
+
+jobs:
+  profile:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run test:mobileconfig
+      - name: Generate Run Profile
+        run: |
+          mkdir -p artifacts
+          node scripts/run-mobileconfig-profile.mjs artifacts/mobileconfig-profile.mobileconfig artifacts/mobileconfig-profile.json
+      - name: Print payload report
+        run: cat artifacts/mobileconfig-profile.json
+      - name: Upload MobileConfig profile
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobileconfig-run-profile
+          path: artifacts/
