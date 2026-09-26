@@ -41,7 +41,7 @@ wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalId
   const primaryFormats=primaryTargets.map(id=>exportFormats.find(x=>x.id===id)).filter(Boolean);
 
   return <main>
-    <header className="hero"><div className="language-menu"><label>{tr.language}<select value={language} onChange={e=>setLanguage(e.target.value)}><option value="th">{tr.thai}</option><option value="en">{tr.english}</option></select></label></div><div className="hero-badge">Configuration Compiler</div><h1>{tr.title}</h1><p>{tr.subtitle}</p><div style={{display:"flex",gap:"12px",flexWrap:"wrap"}}><a href="./knowledge.html">{tr.knowledge}</a><a href="./dns-benchmark.html">DNS Benchmark</a></div></header>
+    <header className="hero"><div className="language-menu"><label>{tr.language}<select value={language} onChange={e=>setLanguage(e.target.value)}><option value="th">{tr.thai}</option><option value="en">{tr.english}</option></select></label></div><div className="hero-badge">Configuration Compiler</div><h1>{tr.title}</h1><p>{tr.subtitle}</p><div style={{display:"flex",gap:"12px",flexWrap:"wrap"}}><a href="./knowledge.html">{tr.knowledge}</a></div></header>
     <nav className="mobile-nav" aria-label="เมนูหลัก"><a href="#basic"><span>1</span>{tr.step1.replace(/^1\. /,"")}</a><a href="#destination"><span>2</span>{tr.step2.replace(/^2\. /,"")}</a><a href="#export"><span>3</span>{tr.step3.replace(/^3\. /,"")}</a></nav>
     <section className="card" id="basic"><div className="section-title"><div><span className="step">1</span><div><h2>{tr.step1.replace(/^1\. /,"")}</h2><p>{tr.helpText}</p></div></div></div>
       <label>{tr.profileName}<input value={name} onChange={e=>setName(e.target.value)} placeholder="เช่น My DNS Profile"/></label>
