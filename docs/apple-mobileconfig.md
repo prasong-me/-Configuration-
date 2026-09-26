@@ -2,6 +2,8 @@
 
 ## สถานะปัจจุบัน
 
+**Implementation scope: CLOSED.** Core generator, exporter mapping, validation gate, signing workflow, automated tests, and CI release gate for generated MobileConfig are implemented. Remaining Apple device/MDM verification is evidence work and is intentionally kept separate from the exporter implementation.
+
 หน้า Apple MobileConfig ใน Configuration Platform ใช้สร้างไฟล์ Apple Configuration Profile (.mobileconfig) จาก policy กลาง แล้วให้ผู้ใช้ดาวน์โหลดหรือส่งไฟล์ผ่าน Share Sheet บน iOS/iPadOS
 
 ลำดับการใช้งาน:
@@ -54,7 +56,7 @@ Automated tests ยืนยันโครงสร้างและ exporter 
 # Apple MobileConfig Roadmap
 
 ## Phase 1: Core MobileConfig generator
-สถานะ: ทำแล้วเป็นหลัก
+สถานะ: **ปิดงาน implementation แล้ว**
 
 - [x] XML plist / top-level Configuration profile
 - [x] Multi-DNS profiles
@@ -66,7 +68,9 @@ Automated tests ยืนยันโครงสร้างและ exporter 
 - [x] Automated exporter tests
 
 ## Phase 2: Installation and signing
-สถานะ: บางส่วนเสร็จ
+สถานะ: **ปิดงาน implementation แล้ว**
+
+หมายเหตุ: การติดตั้งบนอุปกรณ์จริงและ MDM เป็น verification evidence ไม่ใช่งานค้างของตัว generator
 
 - [x] Download .mobileconfig
 - [x] Share Sheet
@@ -79,6 +83,8 @@ Automated tests ยืนยันโครงสร้างและ exporter 
 - [ ] MDM deployment test
 
 ## Phase 3: Real-device verification
+
+สถานะ: **แยกเป็น evidence gate ภายนอก implementation**
 
 ### DNS
 - [ ] ติดตั้ง MobileConfig จริง
@@ -149,6 +155,8 @@ Apple ทำเครื่องหมาย DNSSettings แบบเดิม�
 หลักการ: export ได้ ไม่เท่ากับใช้งานได้ และติดตั้งได้ ไม่เท่ากับทุก capability ทำงานครบ
 
 ## สถานะสรุป
+
+**MobileConfig implementation is closed.** ห้ามนำสถานะ device/MDM ที่ยังไม่มีหลักฐานมาใช้เป็นข้ออ้างว่า exporter ไม่พร้อม ระบบส่วน exporter และ validation ถูกปิดแล้ว ส่วนที่เหลือคือการเก็บหลักฐานบนอุปกรณ์จริงตาม acceptance criteria.
 
 | ส่วน | สถานะ |
 |---|---|
