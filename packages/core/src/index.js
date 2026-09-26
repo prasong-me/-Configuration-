@@ -99,6 +99,17 @@ export function compatibilityReport(policyInput,targetId){
   const manifest=getTargetManifest(targetId);
   const diagnostics=[...validatePolicy(policy),...analyzePolicy(policy)];
 
+  if(policy.policy.dnsResolution?.mode==="sequential" && Array.isArray(policy.policy.dnsProfiles) && policy.policy.dnsProfiles.filter(x=>x.enabled!==false).length>1){
+    diagnostics.push(
+      diagnostic(
+        DiagnosticLevel.WARNING,
+        "DNS_SEQUENTIAL_RUNTIME_REQUIRED",
+        "Sequential DNS mode requires a runtime DNS controller; target DNS profile lists alone do not create a resolver chain.",
+        {target:targetId,requiredProfiles:policy.policy.dnsResolution.requiredProfiles}
+      )
+    );
+  }
+
   if(!manifest){
     diagnostics.push(
       diagnostic(DiagnosticLevel.CRITICAL,"TARGET_UNKNOWN",`Unknown target: ${targetId}`,{target:targetId})
