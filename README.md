@@ -50,3 +50,34 @@ Web core ต้องไม่ผูกกับ Target รูปแบบแล
 ใช้ `npm test` สำหรับการทดสอบ core
 
 ใช้ `npm --prefix apps/web install && npm --prefix apps/web run build` สำหรับการ build เว็บ
+
+
+## DNS Processing Model
+
+The core keeps DNS provider identity, protocol, capability/role, order, and target adapter concerns separate.
+
+A DNS pipeline is represented as ordered stages. A stage may return PASS, RESPOND, BLOCK, FORWARD, or ERROR. PASS continues processing to the next stage; handled results terminate the current pipeline unless a target-specific adapter defines another documented behavior.
+
+Remote resolvers are not treated as a serial filter chain merely because they appear in sequence. The controller must own the processing semantics and invoke provider-specific handlers deliberately.
+
+Example model:
+
+    Client
+      |
+      v
+    DNS Processing Layer
+      +-- Stage A
+      +-- Stage B
+      +-- Stage C
+      |
+      v
+    Final Resolver / target-specific transport
+      |
+      v
+    Client
+
+Protocol and role remain independent. DoH, DoT, DoQ, DNSCrypt, and plain DNS describe transport; resolver, threat filtering, tracker filtering, custom rules, and other capabilities describe behavior.
+
+## Generic Web Entry
+
+The core policy can carry an optional webEntry object containing a name, URL, and optional icon. Target adapters decide how to represent it. For Apple this can map to a Web Clip payload when that capability is supported. It is not an Apple-only core concept.
