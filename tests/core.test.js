@@ -88,25 +88,53 @@ test("DNS controller stops on a stage BLOCK before resolving", async ()=>{
   assert.equal(resolverCalled,false);
 });
 
-test("DNS controller continues after PASS and uses the first successful resolver", async ()=>{
+test("DNS controller runs every enabled DNS resolver in order by default", async ()=>{
   const calls=[];
   const controller = new (await import("../packages/core/src/index.js")).DnsController({
     handlers:{filter:()=>({result:"PASS"})},
     transports:{
-      first:()=>{calls.push("first");return {result:"ERROR"}},
-      second:()=>{calls.push("second");return {result:"RESPOND",response:{answer:["1.2.3.4"]}}}
+      first:(query)=>{calls.push(["first",query.upstreamResponse]);return {result:"RESPOND",response:{answer:["1.1.1.1"]}}},
+      second:(query)=>{calls.push(["second",query.upstreamResponse]);return {result:"RESPOND",response:{answer:["9.9.9.9"]}}},
+      third:(query)=>{calls.push(["third",query.upstreamResponse]);return {result:"RESPOND",response:{answer:["8.8.8.8"]}}}
     }
   });
   const result=await controller.resolve("example.com",{
     pipeline:[{id:"filter",provider:"Filter",order:1}],
     resolvers:[
       {id:"first",order:1},
-      {id:"second",order:2}
-    ]
+      {id:"second",order:2},
+      {id:"third",order:3}
+    ],
+    policy:{dnsResolution:{mode:"sequential",requiredProfiles:3}}
   });
   assert.equal(result.result,"RESPOND");
+  assert.deepEqual(calls.map(x=>x[0]),["first","second","third"]);
+  assert.equal(calls[0][1],undefined);
+  assert.deepEqual(calls[1][1].answer,["1.1.1.1"]);
+  assert.deepEqual(calls[2][1].answer,["9.9.9.9"]);
+  assert.deepEqual(result.response.answer,["8.8.8.8"]);
+});
+
+test("DNS controller can intentionally select only two DNS profiles", async ()=>{
+  const calls=[];
+  const controller = new (await import("../packages/core/src/index.js")).DnsController({
+    transports:{
+      first:()=>{calls.push("first");return {result:"RESPOND",response:{answer:["1.1.1.1"]}}},
+      second:()=>{calls.push("second");return {result:"RESPOND",response:{answer:["9.9.9.9"]}}},
+      third:()=>{calls.push("third");return {result:"RESPOND",response:{answer:["8.8.8.8"]}}}
+    }
+  });
+  const result=await controller.resolve("example.com",{
+    resolvers:[
+      {id:"first",order:1},
+      {id:"second",order:2},
+      {id:"third",order:3}
+    ],
+    policy:{dnsResolution:{mode:"sequential",requiredProfiles:2}}
+  });
+  assert.equal(result.ok,true);
   assert.deepEqual(calls,["first","second"]);
-  assert.deepEqual(result.response.answer,["1.2.3.4"]);
+  assert.equal(result.response.answer[0],"9.9.9.9");
 });
 
 test("DNS controller does not treat resolver failure as filter-stage PASS", async ()=>{
