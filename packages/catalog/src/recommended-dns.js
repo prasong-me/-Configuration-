@@ -196,17 +196,7 @@ export function getRecommendedDns(id){
 }
 
 
-export const freeProxyPresets=Object.freeze([
-  {id:"none",provider:"No Proxy",free:true,description:"ไม่กำหนด proxy"},
-  {id:"custom",provider:"Custom",free:false,description:"กรอกชนิด proxy และ host:port เอง"}
-]);
-
-export const freeBlocklistPresets=Object.freeze([
-  {id:"oisd-small",provider:"OISD Small",free:true,description:"ads และ trackers"},
-  {id:"hagezi-pro",provider:"HaGeZi Pro",free:true,description:"ads, trackers และ unwanted domains"},
-  {id:"hagezi-tif",provider:"HaGeZi Threat Intelligence",free:true,description:"threat และ malware domains"},
-  {id:"custom",provider:"Custom domains",free:false,description:"กรอกโดเมนเอง"}
-]);
+export { freeVpnPresets, freeProxyPresets, blocklistPresets } from "./network-presets.js";
 
 export const routingPresets=Object.freeze([
   {id:"direct",name:"Direct",action:"DIRECT"},
