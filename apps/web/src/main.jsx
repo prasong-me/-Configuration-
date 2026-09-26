@@ -19,7 +19,12 @@ function App(){
   const [language,setLanguage]=useState("th"); const tr=translations[language];
   const [name,setName]=useState("Configuration Standard"); const [vpn,setVpn]=useState(false); const [dns,setDns]=useState(true);
   const [malware,setMalware]=useState(false); const [trackers,setTrackers]=useState(false);
-  const [dnsServers,setDnsServers]=useState("1.1.1.1\n1.0.0.1"); const [dnsProtocol,setDnsProtocol]=useState("HTTPS");
+  const defaultDnsProfiles=[
+    {id:"privacy-dns",name:"Privacy DNS",preset:"cloudflare-standard",provider:"Cloudflare 1.1.1.1",protocol:"HTTPS",servers:["1.1.1.1","1.0.0.1"],endpoint:"https://cloudflare-dns.com/dns-query",role:"privacy",enabled:true,order:1},
+    {id:"security-dns",name:"Security DNS",preset:"quad9-secure",provider:"Quad9 Secure",protocol:"HTTPS",servers:["9.9.9.9","149.112.112.112"],endpoint:"https://dns.quad9.net/dns-query",role:"security",enabled:true,order:2},
+    {id:"backup-dns",name:"Backup DNS",preset:"google-public-dns",provider:"Google Public DNS",protocol:"HTTPS",servers:["8.8.8.8","8.8.4.4"],endpoint:"https://dns.google/dns-query",role:"resolver",enabled:true,order:3}
+  ];
+  const [dnsProfiles,setDnsProfiles]=useState(defaultDnsProfiles);
   const [proxyServer,setProxyServer]=useState(""); const [dnsServerUrl,setDnsServerUrl]=useState("https://cloudflare-dns.com/dns-query"); const [dnsServerName,setDnsServerName]=useState("");
   const [dnsPreset,setDnsPreset]=useState("cloudflare"); const [target,setTarget]=useState("apple-mobileconfig"); const [message,setMessage]=useState("");
   const [applePayloads,setApplePayloads]=useState({dns:true,webclip:true,wifi:false,vpn:false,globalProxy:false});
@@ -27,9 +32,7 @@ function App(){
   const [vpnRemoteAddress,setVpnRemoteAddress]=useState(""); const [vpnRemoteIdentifier,setVpnRemoteIdentifier]=useState(""); const [vpnLocalIdentifier,setVpnLocalIdentifier]=useState(""); const [vpnSharedSecret,setVpnSharedSecret]=useState("");
   const [blockedDomains,setBlockedDomains]=useState(""); const [blockPreset,setBlockPreset]=useState("custom"); const [routingAction,setRoutingAction]=useState("DIRECT"); const [proxyType,setProxyType]=useState("HTTP");
 
-  const policy=useMemo(()=>({version:"0.4",policy:{name,vpn,dns,routing:vpn,blocking:{malware,trackers,separateFromResolver:true},dnsServers:dns?dnsServers.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean):[],proxyServer:proxyServer.trim(),dnsProtocol,dnsServerUrl:dnsServerUrl.trim(),dnsServerName:dnsServerName.trim(),webAppUrl:window.location.href.split("#")[0],dnsDomains:[],rules:[{match:"*.*",action:routingAction}],finalPolicy:"DIRECT",bypassSystem:true,webEntry:{name:"Configuration Platform",url:window.location.href.split("#")[0],enabled:true},applePayloads,
-wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret,blockedDomains:blockedDomains.split(/[\\s,]+/).map(x=>x.trim()).filter(Boolean),routingAction,proxyType}}),[name,vpn,dns,dnsProtocol,malware,trackers,dnsServers,proxyServer,dnsServerUrl,dnsServerName,applePayloads,wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret,blockedDomains,routingAction,proxyType]);
-
+  const policy=useMemo(()=>({version:"0.5",policy:{name,vpn,dns,routing:vpn,blocking:{malware,trackers,separateFromResolver:true},dnsProfiles:dns?dnsProfiles:[],dnsServers:dns&&dnsProfiles[0]?dnsProfiles[0].servers:[],proxyServer:proxyServer.trim(),dnsProtocol:dnsProfiles[0]?.protocol||"HTTPS",dnsServerUrl:dnsProfiles[0]?.endpoint||"",dnsServerName:"",webAppUrl:window.location.href.split("#")[0],dnsDomains:[],rules:[{match:"*.*",action:routingAction}],finalPolicy:"DIRECT",bypassSystem:true,webEntry:{name:"Configuration Platform",url:window.location.href.split("#")[0],enabled:true},applePayloads,wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret,blockedDomains:blockedDomains.split(/[\\s,]+/).map(x=>x.trim()).filter(Boolean),routingAction,proxyType}}),[name,vpn,dns,dnsProfiles,proxyServer,applePayloads,wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret,blockedDomains,routingAction,proxyType]);
   const policyForExport=policy; const selectedFormat=exportFormats.find(x=>x.id===target)||exportFormats[0];
   const artifact=getExportArtifact(selectedFormat.id,policyForExport); const warnings=getExportWarnings(selectedFormat.id,policyForExport);
   const report=useMemo(()=>compatibilityReport(policy,target),[policy,target]);
@@ -45,9 +48,20 @@ wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalId
     <nav className="mobile-nav" aria-label="เมนูหลัก"><a href="#basic"><span>1</span>{tr.step1.replace(/^1\. /,"")}</a><a href="#destination"><span>2</span>{tr.step2.replace(/^2\. /,"")}</a><a href="#export"><span>3</span>{tr.step3.replace(/^3\. /,"")}</a></nav>
     <section className="card" id="basic"><div className="section-title"><div><span className="step">1</span><div><h2>{tr.step1.replace(/^1\. /,"")}</h2><p>{tr.helpText}</p></div></div></div>
       <label>{tr.profileName}<input value={name} onChange={e=>setName(e.target.value)} placeholder="เช่น My DNS Profile"/></label>
-      <label>{tr.dns}<textarea value={dnsServers} onChange={e=>setDnsServers(e.target.value)} rows="2" placeholder="1.1.1.1&#10;1.0.0.1"/><small>{tr.dnsHint}</small></label>
-      <label>DNS transport<select value={dnsProtocol} onChange={e=>setDnsProtocol(e.target.value)}><option value="HTTPS">DNS-over-HTTPS (HTTPS)</option><option value="TLS">DNS-over-TLS (TLS)</option></select></label>
-      <label>{tr.dnsPreset}<select value={dnsPreset} onChange={e=>{const id=e.target.value;setDnsPreset(id);const preset=recommendedDnsServices.find(x=>x.id===id);if(!preset)return;setDnsServers([...preset.ipv4,...preset.ipv6].join("\n"));if(preset.doh){setDnsProtocol("HTTPS");setDnsServerUrl(preset.doh)}else if(preset.dot){setDnsProtocol("TLS");setDnsServerName(preset.dot);setDnsServerUrl("")}}}><option value="">{tr.chooseDns}</option>{recommendedDnsServices.map(x=><option key={x.id} value={x.id}>{x.provider} · {x.description}</option>)}</select></label>
+      <div className="dns-profile-list">
+        <div className="section-title"><div><h3>DNS Profiles</h3><p>{tr.dnsHint} รองรับหลายชุด และแต่ละชุดเก็บคู่ DNS ของผู้ให้บริการไว้ด้วยกัน</p></div></div>
+        {dnsProfiles.map((profile,index)=><div className="dns-profile-card" key={profile.id}>
+          <div className="advanced-grid">
+            <label>ชื่อชุด DNS<input value={profile.name} onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,name:e.target.value}:p))}/></label>
+            <label>บริการ DNS<select value={profile.preset} onChange={e=>{const preset=recommendedDnsServices.find(x=>x.id===e.target.value);setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,preset:e.target.value,provider:preset?.provider||"Custom",servers:preset?[...preset.ipv4,...preset.ipv6]:p.servers,protocol:preset?.doh?"HTTPS":preset?.dot?"TLS":p.protocol,endpoint:preset?.doh||"",role:p.role}:p))}}>{recommendedDnsServices.map(x=><option key={x.id} value={x.id}>{x.provider} · {x.description}</option>)}</select></label>
+            <label>Protocol<select value={profile.protocol} onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,protocol:e.target.value}:p))}><option value="HTTPS">DNS-over-HTTPS</option><option value="TLS">DNS-over-TLS</option><option value="PLAIN">Plain DNS</option></select></label>
+            <label>บทบาท<select value={profile.role} onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,role:e.target.value}:p))}><option value="resolver">Resolver</option><option value="security">Security / Threat</option><option value="privacy">Privacy</option><option value="custom">Custom</option></select></label>
+          </div>
+          <label>DNS Servers (คู่ของผู้ให้บริการ)<textarea value={profile.servers.join("\n")} rows="2" onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,servers:e.target.value.split(/[,\\s]+/).map(x=>x.trim()).filter(Boolean)}:p))}/></label>
+          <label>Endpoint<input value={profile.endpoint} onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,endpoint:e.target.value}:p))} placeholder="https://dns.example/dns-query"/></label>
+          <label className="check"><input type="checkbox" checked={profile.enabled} onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,enabled:e.target.checked}:p))}/>เปิดใช้ชุดนี้</label>
+        </div>)}
+      </div>
       <details open><summary>Network building blocks</summary>
         <div className="advanced-grid">
           <label>Proxy type<select value={proxyType} onChange={e=>setProxyType(e.target.value)}><option>HTTP</option><option>HTTPS</option><option>SOCKS5</option></select></label>
