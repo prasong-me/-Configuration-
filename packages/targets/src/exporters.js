@@ -1,7 +1,7 @@
 import { compileSurge } from "../../surge-adapter/src/index.js";
 import { compileAppleMobileConfig, compileAppleDeclarativeDns } from "../../apple-adapter/src/index.js";
 
-const defaultPolicy = {finalPolicy:"DIRECT",bypassSystem:true};
+const defaultPolicy = {name:"Configuration Standard",dns:true,dnsServers:["1.1.1.1","1.0.0.1"],dnsProtocol:"HTTPS",dnsServerUrl:"https://cloudflare-dns.com/dns-query",dnsServerName:"",dnsDomains:[],rules:[{match:"*.*",action:"DIRECT"}],finalPolicy:"DIRECT",bypassSystem:true,webEntry:{name:"Configuration Platform",url:"https://prasong-me.github.io/-Configuration-/",enabled:true}};
 
 const functionGuides = {
   surge: [
