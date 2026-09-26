@@ -228,7 +228,7 @@ export function getExportArtifact(targetId,policyInput={}) {
   if(targetId==="wireguard") return "[Interface]\nDNS = "+policy.dnsServers.join(", ")+"\n\n# Configuration Platform Web App\n# "+(policy.webAppUrl||"")+"\n";
   if(targetId==="mihomo"||targetId==="stash") return "# Configuration Platform Web App: "+(policy.webAppUrl||"")+"\n"+JSON.stringify({dns:{nameserver:policy.dnsServers,profiles:policy.dnsProfiles},rules:policy.rules||[]},null,2);
   if(targetId==="shadowrocket"){
-    const rules=(policy.rules||[]).map(r=>[r.type==="DOMAIN-SUFFIX"?"DOMAIN-SUFFIX":r.type,r.value,r.policy].join(", ")).join("\n");
+    const rules=(policy.rules||[]).map(r=>[r.type==="DOMAIN-SUFFIX"?"DOMAIN-SUFFIX":r.type,r.value,r.policy].join(",")).join("\n");
     return "[General]\ndns-server = "+policy.dnsServers.join(", ")+"\n\n[Rule]\n"+rules+"\n\n";
   }
   if(targetId==="loon") return "[General]\n# Configuration Platform Web App: "+(policy.webAppUrl||"")+"\n";
