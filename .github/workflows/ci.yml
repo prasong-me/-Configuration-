@@ -29,5 +29,5 @@ jobs:
         with:
           node-version: 22
       - run: npm run test:mobileconfig
-      - name: Validate signed MobileConfig tooling
-        run: npm test -- --test-name-pattern="Apple certificate/signing is required only for explicit managed deployment"
+      - name: Run full Node test suite
+        run: npm test
