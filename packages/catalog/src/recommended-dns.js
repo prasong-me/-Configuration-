@@ -194,3 +194,24 @@ export const recommendedDnsServices=Object.freeze([
 export function getRecommendedDns(id){
   return recommendedDnsServices.find(service=>service.id===id)||null;
 }
+
+
+export const freeProxyPresets=Object.freeze([
+  {id:"none",provider:"No Proxy",free:true,description:"ไม่กำหนด proxy"},
+  {id:"custom",provider:"Custom",free:false,description:"กรอกชนิด proxy และ host:port เอง"}
+]);
+
+export const freeBlocklistPresets=Object.freeze([
+  {id:"oisd-small",provider:"OISD Small",free:true,description:"ads และ trackers"},
+  {id:"hagezi-pro",provider:"HaGeZi Pro",free:true,description:"ads, trackers และ unwanted domains"},
+  {id:"hagezi-tif",provider:"HaGeZi Threat Intelligence",free:true,description:"threat และ malware domains"},
+  {id:"custom",provider:"Custom domains",free:false,description:"กรอกโดเมนเอง"}
+]);
+
+export const routingPresets=Object.freeze([
+  {id:"direct",name:"Direct",action:"DIRECT"},
+  {id:"proxy",name:"Proxy",action:"PROXY"},
+  {id:"reject",name:"Reject / Block",action:"REJECT"},
+  {id:"dns",name:"DNS",action:"DNS"},
+  {id:"custom",name:"Custom",action:""}
+]);
