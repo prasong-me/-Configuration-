@@ -5,6 +5,7 @@
 ## สถานะงานล่าสุด
 
 ดูสถานะละเอียดและรายการงานที่ยังไม่เสร็จใน [PROJECT-STATUS.md](./PROJECT-STATUS.md)
+- เอกสารสถานะและ roadmap ของ Apple MobileConfig: [docs/apple-mobileconfig.md](./docs/apple-mobileconfig.md)
 
 - Core รองรับ `dnsProfiles[]` หลายชุด โดยไม่ล็อกจำนวนใน data model
 - แต่ละ DNS profile มีชื่อของตัวเอง, provider, protocol, คู่/ชุด server, endpoint, role, enabled และ order

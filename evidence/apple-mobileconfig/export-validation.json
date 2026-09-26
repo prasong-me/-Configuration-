@@ -1,0 +1,21 @@
+{
+  "status": "tested",
+  "target": "apple-mobileconfig",
+  "generatedAt": "",
+  "generatorCommit": "",
+  "profileSha256": "",
+  "payloadTypes": [],
+  "dnsProfiles": {
+    "expectedEnabled": [],
+    "exported": [],
+    "missing": [],
+    "unexpectedDisabled": []
+  },
+  "signature": {
+    "checked": false,
+    "verified": false,
+    "error": ""
+  },
+  "compatibilityReport": "",
+  "notes": []
+}

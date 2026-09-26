@@ -119,3 +119,43 @@ test("DNS controller does not treat resolver failure as filter-stage PASS", asyn
   assert.equal(result.ok,false);
   assert.equal(result.reason,"ALL_RESOLVERS_FAILED");
 });
+
+test("DNS profiles have no artificial three-profile limit and retain editable fields",()=>{
+  const input=Array.from({length:6},(_,i)=>({
+    id:`profile-${i+1}`,
+    name:`Profile ${i+1}`,
+    provider:`Provider ${i+1}`,
+    protocol:i%2?"DoT":"DoH",
+    role:i%2?"security":"privacy",
+    servers:[`192.0.2.${i+1}`],
+    endpoint:`https://dns${i+1}.example/dns-query`,
+    enabled:i!==4,
+    order:i+1
+  }));
+  const p=normalizePolicy({dns:true,dnsProfiles:input});
+  assert.equal(p.policy.dnsProfiles.length,6);
+  assert.equal(p.policy.dnsProfiles[4].enabled,false);
+  assert.equal(p.policy.dnsProfiles[5].provider,"Provider 6");
+  assert.equal(p.policy.dnsProfiles[5].role,"security");
+  assert.deepEqual(p.policy.dnsProfiles.map(x=>x.order),[1,2,3,4,5,6]);
+});
+
+
+test("compatibility diagnostics classify supported, unknown and unsupported capabilities",async ()=>{
+  const supported=compatibilityReport({vpn:true},"surge");
+  assert.equal(supported.compatibility.vpn.level,"OK");
+  assert.equal(supported.compatibility.vpn.state,"SUPPORTED");
+
+  const unknown=compatibilityReport({vpn:true},"mihomo");
+  assert.equal(unknown.compatibility.vpn.level,"WARNING");
+  assert.equal(unknown.compatibility.vpn.state,"UNKNOWN");
+
+  const unsupportedTarget={id:"test-unsupported",version:"1",status:"test",capabilities:{
+    vpn:"UNSUPPORTED",dns:"SUPPORTED",routing:"SUPPORTED","blocking.malware":"SUPPORTED","blocking.trackers":"SUPPORTED"
+  }};
+  const {registerTargetManifest}=await import("../packages/targets/src/index.js");
+  registerTargetManifest(unsupportedTarget);
+  const unsupported=compatibilityReport({vpn:true},"test-unsupported");
+  assert.equal(unsupported.compatibility.vpn.level,"UNSUPPORTED");
+  assert.equal(unsupported.compatibility.vpn.state,"UNSUPPORTED");
+});

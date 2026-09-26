@@ -48,11 +48,26 @@ function webClipIcon(policy){
   }
 }
 
+export function getAppleSigningRequirement(targetId,options={}){
+  if(targetId==="apple-dns-declaration") return {required:false,reason:"Declarative DNS does not require adapter-side profile signing."};
+  if(targetId==="apple-mobileconfig-legacy") return {required:false,reason:"Legacy MobileConfig can be generated unsigned for manual installation."};
+  if(targetId==="apple-mobileconfig"){
+    const mode=String(options.installMode||"manual").toLowerCase();
+    if(mode==="mdm"||mode==="enrollment"||options.requireSigning===true){
+      return {required:true,reason:"The requested deployment path requires a signed profile or enrollment identity."};
+    }
+    return {required:false,reason:"Manual configuration profile generation does not require adapter-side signing."};
+  }
+  return {required:false,reason:"This target is not an Apple configuration profile signing target."};
+}
+
 export function compileAppleMobileConfig(input={}){
   const policy=input?.policy??input;
   const name=isNonEmptyString(policy.name)?policy.name.trim():"Network Configuration";
   const payloads=[];
   const warnings=[];
+  const signing=getAppleSigningRequirement("apple-mobileconfig",policy);
+  if(signing.required && !isNonEmptyString(policy.signingCertificate)) warnings.push({code:"APPLE_PROFILE_SIGNING_REQUIRED",message:signing.reason});
 
   const dnsEnabled=policy.applePayloads?.dns!==false;
   const dnsEntries=dnsEnabled?(Array.isArray(policy.dnsPayloads)&&policy.dnsPayloads.length?policy.dnsPayloads:(Array.isArray(policy.dnsServers)&&policy.dnsServers.length?[{servers:policy.dnsServers,protocol:policy.dnsProtocol,serverUrl:policy.dnsServerUrl,serverName:policy.dnsServerName,domains:policy.dnsDomains}]:[])):[];
@@ -63,7 +78,7 @@ export function compileAppleMobileConfig(input={}){
     if(protocol==="HTTPS"){const u=entry.serverUrl||policy.dnsServerUrl;if(validHttpsUrl(u))dns.ServerURL=String(u).trim();else{valid=false;warnings.push({code:"APPLE_DNS_SERVER_URL_REQUIRED",message:"DNS-over-HTTPS ต้องมี ServerURL แบบ https://"});}}
     if(protocol==="TLS"){const n=entry.serverName||policy.dnsServerName;if(isNonEmptyString(n))dns.ServerName=String(n).trim();else{valid=false;warnings.push({code:"APPLE_DNS_SERVER_NAME_REQUIRED",message:"DNS-over-TLS ต้องมี ServerName"});}}
     if(Array.isArray(entry.domains)&&entry.domains.length)dns.SupplementalMatchDomains=entry.domains.filter(isNonEmptyString);
-    if(valid)payloads.push(payload("com.apple.dnsSettings.managed","com.configurationplatform.dns."+uuid(),entry.name||name+" DNS Settings",{DNSSettings:dns}));
+    if(valid)payloads.push(payload("com.apple.dnsSettings.managed","com.configurationplatform.dns."+(isNonEmptyString(entry.id)?entry.id:uuid()),entry.name||name+" DNS Settings",{DNSSettings:dns}));
   }
 
   if((policy.applePayloads?.webclip!==false)&&isNonEmptyString(policy.webAppUrl)){
@@ -135,3 +150,18 @@ export function compileAppleDeclarativeDns(input={}){
     Payload:{VisibleName:name,DNSSettings:dns}
   };
 }
+
+export function mapAppleDnsSettings(profile={},mode="declarative"){
+  const protocol=String(profile.protocol||"HTTPS").toUpperCase().replace("DOH","HTTPS").replace("DOT","TLS");
+  const settings={DNSProtocol:protocol,ServerAddresses:Array.isArray(profile.servers)?profile.servers.filter(isNonEmptyString):[]};
+  if(protocol==="HTTPS"&&isNonEmptyString(profile.endpoint)) settings.ServerURL=String(profile.endpoint).trim();
+  if(protocol==="TLS"&&isNonEmptyString(profile.serverName)) settings.ServerName=String(profile.serverName).trim();
+  if(Array.isArray(profile.domains)&&profile.domains.length) settings.SupplementalMatchDomains=profile.domains.filter(isNonEmptyString);
+  if(typeof profile.allowFailover==="boolean") settings.AllowFailover=profile.allowFailover;
+  if(mode==="legacy"&&isNonEmptyString(profile.certificateUUID)) settings.PayloadCertificateUUID=profile.certificateUUID;
+  if(mode==="declarative"&&isNonEmptyString(profile.identityAssetReference)) settings.IdentityAssetReference=profile.identityAssetReference;
+  return settings;
+}
+
+export function mapAppleLegacyDnsSettings(profile={}){ return mapAppleDnsSettings(profile,"legacy"); }
+
