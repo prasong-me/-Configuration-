@@ -1,7 +1,38 @@
 import { compileSurge } from "../../surge-adapter/src/index.js";
 import { compileAppleMobileConfig, compileAppleDeclarativeDns } from "../../apple-adapter/src/index.js";
 
-const defaultPolicy = {name:"Configuration Standard",dns:true,dnsServers:["1.1.1.1","1.0.0.1"],dnsProtocol:"HTTPS",dnsServerUrl:"https://cloudflare-dns.com/dns-query",dnsServerName:"",dnsDomains:[],rules:[{match:"*.*",action:"DIRECT"}],finalPolicy:"DIRECT",bypassSystem:true,webEntry:{name:"Configuration Platform",url:"https://prasong-me.github.io/-Configuration-/",enabled:true}};
+const defaultDnsProfiles = [
+  {id:"privacy-dns",name:"Privacy DNS",provider:"Cloudflare",protocol:"DoH",servers:["1.1.1.1","1.0.0.1"],endpoint:"https://cloudflare-dns.com/dns-query",role:"resolver",enabled:true,order:1},
+  {id:"security-dns",name:"Security DNS",provider:"Quad9",protocol:"DoH",servers:["9.9.9.9","149.112.112.112"],endpoint:"https://dns.quad9.net/dns-query",role:"resolver",enabled:true,order:2},
+  {id:"backup-dns",name:"Backup DNS",provider:"Google Public DNS",protocol:"DoH",servers:["8.8.8.8","8.8.4.4"],endpoint:"https://dns.google/dns-query",role:"resolver",enabled:true,order:3}
+];
+
+const defaultPolicy = {
+  name:"Configuration Standard",
+  dns:true,
+  dnsProfiles:defaultDnsProfiles,
+  dnsServers:defaultDnsProfiles[0].servers,
+  dnsProtocol:"HTTPS",
+  dnsServerUrl:defaultDnsProfiles[0].endpoint,
+  dnsServerName:"",
+  dnsDomains:[],
+  rules:[{match:"*.*",action:"DIRECT"}],
+  finalPolicy:"DIRECT",
+  bypassSystem:true,
+  webEntry:{name:"Configuration Platform",url:"https://prasong-me.github.io/-Configuration-/",enabled:true}
+};
+
+function getDnsProfiles(policy={}) {
+  if(Array.isArray(policy.dnsProfiles) && policy.dnsProfiles.length) return policy.dnsProfiles.filter(p=>p && p.enabled!==false);
+  if(Array.isArray(policy.dnsServers) && policy.dnsServers.length) {
+    return [{id:"dns-default",name:"DNS",provider:"Custom",protocol:policy.dnsProtocol||"DoH",servers:policy.dnsServers,endpoint:policy.dnsServerUrl||"",role:"resolver",enabled:true,order:1}];
+  }
+  return defaultDnsProfiles;
+}
+
+function getDnsServers(policy={}) {
+  return getDnsProfiles(policy).flatMap(profile=>Array.isArray(profile.servers)?profile.servers:[]);
+}
 
 const functionGuides = {
   surge: [
@@ -167,15 +198,15 @@ export function getExportArtifact(targetId,policyInput={}) {
   if(targetId==="apple-dns-declaration") return JSON.stringify(compileAppleDeclarativeDns(policyInput),null,2);
   if(targetId==="surge") return exportSurge(policyInput);
   if(targetId==="wireguard") return "[Interface]\nDNS = "+(policy.dnsServers||[]).join(", ")+"\n\n# Configuration Platform Web App\n# "+(policy.webAppUrl||"")+"\n";
-  if(targetId==="mihomo"||targetId==="stash") return "# Configuration Platform Web App: "+(policy.webAppUrl||"")+"\n"+JSON.stringify({dns:{nameserver:policy.dnsServers||[]},rules:policy.rules||[]},null,2);
+  if(targetId==="mihomo"||targetId==="stash") return "# Configuration Platform Web App: "+(policy.webAppUrl||"")+"\n"+JSON.stringify({dns:{nameserver:getDnsServers(policy),profiles:getDnsProfiles(policy)},rules:policy.rules||[]},null,2);
   if(targetId==="shadowrocket"){
   const rules=(policy.rules||[]).map(r=>[r.match||r.domain||r.host,r.action||policy.routingAction||"DIRECT"].filter(Boolean).join(", ")).join("\\n");
-  return "[General]\\ndns-server = "+(policy.dnsServers||[]).join(", ")+"\\n\\n[Rule]\\n"+rules+"\\n\\n";
+  return "[General]\\ndns-server = "+getDnsServers(policy).join(", ")+"\\n\\n[Rule]\\n"+rules+"\\n\\n";
 }
   if(targetId==="loon") return "[General]\n# Configuration Platform Web App: "+(policy.webAppUrl||"")+"\n";
   if(targetId==="quantumult-x"){
   const rules=(policy.rules||[]).map(r=>[r.match||r.domain||r.host,r.action||policy.routingAction||"direct"].filter(Boolean).join(", ")).join("\\n");
-  return "[dns]\\nserver = "+(policy.dnsServers||[]).join(", ")+"\\n\\n[filter_local]\\n"+rules+"\\n";
+  return "[dns]\\nserver = "+getDnsServers(policy).join(", ")+"\\n\\n[filter_local]\\n"+rules+"\\n";
 }
   return "";
 }
