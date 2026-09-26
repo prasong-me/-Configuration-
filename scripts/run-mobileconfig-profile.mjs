@@ -13,9 +13,9 @@ function run(command, args) {
 }
 
 const profiles = [
-  { id: "p1", name: "Privacy", provider: "Cloudflare", protocol: "DoH", servers: ["1.1.1.1", "1.0.0.1"], endpoint: "https://cloudflare-dns.com/dns-query", enabled: true, order: 1 },
-  { id: "p2", name: "Security", provider: "Quad9", protocol: "DoH", servers: ["9.9.9.9", "149.112.112.112"], endpoint: "https://dns.quad9.net/dns-query", enabled: true, order: 2 },
-  { id: "p3", name: "Backup", provider: "Google", protocol: "DoH", servers: ["8.8.8.8", "8.8.4.4"], endpoint: "https://dns.google/dns-query", enabled: true, order: 3 }
+  { id: "p1", name: "Privacy", provider: "Cloudflare", protocol: "HTTPS", servers: ["1.1.1.1", "1.0.0.1"], endpoint: "https://cloudflare-dns.com/dns-query", enabled: true, order: 1 },
+  { id: "p2", name: "Security", provider: "Quad9", protocol: "HTTPS", servers: ["9.9.9.9", "149.112.112.112"], endpoint: "https://dns.quad9.net/dns-query", enabled: true, order: 2 },
+  { id: "p3", name: "Backup", provider: "Google", protocol: "HTTPS", servers: ["8.8.8.8", "8.8.4.4"], endpoint: "https://dns.google/dns-query", enabled: true, order: 3 }
 ];
 
 const artifact = getExportArtifact("apple-mobileconfig", {
