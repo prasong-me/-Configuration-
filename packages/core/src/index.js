@@ -4,8 +4,10 @@ import { CapabilityState } from "../../capabilities/src/index.js";
 import { diagnostic, DiagnosticLevel, hasBlockingDiagnostics } from "../../diagnostics/src/index.js";
 import { validatePolicy } from "../../validator/src/index.js";
 import { getTargetManifest } from "../../targets/src/index.js";
+import { normalizeDnsPipeline } from "./dns-pipeline.js";
 
 export { CapabilityState, DiagnosticLevel, diagnostic, hasBlockingDiagnostics, redact };
+export { DnsStageResult, normalizeDnsPipeline, processDnsQuery } from "./dns-pipeline.js";
 
 export function normalizePolicy(input) {
   const source=input ?? {};
@@ -18,7 +20,7 @@ export function normalizePolicy(input) {
       malware:Boolean(policy.blocking?.malware),
       trackers:Boolean(policy.blocking?.trackers)
     },
-    ...(policy.providers ? {providers:policy.providers} : {})
+    ...(policy.providers ? {providers:structuredClone(policy.providers)} : {})
   };
   if(typeof policy.name==="string"&&policy.name.trim()) normalized.name=policy.name.trim();
   if(Array.isArray(policy.dnsServers)){
@@ -26,6 +28,7 @@ export function normalizePolicy(input) {
       .filter(x=>typeof x==="string"&&x.trim())
       .map(x=>x.trim());
   }
+  normalized.dnsPipeline=normalizeDnsPipeline(policy);
   if(typeof policy.proxyServer==="string"&&policy.proxyServer.trim()){
     normalized.proxyServer=policy.proxyServer.trim();
   }
@@ -35,6 +38,14 @@ export function normalizePolicy(input) {
   }
   if(typeof policy.bypassSystem==="boolean") normalized.bypassSystem=policy.bypassSystem;
   if(policy.commands && Array.isArray(policy.commands)) normalized.commands=structuredClone(policy.commands);
+  if(policy.webEntry && typeof policy.webEntry==="object"){
+    normalized.webEntry={
+      url:typeof policy.webEntry.url==="string" ? policy.webEntry.url.trim() : "",
+      name:typeof policy.webEntry.name==="string" ? policy.webEntry.name.trim() : "",
+      icon:typeof policy.webEntry.icon==="string" ? policy.webEntry.icon.trim() : "",
+      enabled:policy.webEntry.enabled !== false,
+    };
+  }
   return {version:source.version ?? "0.1",policy:normalized};
 }
 
