@@ -8,6 +8,7 @@ on:
       - "packages/targets/**"
       - "scripts/run-mobileconfig-profile.mjs"
       - "scripts/validate-mobileconfig.mjs"
+      - "package.json"
       - ".github/workflows/mobileconfig-profile.yml"
   workflow_dispatch:
 
