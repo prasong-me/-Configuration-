@@ -145,5 +145,5 @@ test("DNS controller does not treat resolver failure as filter-stage PASS", asyn
     resolvers:[{id:"resolver-a",order:1}]
   });
   assert.equal(result.ok,false);
-  assert.equal(result.reason,"ALL_RESOLVERS_FAILED");
+  assert.equal(result.reason,"DNS_CHAIN_STAGE_FAILED");
 });
