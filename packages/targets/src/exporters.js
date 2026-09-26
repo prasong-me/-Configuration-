@@ -34,6 +34,20 @@ function getDnsServers(policy={}) {
   return getDnsProfiles(policy).flatMap(profile=>Array.isArray(profile.servers)?profile.servers:[]);
 }
 
+function applePolicyFor(policyInput={}) {
+  const policy=policyInput?.policy??policyInput;
+  const profiles=getDnsProfiles(policy).map((profile)=>({
+    id:profile.id,
+    name:profile.name,
+    servers:Array.isArray(profile.servers)?profile.servers:[],
+    protocol:String(profile.protocol||policy.dnsProtocol||"HTTPS").toUpperCase()==="DOH"?"HTTPS":String(profile.protocol||policy.dnsProtocol||"HTTPS").toUpperCase()==="DOT"?"TLS":String(profile.protocol||policy.dnsProtocol||"HTTPS").toUpperCase(),
+    serverUrl:profile.endpoint||"",
+    serverName:profile.serverName||"",
+    domains:Array.isArray(profile.domains)?profile.domains:[]
+  })).filter(profile=>profile.servers.length);
+  return {...policy,dnsPayloads:profiles};
+}
+
 const functionGuides = {
   surge: [
     {id:"dns",title:"DNS",config:"[General] → dns-server",test:"ตั้ง DNS ที่ต้องการ แล้วตรวจ Effective DNS / log"},
@@ -194,7 +208,7 @@ export const exportFormats = [
 
 export function getExportArtifact(targetId,policyInput={}) {
   const policy=policyInput?.policy??policyInput;
-  if(targetId==="apple-mobileconfig") return compileAppleMobileConfig(policyInput).content;
+  if(targetId==="apple-mobileconfig") return compileAppleMobileConfig(applePolicyFor(policyInput)).content;
   if(targetId==="apple-dns-declaration") return JSON.stringify(compileAppleDeclarativeDns(policyInput),null,2);
   if(targetId==="surge") return exportSurge(policyInput);
   if(targetId==="wireguard") return "[Interface]\nDNS = "+(policy.dnsServers||[]).join(", ")+"\n\n# Configuration Platform Web App\n# "+(policy.webAppUrl||"")+"\n";
@@ -212,7 +226,7 @@ export function getExportArtifact(targetId,policyInput={}) {
 }
 
 export function getExportWarnings(targetId,policyInput={}) {
-  if(targetId==="apple-mobileconfig") return compileAppleMobileConfig(policyInput).warnings;
+  if(targetId==="apple-mobileconfig") return compileAppleMobileConfig(applePolicyFor(policyInput)).warnings;
   return [];
 }
 
