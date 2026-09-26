@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { getExportArtifact } from "../packages/targets/src/exporters.js";
-import { compileAppleDeclarativeDns, mapAppleDnsSettings, mapAppleLegacyDnsSettings } from "../packages/apple-adapter/src/index.js";
+import { compileAppleDeclarativeDns, mapAppleDnsSettings, mapAppleLegacyDnsSettings, getAppleSigningRequirement } from "../packages/apple-adapter/src/index.js";
 
 const profiles = [
   {id:"p1",name:"Privacy",provider:"Cloudflare",protocol:"DoH",servers:["1.1.1.1","1.0.0.1"],endpoint:"https://cloudflare-dns.com/dns-query",role:"resolver",enabled:true,order:1},
@@ -68,4 +68,16 @@ test("Apple declarative DNS export uses the declarative NetworkDNSSettings shape
   assert.equal(artifact.Payload.DNSSettings.ServerURL,"https://cloudflare-dns.com/dns-query");
   assert.equal(artifact.Payload.DNSSettings.AllowFailover,false);
   assert.equal(artifact.Payload.DNSSettings.PayloadCertificateUUID,undefined);
+});
+
+
+test("Apple certificate/signing is required only for explicit managed deployment",()=>{
+  const manual= getAppleSigningRequirement("apple-mobileconfig",{installMode:"manual"});
+  const mdm=getAppleSigningRequirement("apple-mobileconfig",{installMode:"mdm"});
+  const declarative=getAppleSigningRequirement("apple-dns-declaration",{installMode:"mdm"});
+  const legacy=getAppleSigningRequirement("apple-mobileconfig-legacy",{installMode:"manual"});
+  assert.equal(manual.required,false);
+  assert.equal(mdm.required,true);
+  assert.equal(declarative.required,false);
+  assert.equal(legacy.required,false);
 });
