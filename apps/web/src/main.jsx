@@ -25,9 +25,10 @@ function App(){
   const [applePayloads,setApplePayloads]=useState({dns:true,webclip:true,wifi:false,vpn:false,globalProxy:false});
   const [wifiSSID,setWifiSSID]=useState(""); const [wifiPassword,setWifiPassword]=useState(""); const [wifiHidden,setWifiHidden]=useState(false);
   const [vpnRemoteAddress,setVpnRemoteAddress]=useState(""); const [vpnRemoteIdentifier,setVpnRemoteIdentifier]=useState(""); const [vpnLocalIdentifier,setVpnLocalIdentifier]=useState(""); const [vpnSharedSecret,setVpnSharedSecret]=useState("");
+  const [blockedDomains,setBlockedDomains]=useState(""); const [blockPreset,setBlockPreset]=useState("custom"); const [routingAction,setRoutingAction]=useState("DIRECT"); const [proxyType,setProxyType]=useState("HTTP");
 
   const policy=useMemo(()=>({version:"0.4",policy:{name,vpn,dns,routing:vpn,blocking:{malware,trackers,separateFromResolver:true},dnsServers:dns?dnsServers.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean):[],proxyServer:proxyServer.trim(),dnsProtocol,dnsServerUrl:dnsServerUrl.trim(),dnsServerName:dnsServerName.trim(),webAppUrl:window.location.href.split("#")[0],dnsDomains:[],rules:[],finalPolicy:"DIRECT",bypassSystem:true,applePayloads,
-wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret}}),[name,vpn,dns,dnsProtocol,malware,trackers,dnsServers,proxyServer,dnsServerUrl,dnsServerName,applePayloads,wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret]);
+wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret,blockedDomains:blockedDomains.split(/[\\s,]+/).map(x=>x.trim()).filter(Boolean),routingAction,proxyType}}),[name,vpn,dns,dnsProtocol,malware,trackers,dnsServers,proxyServer,dnsServerUrl,dnsServerName,applePayloads,wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret,blockedDomains,routingAction,proxyType]);
 
   const policyForExport=policy; const selectedFormat=exportFormats.find(x=>x.id===target)||exportFormats[0];
   const artifact=getExportArtifact(selectedFormat.id,policyForExport); const warnings=getExportWarnings(selectedFormat.id,policyForExport);
@@ -47,6 +48,15 @@ wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalId
       <label>{tr.dns}<textarea value={dnsServers} onChange={e=>setDnsServers(e.target.value)} rows="2" placeholder="1.1.1.1&#10;1.0.0.1"/><small>{tr.dnsHint}</small></label>
       <label>DNS transport<select value={dnsProtocol} onChange={e=>setDnsProtocol(e.target.value)}><option value="HTTPS">DNS-over-HTTPS (HTTPS)</option><option value="TLS">DNS-over-TLS (TLS)</option></select></label>
       <label>{tr.dnsPreset}<select value={dnsPreset} onChange={e=>{const id=e.target.value;setDnsPreset(id);const preset=recommendedDnsServices.find(x=>x.id===id);if(!preset)return;setDnsServers([...preset.ipv4,...preset.ipv6].join("\n"));if(preset.doh){setDnsProtocol("HTTPS");setDnsServerUrl(preset.doh)}else if(preset.dot){setDnsProtocol("TLS");setDnsServerName(preset.dot);setDnsServerUrl("")}}}><option value="">{tr.chooseDns}</option>{recommendedDnsServices.map(x=><option key={x.id} value={x.id}>{x.provider} · {x.description}</option>)}</select></label>
+      <details open><summary>Network building blocks</summary>
+        <div className="advanced-grid">
+          <label>Proxy type<select value={proxyType} onChange={e=>setProxyType(e.target.value)}><option>HTTP</option><option>HTTPS</option><option>SOCKS5</option></select></label>
+          <label>Routing action<select value={routingAction} onChange={e=>setRoutingAction(e.target.value)}><option value="DIRECT">DIRECT</option><option value="PROXY">PROXY</option><option value="REJECT">REJECT / BLOCK</option><option value="DNS">DNS</option></select></label>
+        </div>
+        <label>Blocked domains<textarea value={blockedDomains} onChange={e=>setBlockedDomains(e.target.value)} rows="3" placeholder="example.com&#10;ads.example.com&#10;tracker.example.com"/></label>
+        <label>Blocklist preset<select value={blockPreset} onChange={e=>{setBlockPreset(e.target.value);if(e.target.value!=="custom")setBlockedDomains("<!-- "+e.target.value+" -->")}}><option value="custom">Custom domains</option><option value="oisd-small">OISD Small</option><option value="hagezi-pro">HaGeZi Pro</option><option value="hagezi-tif">HaGeZi Threat Intelligence</option></select></label>
+        <small>Preset เป็นตัวเลือกแหล่งรายการเท่านั้น ส่วนการ export ต้องมีตัวรายการโดเมนจริงก่อน จึงไม่สร้างข้อมูลปลอมแทนรายการจากเว็บภายนอก</small>
+      </details>
       <details open><summary>Apple Payloads ในโปรไฟล์เดียว</summary>
         <div className="advanced-grid">
           <label className="check"><input type="checkbox" checked={applePayloads.dns} onChange={e=>setApplePayloads(x=>({...x,dns:e.target.checked}))}/>Encrypted DNS payload</label>
