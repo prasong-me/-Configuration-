@@ -17,17 +17,17 @@ async function shareFile(file){if(!navigator.share||!navigator.canShare||!naviga
 
 function App(){
   const [language,setLanguage]=useState("th"); const tr=translations[language];
-  const [name,setName]=useState("My Privacy Profile"); const [vpn,setVpn]=useState(false); const [dns,setDns]=useState(true);
+  const [name,setName]=useState("Configuration Standard"); const [vpn,setVpn]=useState(false); const [dns,setDns]=useState(true);
   const [malware,setMalware]=useState(false); const [trackers,setTrackers]=useState(false);
   const [dnsServers,setDnsServers]=useState("1.1.1.1\n1.0.0.1"); const [dnsProtocol,setDnsProtocol]=useState("HTTPS");
   const [proxyServer,setProxyServer]=useState(""); const [dnsServerUrl,setDnsServerUrl]=useState("https://cloudflare-dns.com/dns-query"); const [dnsServerName,setDnsServerName]=useState("");
-  const [dnsPreset,setDnsPreset]=useState(""); const [target,setTarget]=useState("apple-mobileconfig"); const [message,setMessage]=useState("");
+  const [dnsPreset,setDnsPreset]=useState("cloudflare"); const [target,setTarget]=useState("apple-mobileconfig"); const [message,setMessage]=useState("");
   const [applePayloads,setApplePayloads]=useState({dns:true,webclip:true,wifi:false,vpn:false,globalProxy:false});
   const [wifiSSID,setWifiSSID]=useState(""); const [wifiPassword,setWifiPassword]=useState(""); const [wifiHidden,setWifiHidden]=useState(false);
   const [vpnRemoteAddress,setVpnRemoteAddress]=useState(""); const [vpnRemoteIdentifier,setVpnRemoteIdentifier]=useState(""); const [vpnLocalIdentifier,setVpnLocalIdentifier]=useState(""); const [vpnSharedSecret,setVpnSharedSecret]=useState("");
   const [blockedDomains,setBlockedDomains]=useState(""); const [blockPreset,setBlockPreset]=useState("custom"); const [routingAction,setRoutingAction]=useState("DIRECT"); const [proxyType,setProxyType]=useState("HTTP");
 
-  const policy=useMemo(()=>({version:"0.4",policy:{name,vpn,dns,routing:vpn,blocking:{malware,trackers,separateFromResolver:true},dnsServers:dns?dnsServers.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean):[],proxyServer:proxyServer.trim(),dnsProtocol,dnsServerUrl:dnsServerUrl.trim(),dnsServerName:dnsServerName.trim(),webAppUrl:window.location.href.split("#")[0],dnsDomains:[],rules:[],finalPolicy:"DIRECT",bypassSystem:true,applePayloads,
+  const policy=useMemo(()=>({version:"0.4",policy:{name,vpn,dns,routing:vpn,blocking:{malware,trackers,separateFromResolver:true},dnsServers:dns?dnsServers.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean):[],proxyServer:proxyServer.trim(),dnsProtocol,dnsServerUrl:dnsServerUrl.trim(),dnsServerName:dnsServerName.trim(),webAppUrl:window.location.href.split("#")[0],dnsDomains:[],rules:[{match:"*.*",action:routingAction}],finalPolicy:"DIRECT",bypassSystem:true,webEntry:{name:"Configuration Platform",url:window.location.href.split("#")[0],enabled:true},applePayloads,
 wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret,blockedDomains:blockedDomains.split(/[\\s,]+/).map(x=>x.trim()).filter(Boolean),routingAction,proxyType}}),[name,vpn,dns,dnsProtocol,malware,trackers,dnsServers,proxyServer,dnsServerUrl,dnsServerName,applePayloads,wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret,blockedDomains,routingAction,proxyType]);
 
   const policyForExport=policy; const selectedFormat=exportFormats.find(x=>x.id===target)||exportFormats[0];
