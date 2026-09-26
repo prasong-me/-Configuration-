@@ -95,9 +95,20 @@ export function compileAppleMobileConfig(input={}){
     else warnings.push({code:"APPLE_WIFI_SSID_REQUIRED",message:"Wi-Fi payload ต้องมี SSID"});
   }
   if(policy.applePayloads?.vpn){
-    const remote=String(policy.vpnRemoteAddress||"").trim(),local=String(policy.vpnLocalIdentifier||"").trim(),remoteId=String(policy.vpnRemoteIdentifier||"").trim(),auth=String(policy.vpnAuthenticationMethod||"SharedSecret");
-    if(remote&&local&&remoteId){const ike={RemoteAddress:remote,RemoteIdentifier:remoteId,LocalIdentifier:local,AuthenticationMethod:auth};if(auth==="SharedSecret"&&isNonEmptyString(policy.vpnSharedSecret))ike.SharedSecret=policy.vpnSharedSecret;if(isNonEmptyString(policy.vpnAuthName))ike.AuthName=policy.vpnAuthName;if(isNonEmptyString(policy.vpnAuthPassword))ike.AuthPassword=policy.vpnAuthPassword;payloads.push(payload("com.apple.vpn.managed","com.configurationplatform.vpn."+uuid(),policy.vpnName||name+" VPN",{VPNType:"IKEv2",UserDefinedName:policy.vpnName||name+" VPN",IKEv2:ike}));}
-    else warnings.push({code:"APPLE_IKEV2_REQUIRED_FIELDS",message:"IKEv2 ต้องมี RemoteAddress, RemoteIdentifier และ LocalIdentifier"});
+    const vpnProtocol=String(policy.vpnProtocol||"ikev2").toLowerCase();
+    if(vpnProtocol==="l2tp"){
+      const remote=String(policy.vpnRemoteAddress||"").trim(),user=String(policy.vpnAuthName||policy.vpnLocalIdentifier||"").trim(),password=String(policy.vpnAuthPassword||"").trim(),secret=String(policy.vpnSharedSecret||"").trim();
+      if(remote&&user&&password&&secret){
+        const ppp={AuthName:user,AuthPassword:password,CommRemoteAddress:remote};
+        const ipsec={AuthenticationMethod:"SharedSecret",LocalIdentifierType:"KeyID",SharedSecret:secret};
+        const ipv4={OverridePrimary:1};
+        payloads.push(payload("com.apple.vpn.managed","com.configurationplatform.vpn."+uuid(),policy.vpnName||name+" VPN",{VPNType:"L2TP",UserDefinedName:policy.vpnName||name+" VPN",PPP:ppp,IPSec:ipsec,IPv4:ipv4}));
+      }else warnings.push({code:"APPLE_L2TP_REQUIRED_FIELDS",message:"L2TP ต้องมี RemoteAddress, username, password และ SharedSecret"});
+    }else{
+      const remote=String(policy.vpnRemoteAddress||"").trim(),local=String(policy.vpnLocalIdentifier||"").trim(),remoteId=String(policy.vpnRemoteIdentifier||"").trim(),auth=String(policy.vpnAuthenticationMethod||"SharedSecret");
+      if(remote&&local&&remoteId){const ike={RemoteAddress:remote,RemoteIdentifier:remoteId,LocalIdentifier:local,AuthenticationMethod:auth};if(auth==="SharedSecret"&&isNonEmptyString(policy.vpnSharedSecret))ike.SharedSecret=policy.vpnSharedSecret;if(isNonEmptyString(policy.vpnAuthName))ike.AuthName=policy.vpnAuthName;if(isNonEmptyString(policy.vpnAuthPassword))ike.AuthPassword=policy.vpnAuthPassword;payloads.push(payload("com.apple.vpn.managed","com.configurationplatform.vpn."+uuid(),policy.vpnName||name+" VPN",{VPNType:"IKEv2",UserDefinedName:policy.vpnName||name+" VPN",IKEv2:ike}));}
+      else warnings.push({code:"APPLE_IKEV2_REQUIRED_FIELDS",message:"IKEv2 ต้องมี RemoteAddress, RemoteIdentifier และ LocalIdentifier"});
+    }
   }
   if(policy.applePayloads?.globalProxy){
     warnings.push({code:"APPLE_GLOBAL_PROXY_SUPERVISION",message:"Global HTTP Proxy เป็น payload ที่ Apple กำหนดให้ติดตั้งบนอุปกรณ์ที่มี supervision"});
