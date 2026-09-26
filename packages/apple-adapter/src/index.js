@@ -49,8 +49,8 @@ function webClipIcon(policy){
 }
 
 export function getAppleSigningRequirement(targetId,options={}){
-  if(targetId==="apple-dns-declaration") return {required:false,reason:"Declarative DNS is a declaration model; certificate identity is only needed when the selected DNS service explicitly requires one."};
-  if(targetId==="apple-mobileconfig-legacy") return {required:false,reason:"Legacy DNSSettings can be manually installed without profile signing; certificate identity is a separate DNS resolver authentication concern."};
+  if(targetId==="apple-dns-declaration") return {required:false,reason:"Declarative DNS is a declaration model; certificate identity is only needed when the selected DNS service explicitly require[...]
+  if(targetId==="apple-mobileconfig-legacy") return {required:false,reason:"Legacy DNSSettings can be manually installed without profile signing; certificate identity is a separate DNS resolver au[...]
   if(targetId==="apple-mobileconfig"){
     const mode=String(options.installMode||"manual").toLowerCase();
     if(mode==="mdm"||mode==="enrollment"||options.requireSigning===true){
@@ -70,15 +70,15 @@ export function compileAppleMobileConfig(input={}){
   if(signing.required && !isNonEmptyString(policy.signingCertificate)) warnings.push({code:"APPLE_PROFILE_SIGNING_REQUIRED",message:signing.reason});
 
   const dnsEnabled=policy.applePayloads?.dns!==false;
-  const dnsEntries=dnsEnabled?(Array.isArray(policy.dnsPayloads)&&policy.dnsPayloads.length?policy.dnsPayloads:(Array.isArray(policy.dnsServers)&&policy.dnsServers.length?[{servers:policy.dnsServers,protocol:policy.dnsProtocol,serverUrl:policy.dnsServerUrl,serverName:policy.dnsServerName,domains:policy.dnsDomains}]:[])):[];
+  const dnsEntries=dnsEnabled?(Array.isArray(policy.dnsPayloads)&&policy.dnsPayloads.length?policy.dnsPayloads:(Array.isArray(policy.dnsServers)&&policy.dnsServers.length?[{servers:policy.dnsServe[...]
   for(const entry of dnsEntries){
     const servers=Array.isArray(entry.servers)?entry.servers.filter(isNonEmptyString):[]; if(!servers.length) continue;
     const protocol=String(entry.protocol||policy.dnsProtocol||"").toUpperCase(), dns={DNSProtocol:protocol,ServerAddresses:servers}; let valid=true;
     if(protocol!=="HTTPS"&&protocol!=="TLS"){valid=false;warnings.push({code:"APPLE_DNS_PROTOCOL_REQUIRED",message:"DNSProtocol ต้องเป็น HTTPS หรือ TLS"});}
-    if(protocol==="HTTPS"){const u=entry.serverUrl||policy.dnsServerUrl;if(validHttpsUrl(u))dns.ServerURL=String(u).trim();else{valid=false;warnings.push({code:"APPLE_DNS_SERVER_URL_REQUIRED",message:"DNS-over-HTTPS ต้องมี ServerURL แบบ https://"});}}
-    if(protocol==="TLS"){const n=entry.serverName||policy.dnsServerName;if(isNonEmptyString(n))dns.ServerName=String(n).trim();else{valid=false;warnings.push({code:"APPLE_DNS_SERVER_NAME_REQUIRED",message:"DNS-over-TLS ต้องมี ServerName"});}}
+    if(protocol==="HTTPS"){const u=entry.serverUrl||policy.dnsServerUrl;if(validHttpsUrl(u))dns.ServerURL=String(u).trim();else{valid=false;warnings.push({code:"APPLE_DNS_SERVER_URL_REQUIRED",mess[...]
+    if(protocol==="TLS"){const n=entry.serverName||policy.dnsServerName;if(isNonEmptyString(n))dns.ServerName=String(n).trim();else{valid=false;warnings.push({code:"APPLE_DNS_SERVER_NAME_REQUIRED"[...]
     if(Array.isArray(entry.domains)&&entry.domains.length)dns.SupplementalMatchDomains=entry.domains.filter(isNonEmptyString);
-    if(valid)payloads.push(payload("com.apple.dnsSettings.managed","com.configurationplatform.dns."+(isNonEmptyString(entry.id)?entry.id:uuid()),entry.name||name+" DNS Settings",{DNSSettings:dns}));
+    if(valid)payloads.push(payload("com.apple.dnsSettings.managed","com.configurationplatform.dns."+(isNonEmptyString(entry.id)?entry.id:uuid()),entry.name||name+" DNS Settings",{DNSSettings:dns})[...]
   }
 
   if((policy.applePayloads?.webclip!==false)&&isNonEmptyString(policy.webAppUrl)){
@@ -91,32 +91,25 @@ export function compileAppleMobileConfig(input={}){
     };
     const icon=webClipIcon(policy);
     if(icon) warnings.push({code:"APPLE_WEBCLIP_ICON_REQUIRES_DATA",message:"Apple Web Clip กำหนด Icon เป็น PNG data จึงไม่ใส่ URL เป็น Icon"});
-    else if(policy.webAppIconUrl||policy.webAppIconData) warnings.push({code:"APPLE_WEBCLIP_ICON_URL_INVALID",message:"Web Clip Icon ต้องเป็น URL แบบ HTTPS; ระบบจะสร้าง Web Clip โดยไม่ใส่ Icon หาก URL ไม่ถูกต้อง"});
+    else if(policy.webAppIconUrl||policy.webAppIconData) warnings.push({code:"APPLE_WEBCLIP_ICON_URL_INVALID",message:"Web Clip Icon ต้องเป็น URL แบบ HTTPS; ระบบจ··[...]
     payloads.push(payload("com.apple.webClip.managed","com.configurationplatform.webclip."+uuid(),name+" Web App",webClip));
-  }
-
-  if(policy.vpn){
-    const vpnProtocol=String(policy.vpnProtocol||"").toLowerCase();
-    if(vpnProtocol==="ikev2"||vpnProtocol==="ipsec"||vpnProtocol==="l2tp"){
-      warnings.push({code:"APPLE_VPN_CREDENTIALS_REQUIRED",message:"VPN payload ต้องมีข้อมูลเซิร์ฟเวอร์และการยืนยันตัวตนที่ครบถ้วนก่อนสร้าง payload"});
-    }else if(vpnProtocol){
-      warnings.push({code:"APPLE_VPN_EXTENSION_OR_APP_REQUIRED",message:"VPN ประเภทนี้อาจต้องใช้แอปหรือ Network Extension ของผู้ให้บริการ"});
-    }
   }
 
   if(policy.applePayloads?.wifi){
     const ssid=isNonEmptyString(policy.wifiSSID)?policy.wifiSSID.trim():"";
-    if(ssid){const wifi={SSID_STR:ssid,AutoJoin:policy.wifiAutoJoin!==false,EncryptionType:policy.wifiEncryptionType||"Any"};if(isNonEmptyString(policy.wifiPassword))wifi.Password=policy.wifiPassword;if(typeof policy.wifiHidden==="boolean")wifi.HIDDEN_NETWORK=policy.wifiHidden;payloads.push(payload("com.apple.wifi.managed","com.configurationplatform.wifi."+uuid(),policy.wifiName||name+" Wi-Fi",wifi));}
+    if(ssid){const wifi={SSID_STR:ssid,AutoJoin:policy.wifiAutoJoin!==false,EncryptionType:policy.wifiEncryptionType||"Any"};if(isNonEmptyString(policy.wifiPassword))wifi.Password=policy.wifiPass[...]
     else warnings.push({code:"APPLE_WIFI_SSID_REQUIRED",message:"Wi-Fi payload ต้องมี SSID"});
   }
+
   if(policy.applePayloads?.vpn){
-    const remote=String(policy.vpnRemoteAddress||"").trim(),local=String(policy.vpnLocalIdentifier||"").trim(),remoteId=String(policy.vpnRemoteIdentifier||"").trim(),auth=String(policy.vpnAuthenticationMethod||"SharedSecret");
-    if(remote&&local&&remoteId){const ike={RemoteAddress:remote,RemoteIdentifier:remoteId,LocalIdentifier:local,AuthenticationMethod:auth};if(auth==="SharedSecret"&&isNonEmptyString(policy.vpnSharedSecret))ike.SharedSecret=policy.vpnSharedSecret;if(isNonEmptyString(policy.vpnAuthName))ike.AuthName=policy.vpnAuthName;if(isNonEmptyString(policy.vpnAuthPassword))ike.AuthPassword=policy.vpnAuthPassword;payloads.push(payload("com.apple.vpn.managed","com.configurationplatform.vpn."+uuid(),policy.vpnName||name+" VPN",{VPNType:"IKEv2",UserDefinedName:policy.vpnName||name+" VPN",IKEv2:ike}));}
+    const remote=String(policy.vpnRemoteAddress||"").trim(),local=String(policy.vpnLocalIdentifier||"").trim(),remoteId=String(policy.vpnRemoteIdentifier||"").trim(),auth=String(policy.vpnAuthent[...]
+    if(remote&&local&&remoteId){const ike={RemoteAddress:remote,RemoteIdentifier:remoteId,LocalIdentifier:local,AuthenticationMethod:auth};if(auth==="SharedSecret"&&isNonEmptyString(policy.vpnSha[...]
     else warnings.push({code:"APPLE_IKEV2_REQUIRED_FIELDS",message:"IKEv2 ต้องมี RemoteAddress, RemoteIdentifier และ LocalIdentifier"});
   }
+
   if(policy.applePayloads?.globalProxy){
-    warnings.push({code:"APPLE_GLOBAL_PROXY_SUPERVISION",message:"Global HTTP Proxy เป็น payload ที่ Apple กำหนดให้ติดตั้งบนอุปกรณ์ที่มี supervision"});
-    const m=String(policy.proxyServer||"").trim().match(/^([^:]+):(\d{1,5})$/);if(m&&Number(m[2])>=1&&Number(m[2])<=65535)payloads.push(payload("com.apple.proxy.http.global","com.configurationplatform.globalproxy."+uuid(),name+" Global HTTP Proxy",{ProxyType:"Manual",ProxyServer:m[1],ProxyServerPort:Number(m[2]),ProxyCaptiveLoginAllowed:false}));else warnings.push({code:"APPLE_GLOBAL_PROXY_FORMAT",message:"Global HTTP Proxy ใช้รูปแบบ host:port และ port 1-65535"});
+    warnings.push({code:"APPLE_GLOBAL_PROXY_SUPERVISION",message:"Global HTTP Proxy เป็น payload ที่ Apple กำหนดให้ติดตั้งบนอุปกรณ์··[...]
+    const m=String(policy.proxyServer||"").trim().match(/^([^:]+):(\d{1,5})$/);if(m&&Number(m[2])>=1&&Number(m[2])<=65535)payloads.push(payload("com.apple.proxy.http.global","com.configurationpla[...]
   }
 
   const profile=payload("Configuration","com.configurationplatform.profile."+uuid(),name,{
@@ -125,7 +118,7 @@ export function compileAppleMobileConfig(input={}){
   });
 
   return {
-    content:`<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple Inc.//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n${plistValue(profile)}\n</plist>\n`,
+    content:`<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple Inc.//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n${plistVal[...]
     warnings,
     payloadCount:payloads.length,
     signed:false
@@ -154,7 +147,7 @@ export function mapAppleLegacyDnsSettings(profile={}){
 export function compileAppleDeclarativeDns(input={}){
   const policy=input?.policy??input;
   const name=isNonEmptyString(policy.name)?policy.name.trim():"Network Configuration";
-  const profile={protocol:policy.dnsProtocol,servers:policy.dnsServers,endpoint:policy.dnsServerUrl,serverName:policy.dnsServerName,domains:policy.dnsDomains,allowFailover:policy.dnsAllowFailover,identityAssetReference:policy.identityAssetReference};
+  const profile={protocol:policy.dnsProtocol,servers:policy.dnsServers,endpoint:policy.dnsServerUrl,serverName:policy.dnsServerName,domains:policy.dnsDomains,allowFailover:policy.dnsAllowFailover[...]
   const dns=mapAppleDnsSettings(profile,"declarative");
 
   return {
