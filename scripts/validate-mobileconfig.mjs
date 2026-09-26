@@ -35,6 +35,7 @@ const python = [
   "import plistlib,sys; p=plistlib.load(open(sys.argv[1],'rb'))",
   "assert p['PayloadType']=='Configuration'",
   "payloads=p['PayloadContent']",
+  "print('DEBUG payloadCount=',len(payloads),'types=',[x['PayloadType'] for x in payloads])",
   "assert len(payloads)==7",
   "dns=[x for x in payloads if x['PayloadType']=='com.apple.dnsSettings.managed']",
   "assert len(dns)==3",
