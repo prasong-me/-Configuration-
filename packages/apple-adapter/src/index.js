@@ -102,9 +102,12 @@ export function compileAppleMobileConfig(input={}){
   }
 
   if(policy.applePayloads?.vpn){
-    const remote=String(policy.vpnRemoteAddress||"").trim(),local=String(policy.vpnLocalIdentifier||"").trim(),remoteId=String(policy.vpnRemoteIdentifier||"").trim(),auth=String(policy.vpnAuthent[...]
-    if(remote&&local&&remoteId){const ike={RemoteAddress:remote,RemoteIdentifier:remoteId,LocalIdentifier:local,AuthenticationMethod:auth};if(auth==="SharedSecret"&&isNonEmptyString(policy.vpnSha[...]
-    else warnings.push({code:"APPLE_IKEV2_REQUIRED_FIELDS",message:"IKEv2 ต้องมี RemoteAddress, RemoteIdentifier และ LocalIdentifier"});
+    const remote=String(policy.vpnRemoteAddress||"").trim(),local=String(policy.vpnLocalIdentifier||"").trim(),remoteId=String(policy.vpnRemoteIdentifier||"").trim(),auth=String(policy.vpnAuthenticationMethod||"SharedSecret").trim();
+    if(remote&&local&&remoteId){
+      const ike={RemoteAddress:remote,RemoteIdentifier:remoteId,LocalIdentifier:local,AuthenticationMethod:auth};
+      if(auth==="SharedSecret"&&isNonEmptyString(policy.vpnSharedSecret)) ike.SharedSecret=policy.vpnSharedSecret;
+      payloads.push(payload("com.apple.vpn.managed","com.configurationplatform.vpn."+uuid(),policy.vpnName||"IKEv2 VPN",{VPNType:"IKEv2",UserDefinedName:policy.vpnName||"IKEv2 VPN",IKEv2:ike}));
+    } else warnings.push({code:"APPLE_IKEV2_REQUIRED_FIELDS",message:"IKEv2 ต้องมี RemoteAddress, RemoteIdentifier และ LocalIdentifier"});
   }
 
   if(policy.applePayloads?.globalProxy){
