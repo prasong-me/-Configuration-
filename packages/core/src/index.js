@@ -51,6 +51,17 @@ export function normalizePolicy(input) {
   if(typeof policy.proxyServer==="string"&&policy.proxyServer.trim()){
     normalized.proxyServer=policy.proxyServer.trim();
   }
+  if(Array.isArray(policy.blocklists)){
+    normalized.blocklists=policy.blocklists
+      .filter(item=>item&&typeof item==="object"&&typeof item.source==="string"&&item.source.trim())
+      .map(item=>({
+        id:typeof item.id==="string"&&item.id.trim()?item.id.trim():"",
+        provider:typeof item.provider==="string"?item.provider.trim():"",
+        source:item.source.trim(),
+        format:typeof item.format==="string"?item.format.trim():"",
+        enabled:item.enabled!==false
+      }));
+  }
   if(Array.isArray(policy.rules)) normalized.rules=structuredClone(policy.rules);
   if(typeof policy.finalPolicy==="string"&&policy.finalPolicy.trim()){
     normalized.finalPolicy=policy.finalPolicy.trim();
