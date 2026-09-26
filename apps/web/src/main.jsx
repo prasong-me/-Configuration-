@@ -22,8 +22,12 @@ function App(){
   const [dnsServers,setDnsServers]=useState("1.1.1.1\n1.0.0.1"); const [dnsProtocol,setDnsProtocol]=useState("HTTPS");
   const [proxyServer,setProxyServer]=useState(""); const [dnsServerUrl,setDnsServerUrl]=useState(""); const [dnsServerName,setDnsServerName]=useState("");
   const [dnsPreset,setDnsPreset]=useState(""); const [target,setTarget]=useState("apple-mobileconfig"); const [message,setMessage]=useState("");
+  const [applePayloads,setApplePayloads]=useState({dns:true,webclip:true,wifi:false,vpn:false,globalProxy:false});
+  const [wifiSSID,setWifiSSID]=useState(""); const [wifiPassword,setWifiPassword]=useState(""); const [wifiHidden,setWifiHidden]=useState(false);
+  const [vpnRemoteAddress,setVpnRemoteAddress]=useState(""); const [vpnRemoteIdentifier,setVpnRemoteIdentifier]=useState(""); const [vpnLocalIdentifier,setVpnLocalIdentifier]=useState(""); const [vpnSharedSecret,setVpnSharedSecret]=useState("");
 
-  const policy=useMemo(()=>({version:"0.4",policy:{name,vpn,dns,routing:vpn,blocking:{malware,trackers,separateFromResolver:true},dnsServers:dns?dnsServers.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean):[],proxyServer:proxyServer.trim(),dnsProtocol,dnsServerUrl:dnsServerUrl.trim(),dnsServerName:dnsServerName.trim(),webAppUrl:window.location.href.split("#")[0],dnsDomains:[],rules:[],finalPolicy:"DIRECT",bypassSystem:true}}),[name,vpn,dns,dnsProtocol,malware,trackers,dnsServers,proxyServer,dnsServerUrl,dnsServerName]);
+  const policy=useMemo(()=>({version:"0.4",policy:{name,vpn,dns,routing:vpn,blocking:{malware,trackers,separateFromResolver:true},dnsServers:dns?dnsServers.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean):[],proxyServer:proxyServer.trim(),dnsProtocol,dnsServerUrl:dnsServerUrl.trim(),dnsServerName:dnsServerName.trim(),webAppUrl:window.location.href.split("#")[0],dnsDomains:[],rules:[],finalPolicy:"DIRECT",bypassSystem:true,applePayloads,
+wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret}}),[name,vpn,dns,dnsProtocol,malware,trackers,dnsServers,proxyServer,dnsServerUrl,dnsServerName,applePayloads,wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret]);
 
   const policyForExport=redact(policy); const selectedFormat=exportFormats.find(x=>x.id===target)||exportFormats[0];
   const artifact=getExportArtifact(selectedFormat.id,policyForExport); const warnings=getExportWarnings(selectedFormat.id,policyForExport);
@@ -43,6 +47,26 @@ function App(){
       <label>{tr.dns}<textarea value={dnsServers} onChange={e=>setDnsServers(e.target.value)} rows="2" placeholder="1.1.1.1&#10;1.0.0.1"/><small>{tr.dnsHint}</small></label>
       <label>DNS transport<select value={dnsProtocol} onChange={e=>setDnsProtocol(e.target.value)}><option value="HTTPS">DNS-over-HTTPS (HTTPS)</option><option value="TLS">DNS-over-TLS (TLS)</option></select></label>
       <label>{tr.dnsPreset}<select value={dnsPreset} onChange={e=>{const id=e.target.value;setDnsPreset(id);const preset=recommendedDnsServices.find(x=>x.id===id);if(!preset)return;setDnsServers([...preset.ipv4,...preset.ipv6].join("\n"));if(preset.doh){setDnsProtocol("HTTPS");setDnsServerUrl(preset.doh)}else if(preset.dot){setDnsProtocol("TLS");setDnsServerName(preset.dot);setDnsServerUrl("")}}}><option value="">{tr.chooseDns}</option>{recommendedDnsServices.map(x=><option key={x.id} value={x.id}>{x.provider} · {x.description}</option>)}</select></label>
+      <details open><summary>Apple Payloads ในโปรไฟล์เดียว</summary>
+        <div className="advanced-grid">
+          <label className="check"><input type="checkbox" checked={applePayloads.dns} onChange={e=>setApplePayloads(x=>({...x,dns:e.target.checked}))}/>Encrypted DNS payload</label>
+          <label className="check"><input type="checkbox" checked={applePayloads.webclip} onChange={e=>setApplePayloads(x=>({...x,webclip:e.target.checked}))}/>Web Clip / Web App payload</label>
+          <label className="check"><input type="checkbox" checked={applePayloads.wifi} onChange={e=>setApplePayloads(x=>({...x,wifi:e.target.checked}))}/>Wi-Fi payload</label>
+          <label className="check"><input type="checkbox" checked={applePayloads.vpn} onChange={e=>setApplePayloads(x=>({...x,vpn:e.target.checked}))}/>IKEv2 VPN payload</label>
+          <label className="check"><input type="checkbox" checked={applePayloads.globalProxy} onChange={e=>setApplePayloads(x=>({...x,globalProxy:e.target.checked}))}/>Global HTTP Proxy payload</label>
+        </div>
+        {applePayloads.wifi&&<div className="advanced-grid">
+          <label>Wi-Fi SSID<input value={wifiSSID} onChange={e=>setWifiSSID(e.target.value)} placeholder="MyWiFi"/></label>
+          <label>Wi-Fi Password<input type="password" value={wifiPassword} onChange={e=>setWifiPassword(e.target.value)} placeholder="••••••••"/></label>
+          <label className="check"><input type="checkbox" checked={wifiHidden} onChange={e=>setWifiHidden(e.target.checked)}/>Hidden Network</label>
+        </div>}
+        {applePayloads.vpn&&<div className="advanced-grid">
+          <label>VPN Remote Address<input value={vpnRemoteAddress} onChange={e=>setVpnRemoteAddress(e.target.value)} placeholder="vpn.example.com"/></label>
+          <label>VPN Remote Identifier<input value={vpnRemoteIdentifier} onChange={e=>setVpnRemoteIdentifier(e.target.value)} placeholder="vpn.example.com"/></label>
+          <label>VPN Local Identifier<input value={vpnLocalIdentifier} onChange={e=>setVpnLocalIdentifier(e.target.value)} placeholder="user@example.com"/></label>
+          <label>VPN Shared Secret<input type="password" value={vpnSharedSecret} onChange={e=>setVpnSharedSecret(e.target.value)} placeholder="Shared Secret"/></label>
+        </div>}
+      </details>
       <details><summary>{tr.advanced}</summary><div className="advanced-grid"><label>{tr.proxy}<input value={proxyServer} onChange={e=>setProxyServer(e.target.value)} placeholder="proxy.example.com:8080"/></label><label>Encrypted DNS URL<input value={dnsServerUrl} onChange={e=>setDnsServerUrl(e.target.value)} placeholder="https://dns.example.com/dns-query"/></label><label>DNS-over-TLS Server Name<input value={dnsServerName} onChange={e=>setDnsServerName(e.target.value)} placeholder="dns.quad9.net"/></label></div><label className="check"><input type="checkbox" checked={vpn} onChange={e=>setVpn(e.target.checked)}/>{tr.vpn}</label><label className="check"><input type="checkbox" checked={malware} onChange={e=>setMalware(e.target.checked)}/>{tr.malware}</label><label className="check"><input type="checkbox" checked={trackers} onChange={e=>setTrackers(e.target.checked)}/>{tr.trackers}</label></details>
     </section>
     <section className="card" id="destination"><div className="section-title"><div><span className="step">2</span><div><h2>{tr.step2.replace(/^2\. /,"")}</h2><p>{tr.targetHint}</p></div></div></div><div className="target-grid">{primaryFormats.map(format=><button key={format.id} type="button" className={target===format.id?"target-card selected":"target-card"} onClick={()=>selectTarget(format.id)}><strong>{format.label}</strong><span>{format.extension}</span><small>{format.description}</small></button>)}</div></section>
