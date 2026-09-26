@@ -9,9 +9,9 @@ const policy = {
   name: "MobileConfig Validation",
   dns: true,
   dnsProfiles: [
-    {id:"p1",name:"Privacy",protocol:"DoH",servers:["1.1.1.1","1.0.0.1"],endpoint:"https://cloudflare-dns.com/dns-query",enabled:true},
-    {id:"p2",name:"Security",protocol:"DoH",servers:["9.9.9.9","149.112.112.112"],endpoint:"https://dns.quad9.net/dns-query",enabled:true},
-    {id:"p3",name:"Backup",protocol:"DoH",servers:["8.8.8.8","8.8.4.4"],endpoint:"https://dns.google/dns-query",enabled:true}
+    {id:"p1",name:"Privacy",protocol:"HTTPS",servers:["1.1.1.1","1.0.0.1"],endpoint:"https://cloudflare-dns.com/dns-query",enabled:true},
+    {id:"p2",name:"Security",protocol:"HTTPS",servers:["9.9.9.9","149.112.112.112"],endpoint:"https://dns.quad9.net/dns-query",enabled:true},
+    {id:"p3",name:"Backup",protocol:"HTTPS",servers:["8.8.8.8","8.8.4.4"],endpoint:"https://dns.google/dns-query",enabled:true}
   ],
   applePayloads:{dns:true,webclip:true,wifi:true,vpn:true,globalProxy:true},
   webAppUrl:"https://example.com/",
