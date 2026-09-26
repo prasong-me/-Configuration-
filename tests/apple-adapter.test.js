@@ -24,3 +24,20 @@ test("Apple declarative DNS uses the current declaration type",()=>{
   assert.equal(result.Type,"com.apple.configuration.network.dns-settings");
   assert.equal(result.Payload.DNSSettings.ServerURL,"https://dns.example/dns-query");
 });
+
+test("Apple MobileConfig can emit multiple payload types in one profile",()=>{
+  const result=compileAppleMobileConfig({policy:{
+    name:"Multi Payload",
+    dnsServers:["1.1.1.1"],
+    dnsProtocol:"HTTPS",
+    dnsServerUrl:"https://dns.example/dns-query",
+    applePayloads:{dns:true,webclip:true,wifi:true,vpn:false,globalProxy:false},
+    webAppUrl:"https://example.com",
+    wifiSSID:"TestWiFi",
+    wifiPassword:"password"
+  }});
+  assert.match(result.content,/com\.apple\.dnsSettings\.managed/);
+  assert.match(result.content,/com\.apple\.webClip\.managed/);
+  assert.match(result.content,/com\.apple\.wifi\.managed/);
+  assert.equal(result.payloadCount,3);
+});
