@@ -192,32 +192,58 @@ export const exportFormats = [
   }
 ];
 
-export function getExportArtifact(targetId,policyInput={}) {
-  const policy=policyInput?.policy??policyInput;
-  if(targetId==="apple-mobileconfig") {
-    const applePolicy={...policyInput,policy:{...(policyInput?.policy??policyInput),dnsPayloads:getDnsProfiles(policy).map(profile=>({
-      id:profile.id,name:profile.name,servers:profile.servers,protocol:profile.protocol,serverUrl:profile.endpoint,serverName:profile.serverName,domains:profile.domains
-    }))}};
-    return compileAppleMobileConfig(applePolicy).content;
-  }
-  if(targetId==="apple-dns-declaration") return JSON.stringify(compileAppleDeclarativeDns(policyInput),null,2);
-  if(targetId==="surge") return exportSurge(policyInput);
-  if(targetId==="wireguard") return "[Interface]\nDNS = "+(policy.dnsServers||[]).join(", ")+"\n\n# Configuration Platform Web App\n# "+(policy.webAppUrl||"")+"\n";
-  if(targetId==="mihomo"||targetId==="stash") return "# Configuration Platform Web App: "+(policy.webAppUrl||"")+"\n"+JSON.stringify({dns:{nameserver:getDnsServers(policy),profiles:getDnsProfiles(policy)},rules:policy.rules||[]},null,2);
-  if(targetId==="shadowrocket"){
-  const rules=(policy.rules||[]).map(r=>[r.match||r.domain||r.host,r.action||policy.routingAction||"DIRECT"].filter(Boolean).join(", ")).join("\\n");
-  return "[General]\\ndns-server = "+getDnsServers(policy).join(", ")+"\\n\\n[Rule]\\n"+rules+"\\n\\n";
+function normalizeTargetPolicy(policy={}) {
+  const profiles=getDnsProfiles(policy);
+  const dnsServers=getDnsServers(policy);
+  const rules=(policy.rules||[]).map(r=>{
+    if(r?.type&&r?.value&&r?.policy) return r;
+    const raw=String(r?.match||r?.domain||r?.host||"").trim();
+    const suffix=raw.match(/^DOMAIN-SUFFIX,?(.+)$/i);
+    const domain=raw.match(/^DOMAIN,?(.+)$/i);
+    return {
+      type:suffix?"DOMAIN-SUFFIX":domain?"DOMAIN": "DOMAIN",
+      value:(suffix?.[1]||domain?.[1]||raw).trim(),
+      policy:String(r?.action||policy.routingAction||"DIRECT")
+    };
+  }).filter(r=>r.value);
+  return {...policy,dnsProfiles:profiles,dnsServers,rules};
 }
+
+function applePolicyFor(policyInput={},policy={}) {
+  return {...policyInput,policy:{
+    ...policy,
+    dnsPayloads:getDnsProfiles(policy).map(profile=>({
+      id:profile.id,name:profile.name,servers:profile.servers,
+      protocol:String(profile.protocol||"").toUpperCase().replace("DOH","HTTPS").replace("DOT","TLS"),
+      serverUrl:profile.endpoint,serverName:profile.serverName,domains:profile.domains
+    }))
+  }};
+}
+
+export function getExportArtifact(targetId,policyInput={}) {
+  const policy=normalizeTargetPolicy(policyInput?.policy??policyInput);
+  if(targetId==="apple-mobileconfig") return compileAppleMobileConfig(applePolicyFor(policyInput,policy)).content;
+  if(targetId==="apple-dns-declaration") return JSON.stringify(compileAppleDeclarativeDns(policy),null,2);
+  if(targetId==="surge") return compileSurge(policy).content;
+  if(targetId==="wireguard") return "[Interface]\nDNS = "+policy.dnsServers.join(", ")+"\n\n# Configuration Platform Web App\n# "+(policy.webAppUrl||"")+"\n";
+  if(targetId==="mihomo"||targetId==="stash") return "# Configuration Platform Web App: "+(policy.webAppUrl||"")+"\n"+JSON.stringify({dns:{nameserver:policy.dnsServers,profiles:policy.dnsProfiles},rules:policy.rules||[]},null,2);
+  if(targetId==="shadowrocket"){
+    const rules=(policy.rules||[]).map(r=>[r.type==="DOMAIN-SUFFIX"?"DOMAIN-SUFFIX":r.type,r.value,r.policy].join(", ")).join("\n");
+    return "[General]\ndns-server = "+policy.dnsServers.join(", ")+"\n\n[Rule]\n"+rules+"\n\n";
+  }
   if(targetId==="loon") return "[General]\n# Configuration Platform Web App: "+(policy.webAppUrl||"")+"\n";
   if(targetId==="quantumult-x"){
-  const rules=(policy.rules||[]).map(r=>[r.match||r.domain||r.host,r.action||policy.routingAction||"direct"].filter(Boolean).join(", ")).join("\\n");
-  return "[dns]\\nserver = "+getDnsServers(policy).join(", ")+"\\n\\n[filter_local]\\n"+rules+"\\n";
-}
+    const rules=(policy.rules||[]).map(r=>[r.type,r.value,r.policy.toLowerCase()].join(", ")).join("\n");
+    return "[dns]\nserver = "+policy.dnsServers.join(", ")+"\n\n[filter_local]\n"+rules+"\n";
+  }
   return "";
 }
 
 export function getExportWarnings(targetId,policyInput={}) {
-  if(targetId==="apple-mobileconfig") return compileAppleMobileConfig(policyInput).warnings;
+  if(targetId==="apple-mobileconfig") {
+    const policy=normalizeTargetPolicy(policyInput?.policy??policyInput);
+    return compileAppleMobileConfig(applePolicyFor(policyInput,policy)).warnings;
+  }
   return [];
 }
 
