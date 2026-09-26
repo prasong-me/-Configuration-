@@ -1,13 +1,13 @@
 import { analyzePolicy } from "../../threat/src/index.js";
 import { redact } from "../../opsec/src/index.js";
 import { CapabilityState } from "../../capabilities/src/index.js";
-import { diagnostic, DiagnosticLevel, hasBlockingDiagnostics } from "../../diagnostics/src/index.js";
+import { diagnostic, DiagnosticLevel, CompatibilityLevel, compatibilityDiagnostic, hasBlockingDiagnostics } from "../../diagnostics/src/index.js";
 import { validatePolicy } from "../../validator/src/index.js";
 import { getTargetManifest } from "../../targets/src/index.js";
 import { normalizeDnsPipeline } from "./dns-pipeline.js";
 import { DnsController, createDnsController } from "./dns-controller.js";
 
-export { CapabilityState, DiagnosticLevel, diagnostic, hasBlockingDiagnostics, redact };
+export { CapabilityState, DiagnosticLevel, CompatibilityLevel, diagnostic, compatibilityDiagnostic, hasBlockingDiagnostics, redact };
 export { DnsStageResult, normalizeDnsPipeline, processDnsQuery } from "./dns-pipeline.js";
 export { DnsController, createDnsController } from "./dns-controller.js";
 
@@ -119,11 +119,22 @@ export function compatibilityReport(policyInput,targetId){
     }
   }
 
+  const compatibility=Object.fromEntries(Object.entries(capabilities).map(([feature,value])=>{
+    const level=value.state==="NOT_REQUESTED"
+      ? CompatibilityLevel.OK
+      : value.state===CapabilityState.UNSUPPORTED
+        ? CompatibilityLevel.UNSUPPORTED
+        : value.state===CapabilityState.UNKNOWN
+          ? CompatibilityLevel.WARNING
+          : CompatibilityLevel.OK;
+    return [feature,compatibilityDiagnostic(level,`CAPABILITY_${level}`,`${feature}: ${level}`,{target:targetId,feature,state:value.state,requested:value.requested})];
+  }));
   return {
     target:targetId,
     targetVersion:manifest.version,
     policy,
     capabilities,
+    compatibility,
     diagnostics,
     exportable:!hasBlockingDiagnostics(diagnostics)
   };
