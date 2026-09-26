@@ -29,7 +29,7 @@ function App(){
   const policy=useMemo(()=>({version:"0.4",policy:{name,vpn,dns,routing:vpn,blocking:{malware,trackers,separateFromResolver:true},dnsServers:dns?dnsServers.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean):[],proxyServer:proxyServer.trim(),dnsProtocol,dnsServerUrl:dnsServerUrl.trim(),dnsServerName:dnsServerName.trim(),webAppUrl:window.location.href.split("#")[0],dnsDomains:[],rules:[],finalPolicy:"DIRECT",bypassSystem:true,applePayloads,
 wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret}}),[name,vpn,dns,dnsProtocol,malware,trackers,dnsServers,proxyServer,dnsServerUrl,dnsServerName,applePayloads,wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret]);
 
-  const policyForExport=redact(policy); const selectedFormat=exportFormats.find(x=>x.id===target)||exportFormats[0];
+  const policyForExport=policy; const selectedFormat=exportFormats.find(x=>x.id===target)||exportFormats[0];
   const artifact=getExportArtifact(selectedFormat.id,policyForExport); const warnings=getExportWarnings(selectedFormat.id,policyForExport);
   const report=useMemo(()=>compatibilityReport(policy,target),[policy,target]);
   const blocking=report.diagnostics.filter(x=>(x.level==="CRITICAL"||x.level==="HIGH")&&x.code!=="CAPABILITY_UNKNOWN");
