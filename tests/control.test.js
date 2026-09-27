@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { defaultControlRegistry } from "../packages/control/src/registry.js";
 import {
   ControlState,
   createControlRequest,
@@ -62,6 +63,20 @@ test("partial clarification keeps the request blocked", () => {
   assert.equal(result.state, ControlState.NEEDS_CLARIFICATION);
   assert.ok(result.analysis.missing.includes("operation"));
   assert.ok(result.analysis.missing.includes("format"));
+});
+
+test("control registry resolves Apple formats without embedding adapter logic", () => {
+  assert.deepEqual(defaultControlRegistry.resolve("apple", "mobileconfig"), {
+    target: "apple",
+    format: "mobileconfig",
+    targetId: "apple-mobileconfig",
+  });
+  assert.deepEqual(defaultControlRegistry.resolve("apple", "dns-declaration"), {
+    target: "apple",
+    format: "dns-declaration",
+    targetId: "apple-dns-declaration",
+  });
+  assert.equal(defaultControlRegistry.resolve("apple", "unknown"), null);
 });
 
 test("resolved request creates a target-neutral execution plan", () => {
