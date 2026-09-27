@@ -17,8 +17,14 @@ export class SerializerRegistry {
 
   /** @param {Serializer} serializer */
   register(serializer) {
-    if (!serializer || !OUTPUT_FORMATS.has(serializer.format)) {
-      throw new TypeError('Serializer must define a supported output format.');
+    if (
+      !serializer ||
+      !OUTPUT_FORMATS.has(serializer.format) ||
+      typeof serializer.serialize !== 'function'
+    ) {
+      throw new TypeError(
+        'Serializer must define a supported output format and serialize function.',
+      );
     }
     if (this.serializers.has(serializer.format)) {
       throw new Error(`Serializer for format '${serializer.format}' is already registered.`);
