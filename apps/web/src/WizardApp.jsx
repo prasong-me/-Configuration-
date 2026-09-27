@@ -3,6 +3,7 @@ import {compatibilityReport} from "../../../packages/core/src/index.js";
 import {exportFormats,getExportArtifact,getExportWarnings} from "../../../packages/targets/src/exporters.js";
 import {recommendedDnsServices} from "../../../packages/catalog/src/recommended-dns.js";
 import {configurationWizard} from "./wizard.js";
+import {configurationWizardSteps} from "./wizard-steps.js";
 
 const primaryTargets=["apple-mobileconfig","surge","shadowrocket","quantumult-x","wireguard","loon","stash","mihomo"];
 
@@ -192,7 +193,7 @@ export function WizardApp(){
               <label>บทบาท<select value={profile.role} onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,role:e.target.value}:p))}><option value="resolver">Resolver</option><option value="security">Security / Threat</option><option value="privacy">Privacy</option><option value="custom">Custom</option></select></label>
             </div>
             <label>DNS Servers<textarea value={profile.servers.join("\n")} rows="2" onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,servers:e.target.value.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean)}:p))}/></label>
-            <label>Endpoint<input value={profile.endpoint} onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,endpoint:e.target.value}:p)} placeholder="https://dns.example/dns-query"/></label>
+            <label>Endpoint<input value={profile.endpoint} onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,endpoint:e.target.value}:p))} placeholder="https://dns.example/dns-query"/></label>
             <label className="check"><input type="checkbox" checked={profile.enabled} onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,enabled:e.target.checked}:p))}/>เปิดใช้ชุดนี้</label>
           </div>)}
           <div className="advanced-grid">
