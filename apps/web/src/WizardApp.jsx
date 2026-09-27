@@ -3,7 +3,7 @@ import {compatibilityReport} from "../../../packages/core/src/index.js";
 import {exportFormats,getExportArtifact,getExportWarnings} from "../../../packages/targets/src/exporters.js";
 import {recommendedDnsServices} from "../../../packages/catalog/src/recommended-dns.js";
 import {configurationWizard} from "./wizard.js";
-import {configurationWizardSteps} from "./wizard-steps.js";
+import {applyWizardSkipSemantics,configurationWizardSteps} from "./wizard-steps.js";
 
 const primaryTargets=["apple-mobileconfig","surge","shadowrocket","quantumult-x","wireguard","loon","stash","mihomo"];
 
@@ -101,10 +101,11 @@ export function WizardApp(){
     }
   }),[name,vpn,dns,dnsProfiles,proxyServer,dnsServerUrl,dnsServerName,routingAction,applePayloads,wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret,blockedDomains,proxyType]);
 
+  const effectivePolicy=useMemo(()=>applyWizardSkipSemantics(policy,skippedSteps),[policy,skippedSteps]);
   const selectedFormat=exportFormats.find(x=>x.id===target)||exportFormats[0];
-  const artifact=getExportArtifact(selectedFormat.id,policy);
-  const warnings=getExportWarnings(selectedFormat.id,policy);
-  const report=useMemo(()=>compatibilityReport(policy,target),[policy,target]);
+  const artifact=getExportArtifact(selectedFormat.id,effectivePolicy);
+  const warnings=getExportWarnings(selectedFormat.id,effectivePolicy);
+  const report=useMemo(()=>compatibilityReport(effectivePolicy,target),[effectivePolicy,target]);
   const blocking=report.diagnostics.filter(x=>(x.level==="CRITICAL"||x.level==="HIGH")&&x.code!=="CAPABILITY_UNKNOWN");
   const capabilityWarnings=report.diagnostics.filter(x=>x.code==="CAPABILITY_UNKNOWN");
   const exportReady=Boolean(artifact)&&blocking.length===0;
@@ -123,6 +124,28 @@ export function WizardApp(){
   const next=async()=>{
     if(stepper.canNext){await stepper.next()}
   };
+  const previous=async()=>{
+    const previousStep=stepper.steps[stepper.index-1];
+    if(await stepper.prev() && previousStep?.id){
+      setSkippedSteps(current=>{
+        const nextState=new Set(current);
+        nextState.delete(previousStep.id);
+        return nextState;
+      });
+    }
+  };
+  const goToStep=async id=>{
+    if(indexOfStep(id)<=stepper.index){
+      if(await stepper.goTo(id)){
+        setSkippedSteps(current=>{
+          const nextState=new Set(current);
+          nextState.delete(id);
+          return nextState;
+        });
+      }
+    }
+  };
+  const indexOfStep=id=>configurationWizardSteps.findIndex(step=>step.id===id);
   const skip=async()=>{
     if(!stepper.current.skippable||!stepper.canNext)return;
     setSkippedSteps(previous=>new Set(previous).add(stepper.id));
@@ -149,7 +172,7 @@ export function WizardApp(){
         {configurationWizardSteps.map((step,index)=>{
           const state=index===stepper.index?"active":index<stepper.index?"previous":"upcoming";
           return <li key={step.id} className={`wizard-step ${state}`}>
-            <button type="button" onClick={()=>index<=stepper.index&&stepper.goTo(step.id)} disabled={index>stepper.index} aria-current={state==="active"?"step":undefined}>
+            <button type="button" onClick={()=>index<=stepper.index&&goToStep(step.id)} disabled={index>stepper.index} aria-current={state==="active"?"step":undefined}>
               <span className="wizard-index">{index+1}</span><span><strong>{stepTitle(step)}</strong><small>{step.description}</small></span>
             </button>
             {index<configurationWizardSteps.length-1&&<span className="wizard-connector" aria-hidden="true"/>}
@@ -232,9 +255,9 @@ export function WizardApp(){
         </div>}
 
         <footer className="wizard-actions">
-          <button className="secondary-action wizard-button" type="button" disabled={!stepper.canPrev||stepper.isPending} onClick={()=>stepper.prev()}>{tr.back}</button>
+          <button className="secondary-action wizard-button" type="button" disabled={!stepper.canPrev||stepper.isPending} onClick={previous}>{tr.back}</button>
           <button className="secondary-action wizard-button" type="button" onClick={reset}>{tr.reset}</button>
-          {stepper.current.skippable&&stepper.canNext&&<button className="secondary-action wizard-button" type="button" disabled={stepper.isPending} onClick={skip}>{skippedSteps.has(stepper.id)?tr.skipped:tr.skip}</button>}
+          {stepper.current.skippable&&stepper.canNext&&<button className="secondary-action wizard-button" type="button" disabled={stepper.isPending||skippedSteps.has(stepper.id)} onClick={skip}>{skippedSteps.has(stepper.id)?tr.skipped:tr.skip}</button>}
           {!stepper.isLast&&<button className="primary-action wizard-button" type="button" disabled={!stepper.canNext||stepper.isPending} onClick={next}>{tr.next}</button>}
         </footer>
       </section>
