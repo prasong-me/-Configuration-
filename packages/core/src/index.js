@@ -191,3 +191,5 @@ export function compile(policyInput,targetId,adapter){
   const artifact=adapter.compile(report.policy);
   return {ok:true,report,artifact};
 }
+
+export { ConfigurationExporter } from "./target/exporter.js";
