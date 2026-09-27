@@ -1,3 +1,4 @@
+import {isIP} from "node:net";
 import {createAppleDnsCommandLayers} from "./dns-command-model.js";
 import {compileAppleDnsDeclaration} from "./dns-schema.js";
 
@@ -69,7 +70,7 @@ function normalizeAppleDnsPayloads(policy){
       .map((profile,index)=>({
         id:isNonEmptyString(profile.id)?profile.id.trim():`dns-profile-${index+1}`,
         name:isNonEmptyString(profile.name)?profile.name.trim():`DNS Profile ${index+1}`,
-        servers:Array.isArray(profile.servers)?profile.servers.filter(isNonEmptyString).filter(value=>{try{const url=new URL("http://"+value.trim());return url.hostname===value.trim()&&/^\d+(?:\.\d+){3}$/.test(value.trim());}catch{return false;}}):[],
+        servers:Array.isArray(profile.servers)?profile.servers.filter(isNonEmptyString).filter(value=>isIP(value.trim())>0):[],
         protocol:normalizeAppleDnsProtocol(profile.protocol||policy.dnsProtocol),
         serverUrl:profile.endpoint||policy.dnsServerUrl||"",
         serverName:profile.serverName||policy.dnsServerName||"",
