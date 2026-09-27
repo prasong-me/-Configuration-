@@ -69,7 +69,7 @@ function normalizeAppleDnsPayloads(policy){
       .map((profile,index)=>({
         id:isNonEmptyString(profile.id)?profile.id.trim():`dns-profile-${index+1}`,
         name:isNonEmptyString(profile.name)?profile.name.trim():`DNS Profile ${index+1}`,
-        servers:Array.isArray(profile.servers)?profile.servers.filter(isNonEmptyString):[],
+        servers:Array.isArray(profile.servers)?profile.servers.filter(isNonEmptyString).filter(value=>{try{const url=new URL("http://"+value.trim());return url.hostname===value.trim()&&/^\d+(?:\.\d+){3}$/.test(value.trim());}catch{return false;}}):[],
         protocol:normalizeAppleDnsProtocol(profile.protocol||policy.dnsProtocol),
         serverUrl:profile.endpoint||policy.dnsServerUrl||"",
         serverName:profile.serverName||policy.dnsServerName||"",
@@ -102,11 +102,16 @@ export function compileAppleMobileConfig(input={}){
   const dnsEnabled=policy.applePayloads?.dns!==false;
   const dnsEntries=dnsEnabled?normalizeAppleDnsPayloads(policy):[];
   for(const entry of dnsEntries){
-    const servers=Array.isArray(entry.servers)?entry.servers.filter(isNonEmptyString):[]; if(!servers.length) continue;
-    const protocol=String(entry.protocol||policy.dnsProtocol||"").toUpperCase(), dns={DNSProtocol:protocol,ServerAddresses:servers}; let valid=true;
+    const servers=Array.isArray(entry.servers)?entry.servers.filter(isNonEmptyString):[];
+    const serverUrl=entry.serverUrl||policy.dnsServerUrl||"";
+    const serverName=entry.serverName||policy.dnsServerName||"";
+    if(!servers.length&&!serverUrl&&!serverName) continue;
+    const protocol=String(entry.protocol||policy.dnsProtocol||"").toUpperCase(), dns={DNSProtocol:protocol};
+    if(servers.length) dns.ServerAddresses=servers;
+    let valid=true;
     if(protocol!=="HTTPS"&&protocol!=="TLS"){valid=false;warnings.push({code:"APPLE_DNS_PROTOCOL_REQUIRED",message:"DNSProtocol ต้องเป็น HTTPS หรือ TLS"});}
-    if(protocol==="HTTPS"){const u=entry.serverUrl||policy.dnsServerUrl;if(validHttpsUrl(u))dns.ServerURL=String(u).trim();else{valid=false;warnings.push({code:"APPLE_DNS_SERVER_URL_REQUIRED",message:"DNS-over-HTTPS ต้องมี ServerURL แบบ https://"});}}
-    if(protocol==="TLS"){const n=entry.serverName||policy.dnsServerName;if(isNonEmptyString(n))dns.ServerName=String(n).trim();else{valid=false;warnings.push({code:"APPLE_DNS_SERVER_NAME_REQUIRED",message:"DNS-over-TLS ต้องมี ServerName"});}}
+    if(protocol==="HTTPS"){const u=serverUrl;if(validHttpsUrl(u))dns.ServerURL=String(u).trim();else{valid=false;warnings.push({code:"APPLE_DNS_SERVER_URL_REQUIRED",message:"DNS-over-HTTPS ต้องมี ServerURL แบบ https://"});}}
+    if(protocol==="TLS"){const n=serverName;if(isNonEmptyString(n))dns.ServerName=String(n).trim();else{valid=false;warnings.push({code:"APPLE_DNS_SERVER_NAME_REQUIRED",message:"DNS-over-TLS ต้องมี ServerName"});}}
     if(Array.isArray(entry.domains)&&entry.domains.length)dns.SupplementalMatchDomains=entry.domains.filter(isNonEmptyString);
     if(valid){
       const identifier=isNonEmptyString(entry.id)?"com.configurationplatform.dns."+entry.id:"com.configurationplatform.dns."+uuid();
