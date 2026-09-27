@@ -1,0 +1,9 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {exportWorkbook,importWorkbook,validateWorkbookRows} from "../packages/excel-io/src/index.js";
+
+const sample={version:"0.1",policy:{name:"Excel round trip",vpn:true,dns:true,routing:false,blocking:{malware:true,trackers:false},dnsProfiles:[{id:"cloudflare",name:"Privacy DNS",provider:"Cloudflare",protocol:"DoH",servers:["1.1.1.1","1.0.0.1"],endpoint:"https://cloudflare-dns.com/dns-query",role:"privacy",enabled:true,order:1,rules:[]}],blocklists:[{id:"malware",provider:"test",source:"https://example.test/list",format:"domain",enabled:true}],rules:[{id:"rule-1",action:"BLOCK",match:"example.com"}],webEntry:{name:"Example",url:"https://example.com",icon:"",enabled:true}}};
+test("Excel export/import preserves canonical fields",()=>{const r=importWorkbook(exportWorkbook(sample));assert.equal(r.policy.name,"Excel round trip");assert.deepEqual(r.policy.dnsProfiles[0].servers,["1.1.1.1","1.0.0.1"]);assert.equal(r.policy.blocklists[0].source,"https://example.test/list");assert.equal(r.policy.webEntry.url,"https://example.com");});
+test("duplicate DNS server is rejected",()=>{const r=validateWorkbookRows({metadata:[{schema_version:"1"}],dnsProfiles:[{id:"p1"}],dnsServers:[{profile_id:"p1",server:"1.1.1.1"},{profile_id:"p1",server:"1.1.1.1"}]});assert.equal(r.valid,false);assert.equal(r.errors[0].code,"DUPLICATE");});
+test("missing DNS profile reference is rejected",()=>{const r=validateWorkbookRows({metadata:[{schema_version:"1"}],dnsServers:[{profile_id:"missing",server:"1.1.1.1"}]});assert.equal(r.valid,false);assert.equal(r.errors[0].code,"REFERENCE_NOT_FOUND");});
+test("unsupported schema version is rejected",()=>{const r=validateWorkbookRows({metadata:[{schema_version:"99"}]});assert.equal(r.valid,false);assert.equal(r.errors[0].code,"SCHEMA_VERSION_UNSUPPORTED");});
