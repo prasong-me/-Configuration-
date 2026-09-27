@@ -1,23 +1,15 @@
-const OUTPUT_FORMATS = new Set(["plist", "json", "yaml", "ini", "text"]);
-
 export class ConfigurationExporter {
-  constructor() {
-    this.adapters = new Map();
-    this.serializers = new Map();
-  }
-
-  registerAdapter(adapter) {
-    if (!adapter || typeof adapter.targetId !== "string" || typeof adapter.compile !== "function") {
-      throw new TypeError("Invalid target adapter registration.");
+  constructor(targetRegistry, serializerRegistry) {
+    if (!targetRegistry || typeof targetRegistry.get !== "function") {
+      throw new TypeError("ConfigurationExporter requires a target registry.");
     }
-    this.adapters.set(adapter.targetId, adapter);
-  }
 
-  registerSerializer(serializer) {
-    if (!serializer || !OUTPUT_FORMATS.has(serializer.format) || typeof serializer.serialize !== "function") {
-      throw new TypeError("Invalid serializer registration.");
+    if (!serializerRegistry || typeof serializerRegistry.get !== "function") {
+      throw new TypeError("ConfigurationExporter requires a serializer registry.");
     }
-    this.serializers.set(serializer.format, serializer);
+
+    this.targetRegistry = targetRegistry;
+    this.serializerRegistry = serializerRegistry;
   }
 
   export(input) {
@@ -25,74 +17,149 @@ export class ConfigurationExporter {
     const targetId = input?.target?.targetId;
 
     if (!resultMetadata || typeof resultMetadata.status !== "string") {
-      return {
-        status: "FAILED",
-        resultMetadata,
-      };
+      throw new TypeError("ConfigurationExporter requires Processing resultMetadata.");
     }
 
     if (resultMetadata.status === "FAILED") {
       return {
         status: "BLOCKED",
         resultMetadata,
+        diagnostics: [],
       };
     }
 
-    const adapter = this.adapters.get(targetId);
-    if (!adapter) {
+    const registration = this.targetRegistry.get(targetId);
+    if (!registration) {
       return {
         status: "FAILED",
         resultMetadata,
+        diagnostics: [{
+          code: "TARGET_NOT_REGISTERED",
+          severity: "ERROR",
+          message: `Target '${targetId}' is not registered.`,
+          targetId,
+        }],
       };
     }
 
+    let compileResult;
     try {
-      const compileResult = adapter.compile(input);
-
-      if (!compileResult || compileResult.targetId !== targetId) {
-        return {
-          status: "FAILED",
-          resultMetadata,
-        };
-      }
-
-      if (!OUTPUT_FORMATS.has(compileResult.outputFormat)) {
-        return {
-          status: "FAILED",
-          resultMetadata,
-        };
-      }
-
-      const serializer = this.serializers.get(compileResult.outputFormat);
-      if (!serializer || serializer.format !== compileResult.outputFormat) {
-        return {
-          status: "FAILED",
-          resultMetadata,
-        };
-      }
-
-      const content = serializer.serialize(compileResult.representation);
-
-      if (!(typeof content === "string" || content instanceof Uint8Array)) {
-        return {
-          status: "FAILED",
-          resultMetadata,
-        };
-      }
-
-      return {
-        status: "EXPORTED",
-        artifact: {
-          content,
-          outputFormat: compileResult.outputFormat,
-        },
-        resultMetadata,
-      };
-    } catch {
+      compileResult = registration.adapter.compile(input);
+    } catch (error) {
       return {
         status: "FAILED",
         resultMetadata,
+        diagnostics: [{
+          code: "COMPILE_FAILED",
+          severity: "ERROR",
+          message: `Target adapter '${targetId}' failed during compilation.`,
+          targetId,
+          cause: error,
+        }],
       };
     }
+
+    if (
+      !compileResult ||
+      typeof compileResult !== "object" ||
+      typeof compileResult.targetId !== "string" ||
+      typeof compileResult.outputFormat !== "string" ||
+      !Object.hasOwn(compileResult, "representation")
+    ) {
+      return {
+        status: "FAILED",
+        resultMetadata,
+        diagnostics: [{
+          code: "INVALID_COMPILE_RESULT",
+          severity: "ERROR",
+          message: `Target adapter '${targetId}' returned an invalid compile result.`,
+          targetId,
+        }],
+      };
+    }
+
+    if (compileResult.targetId !== targetId) {
+      return {
+        status: "FAILED",
+        resultMetadata,
+        diagnostics: [{
+          code: "TARGET_ID_MISMATCH",
+          severity: "ERROR",
+          message: `Target adapter returned target '${compileResult.targetId}' for requested target '${targetId}'.`,
+          targetId,
+        }],
+      };
+    }
+
+    if (registration.target.outputFormat !== compileResult.outputFormat) {
+      return {
+        status: "FAILED",
+        resultMetadata,
+        diagnostics: [{
+          code: "TARGET_OUTPUT_FORMAT_MISMATCH",
+          severity: "ERROR",
+          message: `Target '${targetId}' declares output format '${registration.target.outputFormat}' but adapter returned '${compileResult.outputFormat}'.`,
+          targetId,
+          outputFormat: compileResult.outputFormat,
+        }],
+      };
+    }
+
+    const serializer = this.serializerRegistry.get(compileResult.outputFormat);
+    if (!serializer) {
+      return {
+        status: "FAILED",
+        resultMetadata,
+        diagnostics: [{
+          code: "SERIALIZER_NOT_REGISTERED",
+          severity: "ERROR",
+          message: `No serializer is registered for output format '${compileResult.outputFormat}'.`,
+          targetId,
+          outputFormat: compileResult.outputFormat,
+        }],
+      };
+    }
+
+    let content;
+    try {
+      content = serializer.serialize(compileResult.representation);
+    } catch (error) {
+      return {
+        status: "FAILED",
+        resultMetadata,
+        diagnostics: [{
+          code: "SERIALIZE_FAILED",
+          severity: "ERROR",
+          message: `Serializer for '${compileResult.outputFormat}' failed.`,
+          targetId,
+          outputFormat: compileResult.outputFormat,
+          cause: error,
+        }],
+      };
+    }
+
+    if (!(typeof content === "string" || content instanceof Uint8Array)) {
+      return {
+        status: "FAILED",
+        resultMetadata,
+        diagnostics: [{
+          code: "SERIALIZE_FAILED",
+          severity: "ERROR",
+          message: `Serializer for '${compileResult.outputFormat}' returned an invalid artifact type.`,
+          targetId,
+          outputFormat: compileResult.outputFormat,
+        }],
+      };
+    }
+
+    return {
+      status: "EXPORTED",
+      artifact: {
+        content,
+        outputFormat: compileResult.outputFormat,
+      },
+      resultMetadata,
+      diagnostics: [],
+    };
   }
 }
