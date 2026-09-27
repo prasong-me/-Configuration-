@@ -5,7 +5,9 @@ import {compileAppleDnsDeclaration, compileAppleDnsSettings} from "../packages/a
 
 test("Apple DNS commands are target-scoped and compile only into Apple schema", () => {
   const commands = createAppleDnsCommandLayers({dnsProtocol:"HTTPS",dnsServerUrl:"https://dns.example/dns-query",dnsServers:["1.1.1.1","2606:4700:4700::1111"],dnsDomains:["example.com"],dnsAllowFailover:false});
-  assert.ok(commands.length > 0);\n  assert.ok(commands.every(layer => Array.isArray(layer.commands)));\n  assert.ok(commands.every(layer => layer.commands.every(command => command.target === "apple")));
+  assert.ok(commands.length > 0);
+  assert.ok(commands.every(layer => Array.isArray(layer.commands)));
+  assert.ok(commands.every(layer => layer.commands.every(command => command.target === "apple")));
   const settings = compileAppleDnsSettings(commands);
   assert.equal(settings.DNSProtocol, "HTTPS");
   assert.equal(settings.ServerURL, "https://dns.example/dns-query");
