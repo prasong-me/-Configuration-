@@ -196,4 +196,3 @@ export function compile(policyInput,targetId,adapter){
   return {ok:true,report,artifact};
 }
 
-export { ConfigurationExporter } from "./target/exporter.js";
