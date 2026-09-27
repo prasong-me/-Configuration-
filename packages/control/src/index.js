@@ -2,6 +2,7 @@ export const ControlState = Object.freeze({
   RECEIVED: "RECEIVED",
   ANALYZING: "ANALYZING",
   NEEDS_CLARIFICATION: "NEEDS_CLARIFICATION",
+  WAITING_FOR_USER: "WAITING_FOR_USER",
   RESOLVED: "RESOLVED",
 });
 
@@ -106,4 +107,27 @@ export function analyzeControlRequest(request) {
       operationCandidates: uniqueOperation,
     },
   };
+}
+
+export function applyClarification(request, answers = {}) {
+  if (!request || request.state !== ControlState.NEEDS_CLARIFICATION) {
+    throw new Error("Clarification can only be applied to a request in NEEDS_CLARIFICATION state.");
+  }
+
+  const current = request.input && typeof request.input === "object"
+    ? structuredClone(request.input)
+    : { request: request.input };
+
+  const allowed = ["target", "operation", "format"];
+  for (const key of allowed) {
+    if (typeof answers[key] === "string" && answers[key].trim()) {
+      current[key] = answers[key].trim();
+    }
+  }
+
+  return analyzeControlRequest({
+    ...request,
+    state: ControlState.WAITING_FOR_USER,
+    input: current,
+  });
 }
