@@ -51,6 +51,48 @@ function webClipIcon(policy){
   }
 }
 
+function normalizeAppleDnsProtocol(value){
+  const protocol=String(value||"").trim().toUpperCase();
+  if(protocol==="DOH") return "HTTPS";
+  if(protocol==="DOT") return "TLS";
+  return protocol;
+}
+
+function normalizeAppleDnsPayloads(policy){
+  if(Array.isArray(policy.dnsPayloads)&&policy.dnsPayloads.length){
+    return policy.dnsPayloads;
+  }
+
+  if(Array.isArray(policy.dnsProfiles)&&policy.dnsProfiles.length){
+    return policy.dnsProfiles
+      .filter(profile=>profile&&profile.enabled!==false)
+      .map((profile,index)=>({
+        id:isNonEmptyString(profile.id)?profile.id.trim():`dns-profile-${index+1}`,
+        name:isNonEmptyString(profile.name)?profile.name.trim():`DNS Profile ${index+1}`,
+        servers:Array.isArray(profile.servers)?profile.servers.filter(isNonEmptyString):[],
+        protocol:normalizeAppleDnsProtocol(profile.protocol||policy.dnsProtocol),
+        serverUrl:profile.endpoint||policy.dnsServerUrl||"",
+        serverName:profile.serverName||policy.dnsServerName||"",
+        domains:Array.isArray(profile.domains)?profile.domains.filter(isNonEmptyString):[]
+      }))
+      .filter(profile=>profile.servers.length||profile.serverUrl||profile.serverName);
+  }
+
+  if(Array.isArray(policy.dnsServers)&&policy.dnsServers.length){
+    return [{
+      id:"dns-default",
+      name:`${isNonEmptyString(policy.name)?policy.name.trim():"Network Configuration"} DNS Settings`,
+      servers:policy.dnsServers.filter(isNonEmptyString),
+      protocol:normalizeAppleDnsProtocol(policy.dnsProtocol),
+      serverUrl:policy.dnsServerUrl||"",
+      serverName:policy.dnsServerName||"",
+      domains:Array.isArray(policy.dnsDomains)?policy.dnsDomains.filter(isNonEmptyString):[]
+    }];
+  }
+
+  return [];
+}
+
 export function compileAppleMobileConfig(input={}){
   const policy=input?.policy??input;
   const name=isNonEmptyString(policy.name)?policy.name.trim():"Network Configuration";
@@ -58,7 +100,7 @@ export function compileAppleMobileConfig(input={}){
   const warnings=[];
 
   const dnsEnabled=policy.applePayloads?.dns!==false;
-  const dnsEntries=dnsEnabled?(Array.isArray(policy.dnsPayloads)&&policy.dnsPayloads.length?policy.dnsPayloads:(Array.isArray(policy.dnsServers)&&policy.dnsServers.length?[{servers:policy.dnsServers,protocol:policy.dnsProtocol,serverUrl:policy.dnsServerUrl,serverName:policy.dnsServerName,domains:policy.dnsDomains}]:[])):[];
+  const dnsEntries=dnsEnabled?normalizeAppleDnsPayloads(policy):[];
   for(const entry of dnsEntries){
     const servers=Array.isArray(entry.servers)?entry.servers.filter(isNonEmptyString):[]; if(!servers.length) continue;
     const protocol=String(entry.protocol||policy.dnsProtocol||"").toUpperCase(), dns={DNSProtocol:protocol,ServerAddresses:servers}; let valid=true;
