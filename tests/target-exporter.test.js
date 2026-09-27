@@ -65,11 +65,20 @@ function setup({
 }
 
 test("Processing FAILED blocks before Registry, Adapter, and Serializer execution", () => {
-  const { exporter, targetRegistry, serializerRegistry, adapter } = setup();
   let registryCalls = 0;
   let serializerRegistryCalls = 0;
   let adapterCalls = 0;
   let serializerCalls = 0;
+  const spySerializer = {
+    format: "json",
+    serialize(value) {
+      serializerCalls += 1;
+      return JSON.stringify(value);
+    },
+  };
+  const { exporter, targetRegistry, serializerRegistry, adapter } = setup({
+    serializers: [spySerializer],
+  });
 
   const originalTargetGet = targetRegistry.get.bind(targetRegistry);
   targetRegistry.get = (...args) => {
@@ -86,13 +95,6 @@ test("Processing FAILED blocks before Registry, Adapter, and Serializer executio
   adapter.compile = () => {
     adapterCalls += 1;
     throw new Error("must not run");
-  };
-
-  const serializer = serializerRegistry.get("json");
-  const originalSerialize = serializer.serialize;
-  serializer.serialize = (...args) => {
-    serializerCalls += 1;
-    return originalSerialize(...args);
   };
 
   const result = exporter.export(input("FAILED"));
