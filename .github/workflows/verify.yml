@@ -25,8 +25,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run core tests
+      - name: Run root tests
         run: npm test
+
+      - name: Run target tests
+        run: npm run test:target
 
       - name: Build web
         run: npm run build:web
