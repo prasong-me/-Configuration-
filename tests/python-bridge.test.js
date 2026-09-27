@@ -30,6 +30,7 @@ test("Python bridge accepts a language-neutral envelope", () => {
 test("Python bridge rejects an unsupported protocol", () => {
   const result = runBridge({
     protocol: "wrong/0.1",
+    contract_version: "0.1",
     request_id: "req-2",
     action: "exchange",
     payload: {},
