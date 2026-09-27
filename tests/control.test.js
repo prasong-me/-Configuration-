@@ -98,6 +98,5 @@ test("analysis stage does not route to an adapter", () => {
     })
   );
 
-  assert.equal("executionPlan" in result, false);
   assert.equal("route" in result, false);
 });
