@@ -1,7 +1,4 @@
-export type DiagnosticSeverity =
-  | 'INFO'
-  | 'WARNING'
-  | 'ERROR';
+export type DiagnosticSeverity = 'INFO' | 'WARNING' | 'ERROR';
 
 export type DiagnosticCode =
   | 'PROFILE_INVALID'
@@ -13,6 +10,7 @@ export type DiagnosticCode =
   | 'FEATURE_UNSUPPORTED'
   | 'FEATURE_PARTIAL'
   | 'TARGET_FEATURE_UNSUPPORTED'
+  | 'TARGET_CAPABILITY_UNKNOWN'
   | 'SEMANTIC_LOSS'
   | 'EXPORT_FAILED'
   | 'INVALID_OUTPUT';
