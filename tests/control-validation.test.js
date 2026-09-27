@@ -7,7 +7,7 @@ test("resolved control request can pass through policy validation", () => {
   const request = analyzeControlRequest(createControlRequest({
     target: "apple", format: "mobileconfig", operation: "export",
   }));
-  const result = validateExecutionInput(request, { vpn: false, dns: false, routing: false });
+  const result = validateExecutionInput(request, { version: "0.1", policy: { vpn: false, dns: false, routing: false, blocking: { malware: false, trackers: false } } });
   assert.equal(result.ok, true);
 });
 
