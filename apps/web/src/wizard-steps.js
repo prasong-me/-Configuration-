@@ -13,3 +13,40 @@ export function nextStepId(id) {
     ? configurationWizardSteps[index + 1].id
     : null;
 }
+
+export function applyWizardSkipSemantics(configuration, skippedSteps) {
+  const policy = structuredClone(configuration);
+  const skipped = skippedSteps instanceof Set ? skippedSteps : new Set(skippedSteps || []);
+
+  if (skipped.has("source")) {
+    policy.policy.vpn = false;
+    policy.policy.routing = false;
+    policy.policy.proxyServer = "";
+    policy.policy.blocking = {
+      ...(policy.policy.blocking || {}),
+      malware: false,
+      trackers: false,
+    };
+    policy.policy.blockedDomains = [];
+    policy.policy.applePayloads = {
+      ...(policy.policy.applePayloads || {}),
+      vpn: false,
+      globalProxy: false,
+    };
+  }
+
+  if (skipped.has("dns")) {
+    policy.policy.dns = false;
+    policy.policy.dnsProfiles = [];
+    policy.policy.dnsServers = [];
+    policy.policy.dnsProtocol = undefined;
+    policy.policy.dnsServerUrl = undefined;
+    policy.policy.dnsServerName = undefined;
+    policy.policy.applePayloads = {
+      ...(policy.policy.applePayloads || {}),
+      dns: false,
+    };
+  }
+
+  return policy;
+}
