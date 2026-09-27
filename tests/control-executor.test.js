@@ -26,6 +26,7 @@ test("resolved Apple request executes through registry and adapter", () => {
   assert.equal(result.ok, true);
   assert.equal(result.stage, "COMPLETED");
   assert.equal(result.targetId, "apple-mobileconfig");
+  assert.deepEqual(result.trace, ["RECEIVED", "ANALYZING", "RESOLVED", "ROUTING", "VALIDATING", "EXECUTING", "EXPORTING", "COMPLETED"]);
   assert.match(result.artifact.content, /com\.apple\.dnsSettings\.managed/);
 });
 
