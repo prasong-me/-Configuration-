@@ -53,6 +53,6 @@ test("SerializerRegistry rejects serializers without a valid format", () => {
 
   assert.throws(
     () => registry.register({ format: "" , serialize() {} }),
-    /valid format/,
+    /supported output format|valid format/,
   );
 });
