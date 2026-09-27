@@ -3,7 +3,8 @@ export type RequirementLevel = 'REQUIRED' | 'OPTIONAL';
 export type CapabilityMatchResult =
   | 'SUPPORTED'
   | 'PARTIAL'
-  | 'UNSUPPORTED';
+  | 'UNSUPPORTED'
+  | 'UNKNOWN';
 
 export interface CapabilityRequirement {
   featureKey: string;
