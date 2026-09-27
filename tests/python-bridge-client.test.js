@@ -5,6 +5,7 @@ import { exchangeWithPythonBridge } from "../bridges/python/client.js";
 test("JavaScript runtime can exchange a neutral envelope through Python", () => {
   const response = exchangeWithPythonBridge({
     protocol: "configuration-bridge/0.1",
+    contract_version: "0.1",
     request_id: "runtime-1",
     action: "exchange",
     payload: { language: "javascript", target: "apple" },
