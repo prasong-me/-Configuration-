@@ -6,7 +6,7 @@ const bridge = new URL("../bridges/python/bridge.py", import.meta.url);
 
 function runBridge(input) {
   const result = spawnSync("python3", [bridge.pathname], {
-    input: JSON.stringify(input) + "\\n",
+    input: JSON.stringify(input) + "\n",
     encoding: "utf8",
   });
   assert.equal(result.status, 0, result.stderr);
