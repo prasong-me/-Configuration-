@@ -16,6 +16,7 @@ function runBridge(input) {
 test("Python bridge accepts a language-neutral envelope", () => {
   const result = runBridge({
     protocol: "configuration-bridge/0.1",
+    contract_version: "0.1",
     request_id: "req-1",
     action: "exchange",
     payload: { language: "typescript", target: "apple" },
