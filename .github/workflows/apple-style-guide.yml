@@ -29,7 +29,7 @@ jobs:
             { regex: /\biphone\b/g, correct: "iPhone" },
             { regex: /\bipad\b/g, correct: "iPad" },
             { regex: /\bmacbook\b/g, correct: "MacBook" },
-            { regex: /\bapp store\b/gi, correct: "App Store" },
+            { regex: /\bapp store\b/g, correct: "App Store" },
             { regex: /\bios\b/g, correct: "iOS" },
             { regex: /\bmacos\b/g, correct: "macOS" }
           ];
