@@ -9,7 +9,8 @@ import json
 import sys
 
 PROTOCOL = "configuration-bridge/0.1"
-REQUIRED = ("protocol", "request_id", "action", "payload")
+CONTRACT_VERSION = "0.1"
+REQUIRED = ("protocol", "contract_version", "request_id", "action", "payload")
 
 
 def process(message):
@@ -22,6 +23,8 @@ def process(message):
 
     if message["protocol"] != PROTOCOL:
         raise ValueError("Unsupported bridge protocol")
+    if message["contract_version"] != CONTRACT_VERSION:
+        raise ValueError("Unsupported contract version")
     if not isinstance(message["request_id"], str) or not message["request_id"].strip():
         raise ValueError("request_id must be a non-empty string")
     if not isinstance(message["action"], str) or not message["action"].strip():
@@ -29,6 +32,7 @@ def process(message):
 
     return {
         "protocol": PROTOCOL,
+        "contract_version": CONTRACT_VERSION,
         "request_id": message["request_id"],
         "status": "ACCEPTED",
         "action": message["action"],
