@@ -1,6 +1,6 @@
 # Configuration Platform · Project Status
 
-อัปเดต: 2026-09-26
+อัปเดต: 2026-09-27
 
 เอกสารนี้เป็นสถานะกลางของงานที่ตกลงและตรวจสอบจากแชทกับ repository เพื่อไม่ให้สถานะใน repo คลาดเคลื่อนจากสิ่งที่ทำจริง
 
@@ -81,7 +81,13 @@ Certificate ไม่ใช่ dependency กลาง ต้องใช้เ�
 
 ทุก input ที่มี standard options ควรมี preset ที่ใช้ค่าจริง และมี Custom เมื่อเหมาะสม
 
-สถานะปัจจุบัน: หน้าเว็บยังเป็น flow 3 ส่วน Basic → Destination → Export และยังไม่ได้เปลี่ยนเป็น wizard 6 ขั้น ดังนั้นยังไม่ถือว่า wizard เสร็จ
+สถานะปัจจุบัน: Wizard 6 ขั้นถูกนำเข้า main แล้วจาก PR #14 และใช้ Stepperize เป็น state/navigation layer
+
+Flow ปัจจุบัน: Intent → Source → DNS / Policy → Target → Compatibility → Review / Export
+
+Skip semantics ถูกผูกกับ policy ก่อน compatibility/export: ข้าม Source จะไม่สร้าง network-source semantics และ payload VPN/Global Proxy; ข้าม DNS จะไม่สร้าง DNS profiles/servers หรือ Apple DNS payload
+
+CI, Verify Configuration Platform และ Apple Style Guide checks ผ่านบน PR #14 final head ก่อน merge
 
 DNS UI มี profile cards หลายชุดและแก้ชื่อ/provider/protocol/role/server/endpoint/enabled ได้ แต่ยังไม่มี UI เพิ่ม/ลบ profile แบบอิสระ แม้ Core รองรับจำนวนไม่จำกัด
 
@@ -132,10 +138,8 @@ README ถูก sync สถานะเป็น commit 4e286ea8d2ee654c19b6f69
 
 ## 12. สิ่งที่ยังต้องทำ
 
-1. เปลี่ยนหน้าเว็บจาก 3-section flow เป็น wizard 6 ขั้น
-2. เพิ่ม skip semantics และไม่สร้าง payload ของขั้นที่ข้าม
-3. เพิ่มการเพิ่ม/ลบ DNS profile แบบอิสระใน UI
-4. ตรวจ exporter ของแต่ละ Target ว่ารักษา DNS profiles ได้ครบตาม semantics จริง
+1. เพิ่มการเพิ่ม/ลบ DNS profile แบบอิสระใน UI
+2. ตรวจ exporter ของแต่ละ Target ว่ารักษา DNS profiles ได้ครบตาม semantics จริง
 5. เพิ่ม compatibility diagnostics เมื่อ Target แทนหลาย profile หรือ pipeline ได้ไม่ครบ
 6. ตรวจ Apple declarative DNS ให้ตรงกับ capability/version ที่ Target รองรับจริง
 7. ทำ certificate/signing เฉพาะจุดที่ Target ต้องการ หลัง core/export semantics นิ่ง
