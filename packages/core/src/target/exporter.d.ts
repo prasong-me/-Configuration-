@@ -1,26 +1,9 @@
-import type { TargetCompileInput, TargetAdapter } from './contracts';
-import type { Serializer } from './serializer';
-import type { OutputFormat } from '../model/target';
-import type { ResultMetadata } from '../model/result';
-
-export interface ExportArtifact {
-  content: string | Uint8Array;
-  outputFormat: OutputFormat;
-}
-
-export type ExportStatus =
-  | 'EXPORTED'
-  | 'BLOCKED'
-  | 'FAILED';
-
-export interface ExportResult {
-  status: ExportStatus;
-  artifact?: ExportArtifact;
-  resultMetadata: ResultMetadata;
-}
+import type { TargetCompileInput } from './contracts';
+import type { ExportResult } from './export-diagnostics';
+import type { SerializerRegistry } from './serializer-registry';
+import type { TargetRegistry } from './registry';
 
 export declare class ConfigurationExporter {
-  registerAdapter(adapter: TargetAdapter): void;
-  registerSerializer(serializer: Serializer): void;
+  constructor(targetRegistry: TargetRegistry, serializerRegistry: SerializerRegistry);
   export(input: TargetCompileInput): ExportResult;
 }
