@@ -10,7 +10,7 @@ test("language-neutral contract creates a versioned envelope", () => {
   });
 
   assert.equal(envelope.protocol, BRIDGE_PROTOCOL);
-  assert.equal(envelope.contractVersion, CONTRACT_VERSION);
+  assert.equal(envelope.contract_version, CONTRACT_VERSION);
   assert.equal(validateEnvelope(envelope).valid, true);
 });
 
