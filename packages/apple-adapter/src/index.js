@@ -1,3 +1,6 @@
+import {createAppleDnsCommandLayers} from "./dns-command-model.js";
+import {compileAppleDnsDeclaration} from "./dns-schema.js";
+
 const xmlEscape=value=>String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;");
 
 const uuid=()=>crypto.randomUUID();
@@ -133,19 +136,10 @@ export function compileAppleMobileConfig(input={}){
 
 export function compileAppleDeclarativeDns(input={}){
   const policy=input?.policy??input;
-  const name=isNonEmptyString(policy.name)?policy.name.trim():"Network Configuration";
-  const protocol=String(policy.dnsProtocol||"HTTPS").toUpperCase();
-  const dns={DNSProtocol:protocol,ServerAddresses:Array.isArray(policy.dnsServers)?policy.dnsServers:[]};
-
-  if(protocol==="HTTPS"&&policy.dnsServerUrl) dns.ServerURL=policy.dnsServerUrl;
-  if(protocol==="TLS"&&policy.dnsServerName) dns.ServerName=policy.dnsServerName;
-  if(Array.isArray(policy.dnsDomains)&&policy.dnsDomains.length) dns.SupplementalMatchDomains=policy.dnsDomains;
-  if(typeof policy.dnsAllowFailover==="boolean") dns.AllowFailover=policy.dnsAllowFailover;
-
-  return {
-    Type:"com.apple.configuration.network.dns-settings",
-    Identifier:uuid(),
-    ServerToken:uuid(),
-    Payload:{VisibleName:name,DNSSettings:dns}
-  };
+  const commands=createAppleDnsCommandLayers(policy);
+  return compileAppleDnsDeclaration(commands, {
+    visibleName:isNonEmptyString(policy.name)?policy.name.trim():"Network Configuration",
+    identifier:policy.dnsDeclarationIdentifier,
+    serverToken:policy.dnsServerToken,
+  });
 }
