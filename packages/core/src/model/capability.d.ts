@@ -9,7 +9,6 @@ export type CapabilityMatchResult =
 export interface CapabilityRequirement {
   featureKey: string;
   requirementLevel: RequirementLevel;
-  supportedByDefault: boolean;
 }
 
 export interface CapabilityMatchOutcome {
