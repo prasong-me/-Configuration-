@@ -6,10 +6,14 @@ import { validatePolicy } from "../../validator/src/index.js";
 import { getTargetManifest } from "../../targets/src/index.js";
 import { normalizeDnsPipeline } from "./dns-pipeline.js";
 import { DnsController, createDnsController } from "./dns-controller.js";
+import { ConfigurationExporter } from "./target/exporter.js";
+import { ConfigurationTargetRegistry } from "./target/registry.js";
+import { SerializerRegistry } from "./target/serializer-registry.js";
 
 export { CapabilityState, DiagnosticLevel, diagnostic, hasBlockingDiagnostics, redact };
 export { DnsStageResult, normalizeDnsPipeline, processDnsQuery } from "./dns-pipeline.js";
 export { DnsController, createDnsController } from "./dns-controller.js";
+export { ConfigurationExporter, ConfigurationTargetRegistry, SerializerRegistry };
 
 export function normalizePolicy(input) {
   const source=input ?? {};
