@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "name": "Configuration DNS",
+  "dns": {
+    "enabled": true,
+    "mode": "ordered-resolvers",
+    "resolvers": [
+      {
+        "order": 1,
+        "provider": "Cloudflare",
+        "protocol": "HTTPS",
+        "endpoint": "https://cloudflare-dns.com/dns-query",
+        "serverAddresses": [
+          "1.1.1.1",
+          "1.0.0.1"
+        ],
+        "enabled": true
+      },
+      {
+        "order": 2,
+        "provider": "AdGuard",
+        "protocol": "HTTPS",
+        "endpoint": "https://d.adguard-dns.com/dns-query/win-731a2e5a-Device-1",
+        "serverAddresses": [],
+        "enabled": true
+      }
+    ]
+  },
+  "targets": {
+    "apple-mobileconfig": {
+      "serialization": "Apple Property List XML",
+      "payloadType": "com.apple.dnsSettings.managed",
+      "exportPolicy": "target-capability-gated"
+    }
+  }
+}

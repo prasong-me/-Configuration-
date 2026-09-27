@@ -41,3 +41,17 @@ test("Apple MobileConfig can emit multiple payload types in one profile",()=>{
   assert.match(result.content,/com\.apple\.wifi\.managed/);
   assert.equal(result.payloadCount,3);
 });
+
+
+test("Apple MobileConfig normalizes target-neutral DNS profiles inside the Apple adapter",()=>{
+  const result=compileAppleMobileConfig({policy:{
+    name:"Profiles",
+    dnsProfiles:[
+      {id:"cloudflare",name:"Cloudflare",protocol:"DoH",servers:["1.1.1.1"],endpoint:"https://cloudflare-dns.com/dns-query",enabled:true},
+      {id:"nextdns",name:"NextDNS",protocol:"DoH",endpoint:"https://dns.nextdns.io",enabled:true}
+    ]
+  }});
+  assert.equal(result.payloadCount,2);
+  assert.match(result.content,/cloudflare-dns\.com/);
+  assert.match(result.content,/dns\.nextdns\.io/);
+});

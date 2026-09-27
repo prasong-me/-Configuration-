@@ -25,6 +25,11 @@ export function normalizePolicy(input) {
     ...(policy.providers ? {providers:structuredClone(policy.providers)} : {})
   };
   if(typeof policy.name==="string"&&policy.name.trim()) normalized.name=policy.name.trim();
+  if(typeof policy.dnsProtocol==="string"&&policy.dnsProtocol.trim()) normalized.dnsProtocol=policy.dnsProtocol.trim();
+  if(typeof policy.dnsServerUrl==="string"&&policy.dnsServerUrl.trim()) normalized.dnsServerUrl=policy.dnsServerUrl.trim();
+  if(typeof policy.dnsServerName==="string"&&policy.dnsServerName.trim()) normalized.dnsServerName=policy.dnsServerName.trim();
+  if(Array.isArray(policy.dnsDomains)) normalized.dnsDomains=policy.dnsDomains.filter(x=>typeof x==="string"&&x.trim()).map(x=>x.trim());
+  if(typeof policy.dnsAllowFailover==="boolean") normalized.dnsAllowFailover=policy.dnsAllowFailover;
   if(Array.isArray(policy.dnsServers)){
     normalized.dnsServers=policy.dnsServers
       .filter(x=>typeof x==="string"&&x.trim())
@@ -37,9 +42,13 @@ export function normalizePolicy(input) {
         id:typeof profile.id==="string"&&profile.id.trim()?profile.id.trim():`dns-profile-${index+1}`,
         name:typeof profile.name==="string"&&profile.name.trim()?profile.name.trim():`DNS Profile ${index+1}`,
         provider:typeof profile.provider==="string"?profile.provider.trim():"",
+        addressMode:typeof profile.addressMode==="string"?profile.addressMode.trim():"",
         protocol:typeof profile.protocol==="string"&&profile.protocol.trim()?profile.protocol.trim():"DoH",
         servers:Array.isArray(profile.servers)?profile.servers.filter(x=>typeof x==="string"&&x.trim()).map(x=>x.trim()):[],
         endpoint:typeof profile.endpoint==="string"?profile.endpoint.trim():"",
+        serverName:typeof profile.serverName==="string"?profile.serverName.trim():"",
+        ipv4Servers:Array.isArray(profile.ipv4Servers)?profile.ipv4Servers.filter(x=>typeof x==="string"&&x.trim()).map(x=>x.trim()):[],
+        ipv6Servers:Array.isArray(profile.ipv6Servers)?profile.ipv6Servers.filter(x=>typeof x==="string"&&x.trim()).map(x=>x.trim()):[],
         role:typeof profile.role==="string"&&profile.role.trim()?profile.role.trim():"resolver",
         enabled:profile.enabled!==false,
         order:Number.isFinite(profile.order)?profile.order:index+1,

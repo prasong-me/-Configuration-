@@ -1,3 +1,7 @@
+import {isIP} from "node:net";
+import {createAppleDnsCommandLayers} from "./dns-command-model.js";
+import {compileAppleDnsDeclaration} from "./dns-schema.js";
+
 const xmlEscape=value=>String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;");
 
 const uuid=()=>crypto.randomUUID();
@@ -48,6 +52,48 @@ function webClipIcon(policy){
   }
 }
 
+function normalizeAppleDnsProtocol(value){
+  const protocol=String(value||"").trim().toUpperCase();
+  if(protocol==="DOH") return "HTTPS";
+  if(protocol==="DOT") return "TLS";
+  return protocol;
+}
+
+function normalizeAppleDnsPayloads(policy){
+  if(Array.isArray(policy.dnsPayloads)&&policy.dnsPayloads.length){
+    return policy.dnsPayloads;
+  }
+
+  if(Array.isArray(policy.dnsProfiles)&&policy.dnsProfiles.length){
+    return policy.dnsProfiles
+      .filter(profile=>profile&&profile.enabled!==false)
+      .map((profile,index)=>({
+        id:isNonEmptyString(profile.id)?profile.id.trim():`dns-profile-${index+1}`,
+        name:isNonEmptyString(profile.name)?profile.name.trim():`DNS Profile ${index+1}`,
+        servers:Array.isArray(profile.servers)?profile.servers.filter(isNonEmptyString).filter(value=>isIP(value.trim())>0):[],
+        protocol:normalizeAppleDnsProtocol(profile.protocol||policy.dnsProtocol),
+        serverUrl:profile.endpoint||policy.dnsServerUrl||"",
+        serverName:profile.serverName||policy.dnsServerName||"",
+        domains:Array.isArray(profile.domains)?profile.domains.filter(isNonEmptyString):[]
+      }))
+      .filter(profile=>profile.servers.length||profile.serverUrl||profile.serverName);
+  }
+
+  if(Array.isArray(policy.dnsServers)&&policy.dnsServers.length){
+    return [{
+      id:"dns-default",
+      name:`${isNonEmptyString(policy.name)?policy.name.trim():"Network Configuration"} DNS Settings`,
+      servers:policy.dnsServers.filter(isNonEmptyString),
+      protocol:normalizeAppleDnsProtocol(policy.dnsProtocol),
+      serverUrl:policy.dnsServerUrl||"",
+      serverName:policy.dnsServerName||"",
+      domains:Array.isArray(policy.dnsDomains)?policy.dnsDomains.filter(isNonEmptyString):[]
+    }];
+  }
+
+  return [];
+}
+
 export function compileAppleMobileConfig(input={}){
   const policy=input?.policy??input;
   const name=isNonEmptyString(policy.name)?policy.name.trim():"Network Configuration";
@@ -55,13 +101,18 @@ export function compileAppleMobileConfig(input={}){
   const warnings=[];
 
   const dnsEnabled=policy.applePayloads?.dns!==false;
-  const dnsEntries=dnsEnabled?(Array.isArray(policy.dnsPayloads)&&policy.dnsPayloads.length?policy.dnsPayloads:(Array.isArray(policy.dnsServers)&&policy.dnsServers.length?[{servers:policy.dnsServers,protocol:policy.dnsProtocol,serverUrl:policy.dnsServerUrl,serverName:policy.dnsServerName,domains:policy.dnsDomains}]:[])):[];
+  const dnsEntries=dnsEnabled?normalizeAppleDnsPayloads(policy):[];
   for(const entry of dnsEntries){
-    const servers=Array.isArray(entry.servers)?entry.servers.filter(isNonEmptyString):[]; if(!servers.length) continue;
-    const protocol=String(entry.protocol||policy.dnsProtocol||"").toUpperCase(), dns={DNSProtocol:protocol,ServerAddresses:servers}; let valid=true;
+    const servers=Array.isArray(entry.servers)?entry.servers.filter(isNonEmptyString):[];
+    const serverUrl=entry.serverUrl||policy.dnsServerUrl||"";
+    const serverName=entry.serverName||policy.dnsServerName||"";
+    if(!servers.length&&!serverUrl&&!serverName) continue;
+    const protocol=String(entry.protocol||policy.dnsProtocol||"").toUpperCase(), dns={DNSProtocol:protocol};
+    if(servers.length) dns.ServerAddresses=servers;
+    let valid=true;
     if(protocol!=="HTTPS"&&protocol!=="TLS"){valid=false;warnings.push({code:"APPLE_DNS_PROTOCOL_REQUIRED",message:"DNSProtocol ต้องเป็น HTTPS หรือ TLS"});}
-    if(protocol==="HTTPS"){const u=entry.serverUrl||policy.dnsServerUrl;if(validHttpsUrl(u))dns.ServerURL=String(u).trim();else{valid=false;warnings.push({code:"APPLE_DNS_SERVER_URL_REQUIRED",message:"DNS-over-HTTPS ต้องมี ServerURL แบบ https://"});}}
-    if(protocol==="TLS"){const n=entry.serverName||policy.dnsServerName;if(isNonEmptyString(n))dns.ServerName=String(n).trim();else{valid=false;warnings.push({code:"APPLE_DNS_SERVER_NAME_REQUIRED",message:"DNS-over-TLS ต้องมี ServerName"});}}
+    if(protocol==="HTTPS"){const u=serverUrl;if(validHttpsUrl(u))dns.ServerURL=String(u).trim();else{valid=false;warnings.push({code:"APPLE_DNS_SERVER_URL_REQUIRED",message:"DNS-over-HTTPS ต้องมี ServerURL แบบ https://"});}}
+    if(protocol==="TLS"){const n=serverName;if(isNonEmptyString(n))dns.ServerName=String(n).trim();else{valid=false;warnings.push({code:"APPLE_DNS_SERVER_NAME_REQUIRED",message:"DNS-over-TLS ต้องมี ServerName"});}}
     if(Array.isArray(entry.domains)&&entry.domains.length)dns.SupplementalMatchDomains=entry.domains.filter(isNonEmptyString);
     if(valid){
       const identifier=isNonEmptyString(entry.id)?"com.configurationplatform.dns."+entry.id:"com.configurationplatform.dns."+uuid();
@@ -133,19 +184,10 @@ export function compileAppleMobileConfig(input={}){
 
 export function compileAppleDeclarativeDns(input={}){
   const policy=input?.policy??input;
-  const name=isNonEmptyString(policy.name)?policy.name.trim():"Network Configuration";
-  const protocol=String(policy.dnsProtocol||"HTTPS").toUpperCase();
-  const dns={DNSProtocol:protocol,ServerAddresses:Array.isArray(policy.dnsServers)?policy.dnsServers:[]};
-
-  if(protocol==="HTTPS"&&policy.dnsServerUrl) dns.ServerURL=policy.dnsServerUrl;
-  if(protocol==="TLS"&&policy.dnsServerName) dns.ServerName=policy.dnsServerName;
-  if(Array.isArray(policy.dnsDomains)&&policy.dnsDomains.length) dns.SupplementalMatchDomains=policy.dnsDomains;
-  if(typeof policy.dnsAllowFailover==="boolean") dns.AllowFailover=policy.dnsAllowFailover;
-
-  return {
-    Type:"com.apple.configuration.network.dns-settings",
-    Identifier:uuid(),
-    ServerToken:uuid(),
-    Payload:{VisibleName:name,DNSSettings:dns}
-  };
+  const commands=createAppleDnsCommandLayers(policy);
+  return compileAppleDnsDeclaration(commands, {
+    visibleName:isNonEmptyString(policy.name)?policy.name.trim():"Network Configuration",
+    identifier:policy.dnsDeclarationIdentifier,
+    serverToken:policy.dnsServerToken,
+  });
 }
