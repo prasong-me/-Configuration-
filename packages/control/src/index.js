@@ -131,3 +131,19 @@ export function applyClarification(request, answers = {}) {
     input: current,
   });
 }
+
+export function buildExecutionPlan(request) {
+  if (!request || request.state !== ControlState.RESOLVED || !request.analysis) {
+    throw new Error("Execution planning requires a RESOLVED control request.");
+  }
+
+  const { target, operation, format } = request.analysis;
+  return Object.freeze({
+    contractVersion: CONTROL_CONTRACT_VERSION,
+    target,
+    operation,
+    format,
+    stages: Object.freeze(["VALIDATE_INPUT", "PREPARE_TARGET_OUTPUT", "VALIDATE_OUTPUT"]),
+    executionAllowed: false,
+  });
+}
