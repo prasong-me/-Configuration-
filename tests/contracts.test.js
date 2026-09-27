@@ -4,7 +4,7 @@ import { BRIDGE_PROTOCOL, CONTRACT_VERSION, createEnvelope, validateEnvelope } f
 
 test("language-neutral contract creates a versioned envelope", () => {
   const envelope = createEnvelope({
-    requestId: "req-1",
+    request_id: "req-1",
     action: "exchange",
     payload: { target: "apple" },
   });
