@@ -21,8 +21,9 @@ function validateProtocol(protocol) {
 
 export function compileAppleDnsSettings(commands = []) {
   if (!Array.isArray(commands)) throw new TypeError("Apple DNS commands must be an array.");
+  const flatCommands = commands.flatMap(item => Array.isArray(item?.commands) ? item.commands : [item]);
   const settings = {};
-  for (const command of commands) {
+  for (const command of flatCommands) {
     if (!command || command.target !== "apple") continue;
     switch (command.command) {
       case "DNSProtocol": settings.DNSProtocol = validateProtocol(command.value); break;
