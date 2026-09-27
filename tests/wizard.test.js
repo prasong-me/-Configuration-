@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { configurationWizardSteps } from "../apps/web/src/wizard.js";
+import { configurationWizardSteps } from "../apps/web/src/wizard-steps.js";
 
 test("defines the Configuration six-step flow in order", () => {
   assert.deepEqual(
