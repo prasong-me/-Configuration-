@@ -27,6 +27,7 @@ const policy = {
     name: "Test",
     dns: true,
     dnsProtocol: "HTTPS",
+    dnsServerUrl: "https://cloudflare-dns.com/dns-query",
     dnsServers: ["1.1.1.1", "1.0.0.1"],
     dnsProfiles: [{
       id: "dns",
