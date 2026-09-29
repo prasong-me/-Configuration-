@@ -134,8 +134,8 @@ const scenarios = [
       '"ServerToken": "inspection-token"',
       '"DNSProtocol": "HTTPS"',
       '"ServerURL": "https://dns.example.com/dns-query"',
-      '"ServerAddresses": ['",
-      '"SupplementalMatchDomains": ['"
+      '"ServerAddresses": [',
+      '"SupplementalMatchDomains": ['
     ]
   },
   {
@@ -156,7 +156,7 @@ const scenarios = [
       '"DNSProtocol": "TLS"',
       '"ServerName": "dns.example.com"',
       ""ServerAddresses": [",
-      '"AllowFailover": true'"
+      '"AllowFailover": true'
     ]
   }
 ];
