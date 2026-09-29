@@ -206,7 +206,7 @@ function assertUint(value, max, code, message) {
 
 function encodeName(name, maxNameLength = 255) {
   if (typeof name !== "string") fail("DNS_WIRE_NAME_INVALID", "DNS name must be a string.");
-  const normalized = name.trim().replace(/\\.$/, "");
+  const normalized = name.trim().replace(/\.$/, "");
   if (normalized.length === 0) return Uint8Array.of(0);
   const labels = normalized.split(".");
   let total = 1;
