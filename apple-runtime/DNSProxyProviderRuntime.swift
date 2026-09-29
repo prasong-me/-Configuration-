@@ -1,3 +1,4 @@
+@available(macOS 15.0, *)
 import Foundation
 import NetworkExtension
 
