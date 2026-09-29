@@ -37,7 +37,7 @@ const policy = {
       endpoint: "https://cloudflare-dns.com/dns-query",
       enabled: true
     }],
-    rules: [{type: "DOMAIN-SUFFIX", value: "example.com", policy: "DIRECT"}],
+    rules: [],
     finalPolicy: "DIRECT",
     bypassSystem: true
   }
