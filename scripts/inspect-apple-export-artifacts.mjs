@@ -155,7 +155,7 @@ const scenarios = [
     required: [
       '"DNSProtocol": "TLS"',
       '"ServerName": "dns.example.com"',
-      ""ServerAddresses": [",
+      '"ServerAddresses": [',
       '"AllowFailover": true'
     ]
   }
