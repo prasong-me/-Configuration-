@@ -14,7 +14,7 @@ export { buildSearchIndex, searchRecords, SearchContract } from "./search.js";
 export { getTargetManifest, listTargetManifests } from "../../targets/src/index.js";
 export { createSerializerRegistry, defaultSerializerRegistry, SerializerFormat, listSupportedSerializerFormats } from "./serializer-registry.js";
 export { createConfigurationExporter, configurationExporter } from "./exporter.js";
-export { CompilerContract, mapPolicySemantics, compileToTargetIR } from "./compiler.js";
+export { CompilerContract, CompileResultContract, createCompileResult, inspectCompileResult, mapPolicySemantics, compileToTargetIR } from "./compiler.js";
 
 export { normalizePolicy } from "./policy-normalizer.js";
 
