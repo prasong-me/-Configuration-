@@ -75,29 +75,28 @@ IMPLEMENTED:
 - macOS NetworkExtension compile fixture/workflow.
 
 PENDING / NOT_ESTABLISHED:
-1. GitHub Actions runner evidence for the latest PR #26 merge commit was not returned by the current GitHub workflow-run connector.
-2. Xcode/macOS compilation result for the latest fixture is therefore NOT_ESTABLISHED from current connector evidence; do not call it passed without runner logs.
-3. Network Extension entitlement/capability validation.
-4. Signing and provisioning.
-5. Packaged app-extension build.
-6. Actual iOS/iPadOS/macOS NEAppProxyFlow retention/open/read/write runtime.
-7. Upstream UDP/TCP/DoT/DoH implementation.
-8. End-to-end DNS forwarding on physical hardware.
-9. Performance, memory, battery, reliability measurements.
-10. Full semantic roundtrip coverage for every supported DNS RDATA representation.
+1. Network Extension entitlement/capability validation.
+2. Signing and provisioning.
+3. Packaged app-extension validation.
+4. Actual iOS/iPadOS/macOS NEAppProxyFlow physical runtime.
+5. Real upstream connectivity and end-to-end DNS forwarding on physical hardware.
+6. Performance, memory, battery, reliability measurements.
+7. Full semantic roundtrip coverage for every supported DNS RDATA representation.
+
+PR #26 compile-boundary uncertainty was superseded by PR #28 transport-runtime validation; do not retain the old 'latest PR #26 runner not returned' wording as current status.
 
 ## CI caveat
 
-Current merge-commit status exposed by the GitHub connector shows a Vercel `build-rate-limit` failure. This is an external deployment/account-rate-limit status and must not be interpreted as a Node, Swift, or DNS test failure.
+The Vercel `build-rate-limit` status is an external deployment/account-rate-limit issue and must not be interpreted as a Node, Swift, or DNS test failure. Per project scope, this external rate-limited item is left deferred.
 
-No GitHub Actions PASS claim is recorded for PR #26 without runner evidence.
+For Apple transport runtime, repository evidence recorded in PR #28 is the authoritative repository-side validation record: NetworkExtension workflow #18 PASS, Xcode 26.6 / Swift 6.3.3, compile PASS, Swift tests 3/3, core CI PASS, platform verification PASS, Apple style guide PASS.
 
 ## Next phase boundary
 
-The next implementation phase is Real Apple Runtime / Transport Integration:
-Flow I/O adapter → upstream transport adapter → DNS wire decode/encode → stage execution → response write-back → physical/device validation.
+Repository-side transport integration is implemented. The remaining Apple boundary is physical/runtime validation and production packaging:
+entitlement/signing/provisioning → packaged extension → device execution → real upstream connectivity → end-to-end DNS policy execution → performance/reliability evidence.
 
-Do not merge platform runtime claims into the existing contract/compile evidence. Keep endpoint adapters separate from shared middle-layer orchestration, with target-specific configuration stored in target adapters and consumed by the middle layer.
+Do not merge platform runtime claims into contract/export evidence. Keep endpoint adapters separate from shared middle-layer orchestration, with target-specific configuration stored in target adapters and consumed by the middle layer.
 
 ## Error/lesson record
 
