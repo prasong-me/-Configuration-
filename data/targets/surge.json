@@ -1,12 +1,33 @@
 {
   "id": "surge",
   "version": "1.1.0",
-  "platforms": ["ios", "ipados", "macos"],
-  "capabilities": ["dns", "proxy", "routing", "rules", "vpn"],
+  "platforms": [
+    "ios",
+    "ipados",
+    "macos"
+  ],
+  "capabilities": [
+    "dns",
+    "proxy",
+    "routing",
+    "rules",
+    "vpn"
+  ],
   "required": {
-    "proxy": ["name", "type", "server", "port"],
-    "rule": ["type", "value", "policy"],
-    "finalRule": ["policy"]
+    "proxy": [
+      "name",
+      "type",
+      "server",
+      "port"
+    ],
+    "rule": [
+      "type",
+      "value",
+      "policy"
+    ],
+    "finalRule": [
+      "policy"
+    ]
   },
   "optional": [
     "proxy.username",
@@ -32,7 +53,12 @@
   ],
   "syntax": {
     "container": "INI-like text",
-    "sections": ["[General]", "[Proxy]", "[Proxy Group]", "[Rule]"],
+    "sections": [
+      "[General]",
+      "[Proxy]",
+      "[Proxy Group]",
+      "[Rule]"
+    ],
     "proxyEntry": "<name> = <type>, <server>, <port>[, <username>, <password>][, <option>...]",
     "ruleEntry": "TYPE,VALUE,POLICY[,OPTION...]",
     "finalRule": "FINAL,POLICY[,OPTION...]",
