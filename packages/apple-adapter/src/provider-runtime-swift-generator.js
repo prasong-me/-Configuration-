@@ -95,6 +95,7 @@ export function validateGeneratedProviderRuntimeSwift(result = {}) {
   if (result?.artifact?.language !== "SWIFT") errors.push("PROVIDER_RUNTIME_SWIFT_LANGUAGE_REQUIRED");
   if (result?.artifact?.runtimeTarget !== "NETWORK_EXTENSION") errors.push("PROVIDER_RUNTIME_SWIFT_TARGET_REQUIRED");
   if (!result?.admission?.allowed) errors.push("PROVIDER_RUNTIME_SWIFT_ADMISSION_REQUIRED");
+  if (typeof file?.content === "string" && !file.content.includes("handleNewFlow(_ flow: NEAppProxyFlow) -> Bool")) errors.push("PROVIDER_RUNTIME_SWIFT_FLOW_ENTRYPOINT_REQUIRED");
   return Object.freeze({ valid: errors.length === 0, errors: Object.freeze(errors) });
 }
 
