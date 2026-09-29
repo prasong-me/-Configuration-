@@ -9,10 +9,9 @@ Target Data reference: data/targets/shadowrocket.json
 - Runtime verification: pending
 
 ## Source evidence
-- https://github.com/Shadowrocket/Shadowrocket
 - https://github.com/OterUN/Shadowrocket/blob/main/Shadowrocket_group.conf
 
-Evidence note: Native-looking configuration examples confirm [Proxy], [Proxy Group], [Rule], and FINAL conventions; authoritative vendor schema source was not located in this pass.
+Evidence note: A maintained configuration reference confirms [Proxy], [Proxy Group], [Rule], policy names, and FINAL usage. No authoritative vendor schema source was located in this pass; treat release-specific syntax as pending.
 
 ## Test vectors
 - VALID_MINIMAL — minimum required configuration; expected validation success.
