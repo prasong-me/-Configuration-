@@ -12,7 +12,7 @@ Target Data reference: data/targets/loon.json
 - https://github.com/Loon0x00/LoonManual
 - https://github.com/Loon0x00/LoonExampleConfig
 
-Evidence note: Loon manual/examples confirm proxy nodes, policy groups, rule syntax, DNS configuration, and native profile sections.
+Evidence note: Loon's public manual/examples confirm native profile sections, proxy/policy-group concepts, rules, and DNS configuration.
 
 ## Test vectors
 - VALID_MINIMAL — minimum required configuration; expected validation success.
