@@ -1,6 +1,6 @@
 import React,{useMemo,useState} from "react";
 import {compatibilityReport,listTargetManifests,searchRecords,configurationExporter} from "../../../packages/core/src/index.js";
-import {exportFormats,getExportArtifact,getExportWarnings} from "../../../packages/targets/src/exporters.js";
+import {exportFormats} from "../../../packages/targets/src/exporters.js";
 import {recommendedDnsServices} from "../../../packages/catalog/src/recommended-dns.js";
 import {configurationWizard} from "./wizard.js";
 import {applyWizardSkipSemantics,configurationWizardSteps} from "./wizard-steps.js";
