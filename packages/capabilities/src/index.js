@@ -15,6 +15,52 @@ export const CapabilityDecision = Object.freeze({
 
 const VALID_STATES = new Set(Object.values(CapabilityState));
 
+export const CapabilityId = Object.freeze({
+  VPN:"vpn",
+  DNS:"dns",
+  ROUTING:"routing",
+  BLOCKING_MALWARE:"blocking.malware",
+  BLOCKING_TRACKERS:"blocking.trackers",
+  ROUTING_RULES:"routing.rules",
+  DNS_PROFILES:"dns.profiles",
+  DNS_RESOLUTION:"dns.resolution",
+  DNS_PIPELINE:"dns.pipeline",
+  PROXY_SERVER:"proxy.server",
+  BLOCKLISTS:"blocking.blocklists",
+  SYSTEM_BYPASS:"routing.bypassSystem",
+  WEB_ENTRY:"web.entry",
+  RUNTIME_COMMANDS:"runtime.commands"
+});
+
+export const CapabilityDefinitions = Object.freeze([
+  Object.freeze({id:CapabilityId.VPN,source:"vpn",kind:"feature"}),
+  Object.freeze({id:CapabilityId.DNS,source:"dns",kind:"feature"}),
+  Object.freeze({id:CapabilityId.ROUTING,source:"routing",kind:"feature"}),
+  Object.freeze({id:CapabilityId.BLOCKING_MALWARE,source:"blocking.malware",kind:"feature"}),
+  Object.freeze({id:CapabilityId.BLOCKING_TRACKERS,source:"blocking.trackers",kind:"feature"}),
+  Object.freeze({id:CapabilityId.ROUTING_RULES,source:"rules",kind:"semantic"}),
+  Object.freeze({id:CapabilityId.DNS_PROFILES,source:"dnsProfiles",kind:"semantic"}),
+  Object.freeze({id:CapabilityId.DNS_RESOLUTION,source:"dnsResolution",kind:"semantic"}),
+  Object.freeze({id:CapabilityId.DNS_PIPELINE,source:"dnsPipeline",kind:"semantic"}),
+  Object.freeze({id:CapabilityId.PROXY_SERVER,source:"proxyServer",kind:"semantic"}),
+  Object.freeze({id:CapabilityId.BLOCKLISTS,source:"blocklists",kind:"semantic"}),
+  Object.freeze({id:CapabilityId.SYSTEM_BYPASS,source:"bypassSystem",kind:"semantic"}),
+  Object.freeze({id:CapabilityId.WEB_ENTRY,source:"webEntry",kind:"semantic"}),
+  Object.freeze({id:CapabilityId.RUNTIME_COMMANDS,source:"commands",kind:"semantic"})
+]);
+
+export const defaultCapabilityRegistry=createCapabilityRegistry(
+  CapabilityDefinitions.map(definition=>({
+    ...definition,
+    states:Object.values(CapabilityState)
+  }))
+);
+
+export function getCapabilityDefinition(id){
+  const definition=CapabilityDefinitions.find(item=>item.id===id);
+  return definition ? Object.freeze({...definition}) : null;
+}
+
 export function evaluateCapability(capability,requested=true){
   if(!requested) return {requested:false,state:"NOT_REQUESTED",decision:CapabilityDecision.ALLOW};
   const state=VALID_STATES.has(capability)?capability:CapabilityState.UNKNOWN;
