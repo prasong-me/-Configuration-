@@ -6,7 +6,7 @@ const adapters = new Map([
     outputFormat: "plist",
     compile: (policy) => {
       const result=compileAppleMobileConfig(policy);
-      return {targetId:"apple-mobileconfig",outputFormat:"plist",representation:result.content,diagnostics:result.warnings};
+      return {...result,targetId:"apple-mobileconfig",outputFormat:"plist",representation:result.content};
     },
   })],
   ["apple-dns-declaration", Object.freeze({
@@ -14,7 +14,7 @@ const adapters = new Map([
     outputFormat: "json",
     compile: (policy) => {
       const result=compileAppleDeclarativeDns(policy);
-      return {targetId:"apple-dns-declaration",outputFormat:"json",representation:result,diagnostics:[]};
+      return {targetId:"apple-dns-declaration",outputFormat:"json",representation:result,...result};
     },
   })],
   ["apple-dns-proxy-provider-runtime", Object.freeze({
