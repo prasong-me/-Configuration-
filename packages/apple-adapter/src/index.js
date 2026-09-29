@@ -230,3 +230,4 @@ export { createProviderRuntimeIR, validateProviderRuntimeIR, isProviderRuntimeIR
 export { createProviderRuntimeGeneratorContract, validateProviderRuntimeGeneratorContract, isProviderRuntimeGeneratorAdmissionAllowed, GeneratorLanguage, GeneratorRuntimeTarget, GeneratorUnit } from "./provider-runtime-generator-contract.js";
 
 export { generateProviderRuntimeSwift, validateGeneratedProviderRuntimeSwift } from "./provider-runtime-swift-generator.js";
+export { decodeDnsWireMessage, encodeDnsWireMessage } from "./dns-wire-runtime.js";
