@@ -26,9 +26,9 @@ export function createProviderRuntimeIR(input = {}) {
   const rawStages = Array.isArray(input.stages) && input.stages.length ? input.stages : runtime.stages;
   const stages = rawStages.map(stage => createProviderStageContract(stage));
   const transports = createProviderTransportContract({
-    transports: Array.isArray(input.transports) && input.transports.length
+    transports: (Array.isArray(input.transports) && input.transports.length
       ? input.transports
-      : runtime.transports,
+      : runtime.transports).slice().sort(),
   });
 
   const execution = resolveProviderStageExecutionOrder(stages);
