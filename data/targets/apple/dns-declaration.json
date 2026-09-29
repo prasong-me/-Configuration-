@@ -1,0 +1,49 @@
+{
+  "id": "apple-dns-declaration",
+  "version": "1.0.0",
+  "platforms": [
+    "ios",
+    "ipados",
+    "macos"
+  ],
+  "capabilities": [
+    "dns"
+  ],
+  "required": [
+    "declaration.identifier",
+    "dns.configuration"
+  ],
+  "optional": [
+    "name",
+    "description",
+    "activation-conditions",
+    "additional-metadata"
+  ],
+  "unsupported": [
+    "proxy",
+    "routing",
+    "wireguard.peer",
+    "third-party-syntax"
+  ],
+  "constraints": [
+    "This target is a declarative DNS configuration model, not a general-purpose proxy or VPN profile."
+  ],
+  "validation": [
+    "declaration-schema",
+    "required-fields",
+    "identifier",
+    "dns-configuration",
+    "data-types"
+  ],
+  "output": {
+    "format": "json",
+    "extension": ".json",
+    "mime": "application/json"
+  },
+  "artifactStatus": {
+    "complete": "runnable",
+    "missingRequired": "template",
+    "schemaFailure": "invalid",
+    "unsupportedCapability": "rejected"
+  }
+}
