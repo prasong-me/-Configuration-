@@ -24,7 +24,7 @@ test("stage contract resolves A-to-B-to-C deterministically", () => {
     createProviderStageContract({ id: "a", order: 1 }),
     createProviderStageContract({ id: "b", order: 2, dependsOn: ["a"] }),
   ];
-  assert.deepEqual(resolveProviderStageExecutionOrder(stages).map(stage => stage.id), ["a", "b", "c"]);
+  assert.deepEqual(resolveProviderStageExecutionOrder(stages).stages.map(stage => stage.id), ["a", "b", "c"]);
 });
 
 test("stage contract rejects a dependency cycle", () => {
