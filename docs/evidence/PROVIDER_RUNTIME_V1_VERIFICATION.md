@@ -37,6 +37,9 @@ Apple documentation confirms that `NEDNSProxyProvider` is a DNS proxy provider a
 
 - https://developer.apple.com/documentation/networkextension/nednsproxyprovider
 - https://developer.apple.com/documentation/networkextension/nednsproxyprovider/handlenewflow(_:)
+- https://developer.apple.com/documentation/networkextension/neappproxyudpflow
+- https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.networkextension
+- https://developer.apple.com/documentation/networkextension/nednsproxyprovider/handlenewflow(_:)
 - https://developer.apple.com/documentation/networkextension/neappproxyflow
 - https://developer.apple.com/documentation/networkextension/handling-flow-copying
 
@@ -44,7 +47,11 @@ Apple documentation confirms that `NEDNSProxyProvider` is a DNS proxy provider a
 
 The repository and CI tests verify deterministic source generation and the JavaScript execution model. They do **not** prove that the generated Swift source compiles or runs on an Apple device.
 
+Apple documentation also establishes that the DNS proxy provider uses `NEDNSProxyProvider`, `NEAppProxyFlow`, `NEAppProxyUDPFlow`, and `NEAppProxyTCPFlow`; `handleNewFlow` returns `true` when the provider elects to handle a flow and `false` when it does not. UDP read/write APIs are currently documented with newer flow-endpoint variants while older methods are deprecated.
+
 No Mac/Xcode runtime validation is claimed here.
+
+The previously proposed fixed 15 MB iOS memory ceiling is **not treated as an authoritative requirement** in this record because no Apple documentation was established for that exact universal limit.
 
 The generated v1 Swift flow entrypoint intentionally fails closed because actual Network Extension flow I/O, DNS wire encode/decode integration, upstream transport implementation, and stage-handler wiring are outside this generator boundary.
 
