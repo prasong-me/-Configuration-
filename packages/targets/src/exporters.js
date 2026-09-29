@@ -41,7 +41,7 @@ function exportQuantumultX(p){
 }
 export const exportFormats=[
  {id:"surge",label:"Surge",extension:".conf",mime:"text/plain",status:"verified",description:"Surge profile export."},
- {id:"mihomo",label:"Mihomo / Clash-compatible",extension:".yaml",mime:"text/yaml",status:"template-export",description:"YAML target configuration; runtime verification remains separate."},
+ {id:"mihomo",label:"Mihomo / Clash-compatible",extension:".yaml",mime:"application/yaml",status:"template-export",description:"YAML target configuration; runtime verification remains separate."},
  {id:"wireguard",label:"WireGuard",extension:".conf",mime:"text/plain",status:"partial-tested",description:"WireGuard configuration; secrets are emitted only when supplied."},
  {id:"shadowrocket",label:"Shadowrocket",extension:".conf",mime:"text/plain",status:"partial-tested",description:"Shadowrocket profile configuration."},
  {id:"loon",label:"Loon",extension:".lcf",mime:"text/plain",status:"template-export",description:"Loon section-based configuration."},
