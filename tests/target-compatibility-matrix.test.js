@@ -24,6 +24,13 @@ test("requested UNKNOWN and UNSUPPORTED capabilities remain fail-closed",()=>{
       else if(definition.id==="policy.providers") policy.policy.providers=[{id:"provider-1"}];
       else if(definition.id==="routing.bypassSystem") policy.policy[definition.source]=true;
       else if(definition.id==="web.entry") policy.policy[definition.source]={url:"https://example.invalid"};
+      else if(definition.id==="proxy.server") policy.policy[definition.source]="proxy.example:8080";
+      else if(definition.id==="dns.resolution") policy.policy[definition.source]={mode:"sequential",requiredProfiles:1};
+      else if(definition.id==="routing.final") policy.policy[definition.source]="REJECT";
+      else if(definition.id==="routing.rules") policy.policy[definition.source]=[{match:"example.com",action:"REJECT"}];
+      else if(definition.id==="dns.profiles") policy.policy[definition.source]=[{id:"dns-1",servers:["1.1.1.1"]}];
+      else if(definition.id==="blocking.blocklists") policy.policy[definition.source]=[{source:"https://example.invalid/list.txt"}];
+      else if(definition.id==="runtime.commands") policy.policy[definition.source]=[{id:"requested"}];
       else policy.policy[definition.source]=[{id:"requested"}];
       const report=compatibilityReport(policy,manifest.id);
       assert.equal(report.exportable,false,manifest.id+" should block "+definition.id+" ("+state+")");
