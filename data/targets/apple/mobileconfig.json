@@ -1,0 +1,58 @@
+{
+  "id": "apple-mobileconfig",
+  "version": "1.0.0",
+  "platforms": [
+    "ios",
+    "ipados",
+    "macos"
+  ],
+  "capabilities": [
+    "dns",
+    "vpn",
+    "mobileconfig"
+  ],
+  "required": [
+    "payload.metadata",
+    "payload.type",
+    "payload.identifier",
+    "payload.uuid",
+    "payload.content"
+  ],
+  "optional": [
+    "displayName",
+    "organization",
+    "description",
+    "removalPassword",
+    "expiration"
+  ],
+  "unsupported": [
+    "surge.syntax",
+    "mihomo.syntax",
+    "shadowrocket.syntax",
+    "loon.syntax",
+    "stash.syntax",
+    "quantumultX.syntax"
+  ],
+  "constraints": [
+    "Every payload must conform to the selected Apple payload schema.",
+    "A capability not represented by an Apple payload must not be silently approximated."
+  ],
+  "validation": [
+    "schema",
+    "uuid",
+    "identifier",
+    "payload-nesting",
+    "platform-compatibility"
+  ],
+  "output": {
+    "format": "plist",
+    "extension": ".mobileconfig",
+    "mime": "application/x-apple-aspen-config"
+  },
+  "artifactStatus": {
+    "complete": "runnable",
+    "missingRequired": "template",
+    "schemaFailure": "invalid",
+    "unsupportedCapability": "rejected"
+  }
+}
