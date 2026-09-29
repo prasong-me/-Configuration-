@@ -86,6 +86,8 @@ export function compile(policyInput,targetId,adapter){
   const report=compatibilityReport(policyInput,targetId);
   if(!report.exportable) return {ok:false,report,artifact:null};
 
+  const semantic=compileSemanticModel(policyInput,targetId);
+
   if(!adapter||adapter.targetId!==targetId||typeof adapter.compile!=="function"){
     const diagnostics=[
       ...report.diagnostics,
@@ -104,5 +106,5 @@ export function compile(policyInput,targetId,adapter){
   }
 
   const artifact=adapter.compile(report.policy);
-  return {ok:true,report,artifact};
+  return {ok:true,report,semantic,artifact};
 }
