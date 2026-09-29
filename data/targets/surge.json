@@ -1,0 +1,66 @@
+{
+  "id": "surge",
+  "version": "1.0.0",
+  "platforms": [
+    "ios",
+    "ipados",
+    "macos"
+  ],
+  "capabilities": [
+    "dns",
+    "proxy",
+    "routing",
+    "rules",
+    "vpn"
+  ],
+  "required": {
+    "dns": [
+      "dns.configuration"
+    ],
+    "proxy": [
+      "proxy.id",
+      "proxy.type",
+      "proxy.server",
+      "proxy.port"
+    ],
+    "rule": [
+      "rule.match",
+      "rule.action"
+    ]
+  },
+  "optional": [
+    "proxy.credentials",
+    "proxy.tls",
+    "proxy.udp",
+    "dns.fallback",
+    "policy-groups"
+  ],
+  "unsupported": [
+    "unknown-section",
+    "unresolved-proxy-reference"
+  ],
+  "constraints": [
+    "A PROXY action requires a resolvable proxy node or group.",
+    "Never convert PROXY to DIRECT without an explicit canonical fallback policy."
+  ],
+  "validation": [
+    "section-syntax",
+    "proxy-reference-resolution",
+    "server",
+    "port",
+    "rule-syntax",
+    "dns-syntax"
+  ],
+  "output": {
+    "format": "text",
+    "extension": ".conf",
+    "mime": "text/plain"
+  },
+  "artifactStatus": {
+    "complete": "runnable",
+    "missingRuntimeData": "template",
+    "partialMapping": "partial",
+    "unsupportedCapability": "rejected",
+    "invalidSyntax": "invalid"
+  }
+}
