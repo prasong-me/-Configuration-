@@ -21,7 +21,6 @@ public struct DNSProxyUpstreamConfiguration: Sendable {
     }
 }
 
-@available(macOS 15.0, *)
 public final class DNSProxyFlowSession {
     private let flow: NEAppProxyFlow
     private let upstream: DNSProxyUpstreamConfiguration
