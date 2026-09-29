@@ -1,40 +1,55 @@
 import { compileTargetExport } from "../packages/targets/src/exporters.js";
 import { listTargetData } from "../packages/targets/src/target-data.js";
 
-const targets = listTargetData();
+const scenarioId = "dns";
+const targets = listTargetData().filter(target => target.capabilities.includes("dns"));
+
 const dnsServers = ["9.9.9.9", "149.112.112.112"];
 const input = {
   policy: {
-    name: "Export Inspection",
+    name: "DNS Export Inspection",
     dns: true,
+    dnsProtocol: "HTTPS",
     dnsServers,
+    dnsServerUrl: "https://dns.quad9.net/dns-query",
+    dnsServerName: "dns.quad9.net",
+    dnsDomains: ["example.com", "internal.example"],
     dnsProfiles: [{
       id: "inspection-dns",
-      name: "Inspection DNS",
+      name: "Inspection DoH",
       protocol: "HTTPS",
       servers: dnsServers,
       endpoint: "https://dns.quad9.net/dns-query",
+      serverName: "dns.quad9.net",
+      domains: ["example.com", "internal.example"],
       enabled: true
-    }],
-    rules: [
-      { type: "DOMAIN-SUFFIX", value: "example.com", policy: "DIRECT" },
-      { type: "DOMAIN-SUFFIX", value: "proxy.example", policy: "PROXY" }
-    ],
-    finalPolicy: "DIRECT",
-    bypassSystem: true
+    }]
   }
 };
 
-const expectedExtension = new Map(targets.map(t => [t.id, t.output.extension]));
+const outputDir = new URL("../artifacts/export-inspection/", import.meta.url);
+const fs = await import("node:fs/promises");
+const path = await import("node:path");
+const outputPath = path.resolve(outputDir.pathname);
+
 const failures = [];
 const warnings = [];
+const artifacts = [];
 
 function fail(targetId, code, message) {
-  failures.push({ targetId, code, message });
+  failures.push({ scenarioId, targetId, code, message });
 }
+
 function warn(targetId, code, message) {
-  warnings.push({ targetId, code, message });
+  warnings.push({ scenarioId, targetId, code, message });
 }
+
+function hasAll(artifact, values) {
+  return values.every(value => artifact.includes(value));
+}
+
+await fs.rm(outputPath, { recursive: true, force: true });
+await fs.mkdir(outputPath, { recursive: true });
 
 for (const target of targets) {
   let result;
@@ -46,101 +61,127 @@ for (const target of targets) {
   }
 
   const artifact = String(result.representation ?? "");
-  if (!artifact.trim()) fail(target.id, "EMPTY_ARTIFACT", "Exporter produced an empty artifact.");
+  if (!artifact.trim()) {
+    fail(target.id, "EMPTY_ARTIFACT", "DNS exporter produced an empty artifact.");
+    continue;
+  }
 
-  if (result.filename !== `${target.id}-config${expectedExtension.get(target.id)}`) {
-    fail(target.id, "FILENAME_MISMATCH", `Expected target extension ${expectedExtension.get(target.id)}.`);
+  if (result.filename !== `${target.id}-config${target.output.extension}`) {
+    fail(target.id, "FILENAME_MISMATCH", `Expected ${target.output.extension} for ${target.id}.`);
   }
 
   if (result.mime !== target.output.mime) {
     fail(target.id, "MIME_MISMATCH", `Exporter MIME ${result.mime} differs from target data MIME ${target.output.mime}.`);
   }
 
-  const expectedFormat = target.output.format;
-  const formatMap = { "plist": "plist", "json": "json", "yaml": "yaml", "text": "text", "ini": "text" };
-  const expectedOutputFormat = formatMap[expectedFormat];
+  const formatMap = { plist: "plist", json: "json", yaml: "yaml", text: "text", ini: "text" };
+  const expectedOutputFormat = formatMap[target.output.format];
   if (expectedOutputFormat && result.outputFormat !== expectedOutputFormat) {
-    fail(target.id, "OUTPUT_FORMAT_MISMATCH", `Target data declares ${expectedFormat}; exporter reports ${result.outputFormat}.`);
+    fail(target.id, "OUTPUT_FORMAT_MISMATCH", `Target data declares ${target.output.format}; exporter reports ${result.outputFormat}.`);
   }
 
-  for (const server of dnsServers) {
-    if (artifact.includes(server) === false && target.capabilities.includes("dns")) {
-      warn(target.id, "DNS_NOT_EMITTED", `Input DNS server ${server} was not found in the exported artifact.`);
-    }
-  }
-
-  if (artifact.includes("proxy.example") && !artifact.includes("PROXY")) {
-    warn(target.id, "PROXY_TOKEN_NOT_PRESERVED", "The canonical PROXY rule may have been transformed; inspect policy semantics before accepting the artifact.");
+  if (!hasAll(artifact, dnsServers)) {
+    fail(target.id, "DNS_SERVER_LOSS", "One or more canonical DNS server values were not preserved.");
   }
 
   if (target.id === "apple-dns-declaration") {
     try {
       const declaration = JSON.parse(artifact);
+      const settings = declaration.Payload?.DNSSettings;
       if (declaration.Type !== "com.apple.configuration.network.dns-settings") {
-        fail(target.id, "APPLE_DNS_TYPE", "Declarative DNS Type is not the expected Apple DNS declaration type.");
+        fail(target.id, "APPLE_DNS_TYPE", "Unexpected Apple declarative DNS Type.");
       }
-      if (!declaration.Payload?.DNSSettings?.DNSProtocol) {
-        fail(target.id, "APPLE_DNS_PROTOCOL", "Declarative DNS DNSProtocol is missing.");
+      if (settings?.DNSProtocol !== "HTTPS") {
+        fail(target.id, "APPLE_DNS_PROTOCOL", "Apple DNS declaration did not preserve DNSProtocol=HTTPS.");
+      }
+      if (settings?.ServerURL !== "https://dns.quad9.net/dns-query") {
+        fail(target.id, "APPLE_DNS_SERVER_URL", "Apple DNS declaration did not preserve the DoH ServerURL.");
+      }
+      if (settings?.ServerName !== "dns.quad9.net") {
+        fail(target.id, "APPLE_DNS_SERVER_NAME", "Apple DNS declaration did not preserve ServerName.");
+      }
+      if (!hasAll(JSON.stringify(settings?.SupplementalMatchDomains ?? []), input.policy.dnsDomains)) {
+        warn(target.id, "DNS_DOMAINS_NOT_EMITTED", "Supplemental DNS domains were not preserved by the declarative DNS exporter.");
       }
     } catch {
       fail(target.id, "JSON_INVALID", "Apple DNS declaration artifact is not valid JSON.");
     }
-  }
+  } else if (["apple-mobileconfig", "apple-mobileconfig-legacy"].includes(target.id)) {
+    if (!artifact.includes("dns.quad9.net")) {
+      fail(target.id, "DNS_ENDPOINT_LOSS", "Apple MobileConfig artifact did not preserve the configured DNS endpoint.");
+    }
+    if (!hasAll(artifact, dnsServers)) {
+      fail(target.id, "DNS_SERVER_LOSS", "Apple MobileConfig artifact did not preserve all DNS server values.");
+    }
+    if (!artifact.includes("HTTPS")) {
+      warn(target.id, "DNS_PROTOCOL_NOT_VISIBLE", "The serialized MobileConfig does not visibly contain the HTTPS protocol token; inspect the DNS payload structure before acceptance.");
+    }
+  } else {
+    if (artifact.includes("dns-server") || artifact.includes("nameserver") || artifact.includes("server =")) {
+      if (!artifact.includes("9.9.9.9") || !artifact.includes("149.112.112.112")) {
+        fail(target.id, "DNS_SERVER_LOSS", "Target has a DNS field but did not preserve all DNS servers.");
+      }
+    } else {
+      fail(target.id, "DNS_FIELD_MISSING", "Target is DNS-capable but exporter emitted no recognizable DNS field.");
+    }
 
-  const requiredSections = {
-    surge: ["[Proxy]", "[Rule]"],
-    shadowrocket: ["[Proxy]", "[Rule]"],
-    loon: ["[Proxy]", "[Proxy Group]", "[Rule]"],
-    "quantumult-x": ["[dns]", "[policy]", "[filter_local]"],
-    wireguard: ["[Interface]", "[Peer]"]
-  };
-
-  for (const section of requiredSections[target.id] ?? []) {
-    if (!artifact.includes(section)) fail(target.id, "SECTION_MISSING", `Missing required structural marker ${section}.`);
-  }
-
-  if (["mihomo", "stash"].includes(target.id)) {
-    for (const key of ["dns:", "proxies:", "proxy-groups:", "rules:"]) {
-      if (!artifact.includes(key)) fail(target.id, "YAML_SECTION_MISSING", `Missing YAML marker ${key}.`);
+    if (artifact.includes("dns.quad9.net")) {
+      warn(target.id, "DNS_ENDPOINT_TRANSFORMED", "The DoH endpoint hostname is present, but target-specific protocol semantics require separate validation.");
+    } else {
+      warn(target.id, "DNS_PROTOCOL_METADATA_NOT_EMITTED", "DNS server values were exported, but DoH endpoint/protocol metadata was not emitted.");
     }
   }
-}
 
-const fs = await import("node:fs/promises");
-const path = await import("node:path");
-const outputDir = path.resolve("artifacts/export-inspection");
-await fs.rm(outputDir, { recursive: true, force: true });
-await fs.mkdir(outputDir, { recursive: true });
-
-for (const item of artifacts) {
-  const targetDir = path.join(outputDir, item.targetId);
+  const targetDir = path.join(outputPath, scenarioId, target.id);
   await fs.mkdir(targetDir, { recursive: true });
-  await fs.writeFile(path.join(targetDir, item.filename), item.content, "utf8");
-  await fs.writeFile(path.join(targetDir, "manifest.json"), JSON.stringify({
-    targetId: item.targetId,
-    filename: item.filename,
-    mime: item.mime,
-    outputFormat: item.outputFormat,
-    declaredFormat: item.declaredFormat,
-    status: item.status,
-    bytes: item.bytes
-  }, null, 2) + "\n", "utf8");
+  await fs.writeFile(path.join(targetDir, result.filename), artifact, "utf8");
+
+  const manifest = {
+    scenarioId,
+    targetId: target.id,
+    declaredCapabilities: target.capabilities,
+    declaredFormat: target.output.format,
+    filename: result.filename,
+    mime: result.mime,
+    outputFormat: result.outputFormat,
+    verifiedStatus: result.verifiedStatus,
+    bytes: Buffer.byteLength(artifact, "utf8"),
+    inputCoverage: {
+      dnsServers,
+      dnsProtocol: input.policy.dnsProtocol,
+      dnsServerUrl: input.policy.dnsServerUrl,
+      dnsServerName: input.policy.dnsServerName,
+      dnsDomains: input.policy.dnsDomains
+    }
+  };
+
+  await fs.writeFile(
+    path.join(targetDir, "manifest.json"),
+    JSON.stringify(manifest, null, 2) + "\n",
+    "utf8"
+  );
+
+  artifacts.push(manifest);
 }
-await fs.writeFile(path.join(outputDir, "manifest.json"), JSON.stringify({
-  inspection: "target-export-artifacts",
-  generatedTargets: artifacts.length,
-  files: artifacts.map(({ content, ...item }) => item)
-}, null, 2) + "\n", "utf8");
 
 const report = {
   inspection: "target-export-artifacts",
+  scenarioId,
   targetCount: targets.length,
+  generatedArtifacts: artifacts.length,
   passed: failures.length === 0,
   failureCount: failures.length,
   warningCount: warnings.length,
   failures,
-  warnings
+  warnings,
+  artifacts
 };
+
+await fs.writeFile(
+  path.join(outputPath, scenarioId, "manifest.json"),
+  JSON.stringify(report, null, 2) + "\n",
+  "utf8"
+);
 
 console.log(JSON.stringify(report, null, 2));
 process.exitCode = failures.length ? 1 : 0;
