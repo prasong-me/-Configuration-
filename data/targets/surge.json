@@ -1,55 +1,53 @@
 {
   "id": "surge",
-  "version": "1.0.0",
-  "platforms": [
-    "ios",
-    "ipados",
-    "macos"
-  ],
-  "capabilities": [
-    "dns",
-    "proxy",
-    "routing",
-    "rules",
-    "vpn"
-  ],
+  "version": "1.1.0",
+  "platforms": ["ios", "ipados", "macos"],
+  "capabilities": ["dns", "proxy", "routing", "rules", "vpn"],
   "required": {
-    "dns": [
-      "dns.configuration"
-    ],
-    "proxy": [
-      "proxy.id",
-      "proxy.type",
-      "proxy.server",
-      "proxy.port"
-    ],
-    "rule": [
-      "rule.match",
-      "rule.action"
-    ]
+    "proxy": ["name", "type", "server", "port"],
+    "rule": ["type", "value", "policy"],
+    "finalRule": ["policy"]
   },
   "optional": [
-    "proxy.credentials",
+    "proxy.username",
+    "proxy.password",
     "proxy.tls",
     "proxy.udp",
-    "dns.fallback",
-    "policy-groups"
+    "dns-server",
+    "fallback-dns-server",
+    "policy-groups",
+    "general",
+    "tun"
   ],
   "unsupported": [
     "unknown-section",
     "unresolved-proxy-reference"
   ],
   "constraints": [
-    "A PROXY action requires a resolvable proxy node or group.",
-    "Never convert PROXY to DIRECT without an explicit canonical fallback policy."
+    "A proxy entry is defined in [Proxy] as <name> = <type>, <server>, <port>, followed by optional credentials/options.",
+    "A routing rule is defined in [Rule] as TYPE,VALUE,POLICY with optional rule options.",
+    "The final fallback is a FINAL rule and must define a policy.",
+    "A proxy policy must resolve to a defined proxy or policy group unless it is an explicit built-in policy such as DIRECT or REJECT.",
+    "Never convert a proxy policy to DIRECT without an explicit canonical fallback policy."
   ],
+  "syntax": {
+    "container": "INI-like text",
+    "sections": ["[General]", "[Proxy]", "[Proxy Group]", "[Rule]"],
+    "proxyEntry": "<name> = <type>, <server>, <port>[, <username>, <password>][, <option>...]",
+    "ruleEntry": "TYPE,VALUE,POLICY[,OPTION...]",
+    "finalRule": "FINAL,POLICY[,OPTION...]",
+    "comment": "# comment"
+  },
   "validation": [
     "section-syntax",
+    "proxy-entry-syntax",
     "proxy-reference-resolution",
     "server",
     "port",
     "rule-syntax",
-    "dns-syntax"
+    "final-rule",
+    "dns-syntax",
+    "policy-resolution"
   ],
   "output": {
     "format": "text",
