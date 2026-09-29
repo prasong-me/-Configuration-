@@ -15,7 +15,7 @@
 - Target exporters ต้องตรวจสอบแยกตาม format ว่าสามารถแทนหลาย DNS profiles ได้ครบเพียงใด
 - Generic `webEntry` อยู่ใน core และให้ Target adapter เป็นผู้แปลง
 - Apple มี MobileConfig และ declarative DNS; legacy DNS payload ไม่ถือเป็นรูปแบบสมัยใหม่โดยอัตโนมัติ
-- Wizard DNS → Wi-Fi → VPN → Proxy → Web App → Review/Export ยังเป็นงานที่วางแผนไว้ ไม่ใช่ UI ที่เสร็จแล้ว
+- Wizard ปัจจุบันมี 6 ขั้น: Intent → Source → DNS / Policy → Target → Compatibility → Review / Export; flow นี้เป็น implementation ปัจจุบันและใช้เป็น source สำหรับเอกสาร UI
 - Certificates/signing ไม่ใช่ dependency กลางและจะทำเฉพาะเมื่อ Target ต้องใช้
 - Target จะถูกระบุว่า verified จากหลักฐานการทดสอบจริง ไม่ใช่จาก exporter เพียงอย่างเดียว
 
