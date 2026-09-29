@@ -47,9 +47,42 @@ test("DNS wire decoder enforces message size limit", () => {
   );
 });
 
-test("DNS wire encoder remains fail-closed until wire-preservation exists", () => {
+
+test("DNS wire encoder preserves a query semantically", () => {
+  const message = decodeDnsWireMessage(query);
+  const encoded = encodeDnsWireMessage(message);
+  const decoded = decodeDnsWireMessage(encoded);
+  assert.deepEqual(decoded, message);
+});
+
+test("DNS wire encoder emits an uncompressed A answer deterministically", () => {
+  const message = decodeDnsWireMessage(answer);
+  const encoded = encodeDnsWireMessage(message);
+  const decoded = decodeDnsWireMessage(encoded);
+  assert.equal(decoded.transactionId, 0x1234);
+  assert.equal(decoded.answers[0].name, "example.com");
+  assert.equal(decoded.answers[0].type, "A");
+  assert.deepEqual([...decoded.answers[0].rdata], [1, 2, 3, 4]);
+  assert.deepEqual([...encodeDnsWireMessage(message)], [...encoded]);
+});
+
+test("DNS wire encoder rejects compressed-name RDATA without structured semantics", () => {
+  const cname = {
+    transactionId: 1,
+    flags: 0x8180,
+    questions: [],
+    answers: [{
+      name: "example.com",
+      type: "CNAME",
+      class: 1,
+      ttl: 60,
+      rdata: Uint8Array.of(0xc0, 0x0c),
+    }],
+    authority: [],
+    additional: [],
+  };
   assert.throws(
-    () => encodeDnsWireMessage({ transactionId: 1, flags: 0, questions: [] }),
-    error => error.code === "DNS_WIRE_ENCODE_UNIMPLEMENTED"
+    () => encodeDnsWireMessage(cname),
+    error => error.code === "DNS_WIRE_RDATA_STRUCTURED_REQUIRED"
   );
 });
