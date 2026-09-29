@@ -1,0 +1,60 @@
+{
+  "id": "shadowrocket",
+  "version": "1.0.0",
+  "platforms": [
+    "ios",
+    "ipados"
+  ],
+  "capabilities": [
+    "dns",
+    "proxy",
+    "routing",
+    "rules"
+  ],
+  "required": {
+    "dns": [
+      "dns.configuration"
+    ],
+    "proxy": [
+      "proxy.id",
+      "proxy.type",
+      "proxy.server",
+      "proxy.port"
+    ],
+    "rule": [
+      "rule.match",
+      "rule.action"
+    ]
+  },
+  "optional": [
+    "proxy.credentials",
+    "bypass-system",
+    "policy-groups"
+  ],
+  "unsupported": [
+    "unresolved-proxy-reference"
+  ],
+  "constraints": [
+    "A PROXY rule must reference an actual proxy node or group.",
+    "Do not emit an empty proxy section for a policy that requires a proxy."
+  ],
+  "validation": [
+    "section-structure",
+    "proxy-reference-resolution",
+    "dns-syntax",
+    "rule-syntax",
+    "proxy-fields"
+  ],
+  "output": {
+    "format": "text",
+    "extension": ".conf",
+    "mime": "text/plain"
+  },
+  "artifactStatus": {
+    "complete": "runnable",
+    "missingRuntimeData": "template",
+    "partialMapping": "partial",
+    "unsupportedCapability": "rejected",
+    "invalidSyntax": "invalid"
+  }
+}
