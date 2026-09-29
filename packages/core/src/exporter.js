@@ -4,7 +4,7 @@ import { getTargetManifest } from "../../targets/src/index.js";
 import { getTargetAdapter } from "../../targets/src/adapters.js";
 import { compileSurge } from "../../surge-adapter/src/index.js";
 import { getExportArtifact } from "../../targets/src/exporters.js";
-import { inspectCompileResult } from "./compiler.js";
+import { inspectCompileResult, compileToTargetIR } from "./compiler.js";
 
 const OUTPUT_FORMATS=Object.freeze({
   "apple-mobileconfig":"plist",
@@ -63,8 +63,15 @@ export function createConfigurationExporter({targets={resolve:defaultTargetResol
         return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics};
       }
 
+      let semantic;
+      try{ semantic=compileToTargetIR(processingResult.policy,targetId); }
+      catch(error){
+        exportDiagnostics.push(fail("SEMANTIC_COMPILE_FAILED",error?.message||"Semantic compilation failed.",{target:targetId}));
+        return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics};
+      }
+
       let compiled;
-      try{ compiled=target.adapter.compile(processingResult.policy); }
+      try{ compiled=target.adapter.compile(processingResult.policy,semantic); }
       catch(error){
         exportDiagnostics.push(fail("COMPILE_FAILED",error?.message||"Target adapter compilation failed.",{target:targetId}));
         return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics};
@@ -106,6 +113,7 @@ export function createConfigurationExporter({targets={resolve:defaultTargetResol
         outputFormat:compiled.outputFormat,
         targetId,
         resultMetadata:processingResult.resultMetadata,
+        semantic,
         diagnostics:exportDiagnostics
       };
     }
