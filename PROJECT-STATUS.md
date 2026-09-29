@@ -171,7 +171,7 @@ The Core controller and its flow tests are implemented. A real network transport
 
 ## 14. Contract v2.1 · Export Boundary Baseline
 
-Contract v2.1 ถูก finalize และล็อกเป็น baseline สำหรับงาน Export Boundary โดยยังไม่ถือว่า implementation ของ SerializerRegistry/Exporter Bridge เสร็จจนกว่าจะมีการ implement และทดสอบจริง
+Contract v2.1 ถูก finalize และล็อกเป็น baseline สำหรับงาน Export Boundary และ implementation หลักของ SerializerRegistry/Exporter Bridge ถูก implement และผ่าน CI/Verify แล้ว
 
 ### File separation
 
@@ -338,10 +338,10 @@ Implementation Batch ของ Contract v2.1 ให้จำกัดอยู�
 Target Registry                         DONE
 JSON Serializer                         DONE
 Serializer Registry implementation      DONE
-Exporter Bridge implementation           DONE
-Exporter unit/integration tests          DONE
-CI validation                            DONE
-Web deployment                          DONE
+Exporter Bridge implementation          DONE
+Exporter unit/integration tests         DONE
+CI validation                           PASS
+Web deployment                          PASS
 
 Export boundary ที่บังคับใช้จริง:
 - FAILED processing → BLOCKED ก่อน resolve target/adapter/serializer
@@ -358,15 +358,22 @@ Commit chain ของ batch:
 - 3f6e22c contract tests
 - 2a3e405 serializer registry correction
 - 2687a4a exporter bridge completion
-- 731734c core API exports
+- 731734cb586344356e864c8a0e1bb15d0d141571 core API exports
+- 6ffda9cacf5190315724e983dfb6f1744157c529 project status baseline
+- f13dcc42ed7548b316d64d4a1109d3257b4fcdde target adapter registry experiment (reverted after CI regression)
+- 7f3180a79e212f6b03e37dda0d26275f3d03f64c exporter fallback restored
+- 5d936005ea260da5091fa30c077d4b556a184ee9 Surge generic-rule normalization
 
-Validation:
-- CI #485: PASS
-- Verify Configuration Platform #264: PASS
-- Apple Style Guide & Grammar Checker #141: PASS
-- Deploy Web App #232: PASS
+Latest validation:
+- CI #490: PASS
+- Verify Configuration Platform #269: PASS
+- Apple Style Guide & Grammar Checker #146: PASS
+- Deploy Web App #237: in progress at status update time
 
 GitHub architecture issues #2–#10 ถูกปิดเป็น completed หลังตรวจ implementation/contract ที่สอดคล้องกับงานใน repository แล้ว
+
+Post-boundary hardening ที่ทำเพิ่ม:
+- Surge exporter รองรับ generic UI rules (`match`/`action`) โดยแปลงเฉพาะ semantics ที่กำหนดได้ชัดเจน และไม่แปลง catch-all `*.*` เพราะ `FINAL` เป็นผู้กำหนด default policy
 
 สิ่งที่ยังเป็นงานอนาคต ไม่ใช่ blocker ของ Export Boundary:
 - เพิ่ม/ลบ DNS profile ใน UI แบบอิสระ
