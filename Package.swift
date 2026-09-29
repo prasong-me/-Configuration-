@@ -2,7 +2,7 @@
 import PackageDescription
 let package = Package(
     name: "ConfigurationAppleProvider",
-    platforms: [.macOS(.v15)],
+    platforms: [.macOS(.v14)],
     products: [.library(name: "ConfigurationAppleProvider", targets: ["ConfigurationAppleProvider"])],
     targets: [
         .target(name: "ConfigurationAppleProvider", path: "apple-runtime"),
