@@ -194,3 +194,9 @@ export function compileAppleDeclarativeDns(input={}){
 }
 
 export { analyzeAppleChainTopology, classifyAppleDnsChain, createAppleChainIR, isAppleChainAdmissionAllowed, AppleClassification, AppleTopology } from "./apple-chain-ir.js";
+
+export { createProviderRuntimeContract, validateProviderRuntimeContract, isProviderRuntimeAdmissionAllowed } from "./provider-runtime-contract.js";
+export { createDnsWireParserContract, validateDnsWireParserContract } from "./dns-wire-contract.js";
+export { createProviderStageContract, validateProviderStageContract, resolveProviderStageExecutionOrder } from "./provider-stage-contract.js";
+export { createProviderTransportContract, validateProviderTransportContract, ProviderTransportMode } from "./provider-transport-contract.js";
+export { createProviderRuntimeIR, validateProviderRuntimeIR, isProviderRuntimeIRAdmissionAllowed, canonicalizeProviderRuntimeIR } from "./provider-runtime-ir.js";
