@@ -18,6 +18,18 @@ export { CompilerContract, CompileResultContract, createCompileResult, inspectCo
 
 export { normalizePolicy } from "./policy-normalizer.js";
 
+const SEMANTIC_CAPABILITY_PATHS={
+  [CapabilityId.ROUTING_RULES]:p=>p.rules,
+  [CapabilityId.DNS_PROFILES]:p=>p.dnsProfiles,
+  [CapabilityId.DNS_RESOLUTION]:p=>p.dnsResolution,
+  [CapabilityId.DNS_PIPELINE]:p=>p.dnsPipeline,
+  [CapabilityId.PROXY_SERVER]:p=>p.proxyServer,
+  [CapabilityId.BLOCKLISTS]:p=>p.blocklists,
+  [CapabilityId.SYSTEM_BYPASS]:p=>p.bypassSystem,
+  [CapabilityId.WEB_ENTRY]:p=>p.webEntry,
+  [CapabilityId.RUNTIME_COMMANDS]:p=>p.commands
+};
+
 const FEATURE_PATHS={
   [CapabilityId.VPN]:p=>p.vpn,
   [CapabilityId.DNS]:p=>p.dns,
@@ -52,6 +64,14 @@ export function compatibilityReport(policyInput,targetId){
   const capabilities={};
   for(const [feature,read] of Object.entries(FEATURE_PATHS)){
     const requested=Boolean(read(policy.policy));
+    const state=requested
+      ? (manifest.capabilities[feature] ?? CapabilityState.UNKNOWN)
+      : CapabilityState.UNKNOWN;
+    capabilities[feature]=evaluateCapability(state,requested);
+  }
+
+  for(const [feature,read] of Object.entries(SEMANTIC_CAPABILITY_PATHS)){
+    const requested=read(policy.policy)!==undefined;
     const state=requested
       ? (manifest.capabilities[feature] ?? CapabilityState.UNKNOWN)
       : CapabilityState.UNKNOWN;
