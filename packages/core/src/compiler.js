@@ -8,6 +8,40 @@ export const CompilerContract = Object.freeze({
   unknownCapability:"BLOCK"
 });
 
+export const CompileResultContract = Object.freeze({
+  version:"1.0",
+  required:Object.freeze(["targetId","outputFormat","representation"]),
+  representationOwnProperty:true
+});
+
+export function createCompileResult(targetId,outputFormat,representation){
+  if(typeof targetId!=="string"||!targetId.trim()) throw new TypeError("Compile result requires targetId.");
+  if(typeof outputFormat!=="string"||!outputFormat.trim()) throw new TypeError("Compile result requires outputFormat.");
+  return {targetId,outputFormat,representation};
+}
+
+export function inspectCompileResult(result,targetId,expectedFormat){
+  if(!result||typeof result!=="object") return {
+    code:"INVALID_COMPILE_RESULT",
+    message:"Target adapter returned a non-object compile result."
+  };
+  if(result.targetId!==targetId) return {
+    code:"TARGET_ID_MISMATCH",
+    message:"Target adapter compile result targetId does not match requested target.",
+    details:{target:targetId,actual:result.targetId}
+  };
+  if(result.outputFormat!==expectedFormat) return {
+    code:"TARGET_OUTPUT_FORMAT_MISMATCH",
+    message:"Target adapter compile result output format does not match target output format.",
+    details:{target:targetId,expected:expectedFormat,actual:result.outputFormat}
+  };
+  if(!Object.hasOwn(result,"representation")) return {
+    code:"INVALID_COMPILE_RESULT",
+    message:"Target adapter compile result is missing its representation property."
+  };
+  return null;
+}
+
 const FEATURE_ORDER=Object.freeze(["vpn","dns","routing","blocking.malware","blocking.trackers"]);
 
 function stable(value){
@@ -73,9 +107,5 @@ export function compileToTargetIR(policyInput,targetId){
     features:mapped.mappings,
     policy:stable(mapped.policy.policy)
   };
-  return {
-    targetId,
-    outputFormat:"target-ir",
-    representation:ir
-  };
+  return createCompileResult(targetId,"target-ir",ir);
 }
