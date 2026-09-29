@@ -128,6 +128,13 @@ export function mapPolicySemantics(policyInput,targetId){
   };
 }
 
+function capabilityStateFor(targetId,capabilityId){
+  // Target capability admission remains owned by compatibilityReport.
+  // The compiler records semantic mappings only; unknown target capability
+  // information must not be inferred here.
+  return {targetId,capabilityId};
+}
+
 export function compileToTargetIR(policyInput,targetId){
   const mapped=mapPolicySemantics(policyInput,targetId);
   const ir={
@@ -138,4 +145,19 @@ export function compileToTargetIR(policyInput,targetId){
     policy:stable(mapped.policy.policy)
   };
   return createCompileResult(targetId,"target-ir",ir);
+}
+
+export function compileSemanticModel(policyInput,targetId){
+  const mapped=mapPolicySemantics(policyInput,targetId);
+  return {
+    contract:CompilerContract.version,
+    targetId,
+    policyVersion:mapped.policy.version,
+    mappings:stable(mapped.mappings),
+    policy:stable(mapped.policy.policy)
+  };
+}
+
+export function listCompilerCapabilityMappings(){
+  return Object.freeze(FEATURE_ORDER.map(capabilityId=>capabilityStateFor("*",capabilityId)));
 }
