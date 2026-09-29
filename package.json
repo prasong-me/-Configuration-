@@ -8,7 +8,8 @@
     "test:core": "node --test tests/core.test.js",
     "build:web": "npm --prefix apps/web install && npm --prefix apps/web run build",
     "test:mobileconfig": "node scripts/validate-mobileconfig.mjs",
-    "test:export:routing-rules": "node scripts/inspect-export-artifacts.mjs"
+    "test:export:routing-rules": "node scripts/inspect-export-artifacts.mjs",
+    "test:export:vpn": "node scripts/inspect-vpn-export-artifacts.mjs"
   },
   "workspaces": [
     "packages/*",
