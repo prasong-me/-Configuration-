@@ -172,3 +172,16 @@ The generator must not flatten an ordered A->B->C runtime into Apple ServerAddre
 ### Artifact boundary
 
 The contract describes generated-source metadata: language, runtime target, entrypoint, generated files/units, and source-chain provenance. Actual Swift generation is a subsequent implementation step. This keeps the contract testable before committing to a concrete Swift source layout.
+## Swift Provider Runtime Generator v1
+
+The first generator implementation consumes only an admitted `PROVIDER_RUNTIME_IR v1` and emits deterministic Swift source metadata for a Network Extension DNS proxy provider.
+
+Generation boundary:
+
+`PROVIDER_RUNTIME_IR v1 → Generator Contract v1 → Swift Generator v1 → GENERATED_RUNTIME_SOURCE`
+
+The generator preserves source-chain provenance, stage order/dependencies, failure declarations, transport declarations, and bounded resource declarations. Invalid Runtime IR is blocked and no source artifact is returned.
+
+The generated source establishes the `NEDNSProxyProvider` lifecycle boundary and embeds the admitted runtime plan. It does not reinterpret native MobileConfig/DDM DNS settings as an execution pipeline.
+
+Swift source generation is therefore a mechanical compilation step, not an Apple capability inference step.
