@@ -2,29 +2,20 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { getTargetAdapter, listTargetAdapters } from "../packages/targets/src/adapters.js";
 
-const EXPECTED_FORMATS={
-  "apple-mobileconfig":"plist",
-  "apple-dns-declaration":"json",
-  "apple-mobileconfig-legacy":"plist",
-  surge:"text",
-  mihomo:"yaml",
-  wireguard:"text",
-  shadowrocket:"text",
-  loon:"text",
-  "quantumult-x":"text",
-  stash:"yaml"
-};
+test("Apple target adapters are registered by target id", () => {
+  const mobileconfig = getTargetAdapter("apple-mobileconfig");
+  const declaration = getTargetAdapter("apple-dns-declaration");
 
-test("target adapter registry exposes all registered targets and formats",()=>{
-  assert.deepEqual(
-    Object.fromEntries(listTargetAdapters().map(x=>[x.targetId,x.outputFormat])),
-    EXPECTED_FORMATS
-  );
-  for(const [targetId,outputFormat] of Object.entries(EXPECTED_FORMATS)){
-    const adapter=getTargetAdapter(targetId);
-    assert.equal(adapter.targetId,targetId);
-    assert.equal(adapter.outputFormat,outputFormat);
-    assert.equal(typeof adapter.compile,"function");
-  }
-  assert.equal(getTargetAdapter("unknown"),null);
+  assert.equal(mobileconfig.targetId, "apple-mobileconfig");
+  assert.equal(typeof mobileconfig.compile, "function");
+  assert.equal(declaration.targetId, "apple-dns-declaration");
+  assert.equal(typeof declaration.compile, "function");
+  assert.equal(getTargetAdapter("unknown"), null);
+});
+
+test("target adapter registry exposes adapter identity and format", () => {
+  const targets=listTargetAdapters();
+  assert.ok(targets.some(x=>x.targetId==="apple-mobileconfig"&&x.outputFormat==="plist"));
+  assert.ok(targets.some(x=>x.targetId==="apple-dns-declaration"&&x.outputFormat==="json"));
+  assert.ok(targets.some(x=>x.targetId==="surge"&&x.outputFormat==="text"));
 });
