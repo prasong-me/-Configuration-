@@ -15,6 +15,7 @@ const TYPE_BY_CODE = Object.freeze({
   33: "SRV",
   64: "SVCB",
   65: "HTTPS",
+  41: "OPT",
 });
 
 const CODE_BY_TYPE = Object.freeze(Object.fromEntries(Object.entries(TYPE_BY_CODE).map(([k, v]) => [v, Number(k)])));
@@ -82,6 +83,24 @@ function readName(bytes, start, limits, sectionOffset) {
   return { name: labels.join("."), nextOffset, labels };
 }
 
+function parseOptRdata(bytes, start, length) {
+  if (length < 0) fail("DNS_WIRE_TRUNCATED", "Invalid OPT RDATA length.");
+  const end = start + length;
+  let cursor = start;
+  const options = [];
+  while (cursor < end) {
+    if (cursor + 4 > end) fail("DNS_WIRE_TRUNCATED", "Truncated EDNS option header.");
+    const code = u16(bytes, cursor);
+    const optionLength = u16(bytes, cursor + 2);
+    cursor += 4;
+    if (cursor + optionLength > end) fail("DNS_WIRE_TRUNCATED", "Truncated EDNS option data.");
+    options.push({ code, data: bytes.slice(cursor, cursor + optionLength) });
+    cursor += optionLength;
+  }
+  if (cursor !== end) fail("DNS_WIRE_TRUNCATED", "Malformed EDNS option sequence.");
+  return options;
+}
+
 function parseRecord(bytes, name, limits, section) {
   let cursor = name.nextOffset;
   if (cursor + 10 > bytes.length) fail("DNS_WIRE_TRUNCATED", `Truncated ${section} record header.`);
@@ -91,18 +110,34 @@ function parseRecord(bytes, name, limits, section) {
   const rdlength = u16(bytes, cursor + 8);
   cursor += 10;
   if (cursor + rdlength > bytes.length) fail("DNS_WIRE_TRUNCATED", `Truncated ${section} record data.`);
-  return {
-    record: {
-      name: name.name,
-      type: TYPE_BY_CODE[typeCode] || `TYPE${typeCode}`,
-      typeCode,
-      class: recordClass,
-      ttl,
-      rdlength,
-      rdata: bytes.slice(cursor, cursor + rdlength),
-    },
-    nextOffset: cursor + rdlength,
+  const rawRdata = bytes.slice(cursor, cursor + rdlength);
+  let record = {
+    name: name.name,
+    type: TYPE_BY_CODE[typeCode] || `TYPE${typeCode}`,
+    typeCode,
+    class: recordClass,
+    ttl,
+    rdlength,
+    rdata: rawRdata,
   };
+  if (typeCode === 41) {
+    const extRcode = (ttl >>> 24) & 0xff;
+    const version = (ttl >>> 16) & 0xff;
+    const flags = ttl & 0xffff;
+    record = {
+      name: name.name,
+      type: "OPT",
+      typeCode: 41,
+      udpPayloadSize: recordClass,
+      extendedRcode: extRcode,
+      version,
+      do: Boolean(flags & 0x8000),
+      z: flags & 0x7fff,
+      rdlength,
+      options: parseOptRdata(bytes, cursor, rdlength),
+    };
+  }
+  return { record, nextOffset: cursor + rdlength };
 }
 
 export function decodeDnsWireMessage(input, options = {}) {
@@ -248,6 +283,21 @@ function encodeRdata(record) {
     ]);
   }
 
+  if (type === "OPT") {
+    if (record.name !== "" && record.name !== ".") fail("DNS_WIRE_RDATA_INVALID", "OPT owner name must be root.");
+    assertUint(record.udpPayloadSize, 0xffff, "DNS_WIRE_RDATA_INVALID", "OPT UDP payload size is invalid.");
+    assertUint(record.extendedRcode, 0xff, "DNS_WIRE_RDATA_INVALID", "OPT extended RCODE is invalid.");
+    assertUint(record.version, 0xff, "DNS_WIRE_RDATA_INVALID", "OPT version is invalid.");
+    assertUint(record.z, 0x7fff, "DNS_WIRE_RDATA_INVALID", "OPT Z bits are invalid.");
+    const options = Array.isArray(record.options) ? record.options : [];
+    return concatBytes(options.map(option => {
+      assertUint(option?.code, 0xffff, "DNS_WIRE_RDATA_INVALID", "EDNS option code is invalid.");
+      const data = bytesFrom(option?.data);
+      if (data.length > 0xffff) fail("DNS_WIRE_RDATA_INVALID", "EDNS option data is too large.");
+      return concatBytes([u16Bytes(option.code), u16Bytes(data.length), data]);
+    }));
+  }
+
   if (type === "SVCB" || type === "HTTPS") {
     const target = record.target ?? record.rdataName;
     if (typeof target !== "string") fail("DNS_WIRE_RDATA_STRUCTURED_REQUIRED", `${type} requires a structured target name.`);
@@ -278,11 +328,20 @@ function encodeRecord(record) {
   if (!Number.isInteger(typeCode)) fail("DNS_WIRE_RECORD_TYPE_UNSUPPORTED", "DNS record type is unsupported.");
   const rdata = encodeRdata(record);
   if (rdata.length > 0xffff) fail("DNS_WIRE_RDATA_INVALID", "DNS RDATA exceeds the 16-bit wire length.");
+  let recordClass = record.class;
+  let ttl = record.ttl;
+  if (typeCode === 41) {
+    recordClass = record.udpPayloadSize;
+    ttl = ((record.extendedRcode & 0xff) << 24)
+      | ((record.version & 0xff) << 16)
+      | (record.do ? 0x8000 : 0)
+      | (record.z & 0x7fff);
+    ttl >>>= 0;
+  }
   return concatBytes([
     encodeName(record.name),
     u16Bytes(typeCode),
-    u16Bytes(record.class),
-    u32Bytes(record.ttl),
+    u16Bytes(recordClass),
     u16Bytes(rdata.length),
     rdata,
   ]);
