@@ -38,7 +38,7 @@ function exportLoon(p){
 }
 function exportQuantumultX(p){
   const ps=proxies(p), gs=proxyGroups(p);
-  return ["[general]","network_check_url = https://www.apple.com/library/test/success.html","","[dns]","server = "+servers(p).join(", "),"","[server_local]",...ps.map(x=>x.type+"="+x.server+":"+x.port+", tag="+x.name+(x.username?", username="+x.username:"")+(x.password?", password="+x.password:"")+(x.tls===true?", over-tls=true":"")),"","[policy]",...(gs.length?gs.map(g=>g.type+" = "+g.name+", "+list(g.proxies).join(", ")):["static = DIRECT"]),"","[filter_local]",...blocked(p).map(d=>"host-suffix,"+d+",reject"),...rules(p).map(r=>"host-suffix,"+r.value+","+(r.action==="REJECT"?"reject":r.action.toLowerCase())),"final,"+String(p.finalPolicy||"DIRECT").toLowerCase(),""].join("\n");
+  return ["[general]","network_check_url = https://www.apple.com/library/test/success.html","","[dns]","server = "+servers(p).join(", "),"","[server_local]",...ps.map(x=>x.type+"="+x.server+":"+x.port+", tag="+x.name+(x.username?", username="+x.username:"")+(x.password?", password="+x.password:"")+(x.tls===true?", over-tls=true":"")),"","[policy]",...(gs.length?gs.map(g=>g.type+" = "+g.name+", "+list(g.proxies).join(", ")):["static = DIRECT"]),"","[filter_local]",...blocked(p).map(d=>"host-suffix,"+d+",reject"),...rules(p).map(r=>{const type=r.type==="DOMAIN"?"host":r.type==="DOMAIN-SUFFIX"?"host-suffix":r.type.toLowerCase();const action=r.action==="REJECT"?"reject":r.action.toLowerCase();return type+","+r.value+","+action}),"final,"+String(p.finalPolicy||"DIRECT").toLowerCase(),""].join("\n");
 }
 export const exportFormats=[
  {id:"surge",label:"Surge",extension:".conf",mime:"text/plain",status:"verified",description:"Surge profile export."},
