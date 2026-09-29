@@ -3,9 +3,9 @@ import test from "node:test";
 import { CompilerContract, mapPolicySemantics, compileToTargetIR } from "../packages/core/src/index.js";
 
 test("compiler contract exposes deterministic semantic stages",()=>{
-  assert.equal(CompilerContract.version,"1.0");
+  assert.equal(CompilerContract.version,"1.1");
   assert.equal(CompilerContract.deterministic,true);
-  assert.deepEqual(CompilerContract.stages,["NORMALIZE","MAP","IR"]);
+  assert.deepEqual(CompilerContract.stages,["NORMALIZE","MAP","ADMISSION","IR"]);
 });
 
 test("semantic mapping preserves requested features without target-specific mutation",()=>{
