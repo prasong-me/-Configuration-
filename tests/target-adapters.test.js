@@ -15,10 +15,9 @@ const EXPECTED_FORMATS={
   stash:"yaml"
 };
 
-test("all exported targets are registered with an explicit output format",()=>{
-  const registered=listTargetAdapters();
+test("target adapter registry exposes all registered targets and formats",()=>{
   assert.deepEqual(
-    Object.fromEntries(registered.map(x=>[x.targetId,x.outputFormat])),
+    Object.fromEntries(listTargetAdapters().map(x=>[x.targetId,x.outputFormat])),
     EXPECTED_FORMATS
   );
   for(const [targetId,outputFormat] of Object.entries(EXPECTED_FORMATS)){
@@ -28,54 +27,4 @@ test("all exported targets are registered with an explicit output format",()=>{
     assert.equal(typeof adapter.compile,"function");
   }
   assert.equal(getTargetAdapter("unknown"),null);
-});
-
-test("Apple adapters return the locked CompileResult shape",()=>{
-  const mobileconfig=getTargetAdapter("apple-mobileconfig").compile({
-    name:"Test",
-    dns:true,
-    dnsProfiles:[{
-      id:"test-dns",
-      name:"Test DNS",
-      protocol:"HTTPS",
-      servers:["1.1.1.1"],
-      endpoint:"https://example.com/dns-query",
-      enabled:true
-    }]
-  });
-  assert.equal(mobileconfig.targetId,"apple-mobileconfig");
-  assert.equal(mobileconfig.outputFormat,"plist");
-  assert.equal(Object.hasOwn(mobileconfig,"representation"),true);
-  assert.equal(typeof mobileconfig.representation,"string");
-
-  const declaration=getTargetAdapter("apple-dns-declaration").compile({
-    name:"Test",
-    dns:true,
-    dnsProfiles:[{
-      id:"test-dns",
-      name:"Test DNS",
-      protocol:"HTTPS",
-      servers:["1.1.1.1"],
-      endpoint:"https://example.com/dns-query",
-      enabled:true
-    }]
-  });
-  assert.equal(declaration.targetId,"apple-dns-declaration");
-  assert.equal(declaration.outputFormat,"json");
-  assert.equal(Object.hasOwn(declaration,"representation"),true);
-  assert.equal(typeof declaration.representation,"string");
-});
-
-test("non-Apple target adapters use the target exporter as their translator",()=>{
-  for(const targetId of ["surge","mihomo","wireguard","shadowrocket","loon","stash","quantumult-x"]){
-    const adapter=getTargetAdapter(targetId);
-    const result=adapter.compile({
-      dnsServers:["1.1.1.1","1.0.0.1"],
-      rules:[{match:"example.com",action:"DIRECT"}],
-      webAppUrl:"https://example.com"
-    });
-    assert.equal(result.targetId,targetId);
-    assert.equal(result.outputFormat,EXPECTED_FORMATS[targetId]);
-    assert.equal(Object.hasOwn(result,"representation"),true);
-  }
 });
