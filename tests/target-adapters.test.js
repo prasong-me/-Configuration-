@@ -13,9 +13,9 @@ test("Apple target adapters are registered by target id", () => {
   assert.equal(getTargetAdapter("unknown"), null);
 });
 
-test("target adapter registry exposes adapter identity and format", () => {
-  const targets=listTargetAdapters();
-  assert.ok(targets.some(x=>x.targetId==="apple-mobileconfig"&&x.outputFormat==="plist"));
-  assert.ok(targets.some(x=>x.targetId==="apple-dns-declaration"&&x.outputFormat==="json"));
-  assert.ok(targets.some(x=>x.targetId==="surge"&&x.outputFormat==="text"));
+test("target adapter registry exposes only adapter identity", () => {
+  assert.deepEqual(listTargetAdapters(), [
+    { targetId: "apple-mobileconfig" },
+    { targetId: "apple-dns-declaration" },
+  ]);
 });
