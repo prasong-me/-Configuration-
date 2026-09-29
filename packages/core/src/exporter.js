@@ -4,6 +4,7 @@ import { getTargetManifest } from "../../targets/src/index.js";
 import { getTargetAdapter } from "../../targets/src/adapters.js";
 import { compileSurge } from "../../surge-adapter/src/index.js";
 import { getExportArtifact } from "../../targets/src/exporters.js";
+import { inspectCompileResult } from "./compiler.js";
 
 const OUTPUT_FORMATS=Object.freeze({
   "apple-mobileconfig":"plist",
@@ -20,22 +21,6 @@ const OUTPUT_FORMATS=Object.freeze({
 
 function fail(code,message,details){
   return diagnostic(DiagnosticLevel.CRITICAL,code,message,details);
-}
-
-function validateCompileResult(result,targetId,expectedFormat){
-  if(!result||typeof result!=="object"){
-    return fail("INVALID_COMPILE_RESULT","Target adapter returned a non-object compile result.",{target:targetId});
-  }
-  if(result.targetId!==targetId){
-    return fail("TARGET_ID_MISMATCH","Target adapter compile result targetId does not match requested target.",{target:targetId,actual:result.targetId});
-  }
-  if(result.outputFormat!==expectedFormat){
-    return fail("TARGET_OUTPUT_FORMAT_MISMATCH","Target adapter compile result output format does not match target output format.",{target:targetId,expected:expectedFormat,actual:result.outputFormat});
-  }
-  if(!Object.hasOwn(result,"representation")){
-    return fail("INVALID_COMPILE_RESULT","Target adapter compile result is missing its representation property.",{target:targetId});
-  }
-  return null;
 }
 
 function defaultTargetResolver(targetId){
@@ -91,7 +76,7 @@ export function createConfigurationExporter({targets={resolve:defaultTargetResol
         return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics};
       }
 
-      const structuralError=validateCompileResult(compiled,targetId,expectedFormat);
+      const structuralError=inspectCompileResult(compiled,targetId,expectedFormat);
       if(structuralError){
         exportDiagnostics.push(structuralError);
         return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics};
