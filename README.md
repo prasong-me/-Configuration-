@@ -10,7 +10,7 @@
 - แต่ละ DNS profile มีชื่อของตัวเอง, provider, protocol, คู่/ชุด server, endpoint, role, enabled และ order
 - คู่ DNS ของ provider เดียวกันถือเป็น profile เดียว ไม่ใช่ DNS คนละ stage
 - มี DNS pipeline แยกต่างหากสำหรับ processing semantics แบบ PASS / RESPOND / BLOCK / FORWARD / ERROR
-- UI ปัจจุบันตั้งต้น DNS profiles 3 ชุด: Privacy DNS / Cloudflare, Security DNS / Quad9 และ Backup DNS / Google Public DNS
+- Core/exporter มี preset DNS 3 ชุดเป็น baseline แต่ UI Wizard ปัจจุบันเริ่มต้นแสดง 1 profile และยังต้องเพิ่ม UI เพิ่ม/ลบ profile แบบอิสระ
 - UI ยังต้องเพิ่มการเพิ่ม/ลบ profile แบบอิสระ
 - Target exporters ต้องตรวจสอบแยกตาม format ว่าสามารถแทนหลาย DNS profiles ได้ครบเพียงใด
 - Generic `webEntry` อยู่ใน core และให้ Target adapter เป็นผู้แปลง
@@ -40,10 +40,10 @@
 เอกสารทางการใช้ยืนยันข้อมูลรูปแบบและข้อมูลอ้างอิง แต่ไม่ใช่หลักฐานว่าทำงานร่วมกับระบบจริงได้
 
 ผลที่บันทึกไว้:
-- Surge 5.x: verified ตาม evidence ใน repository
+- Surge 5.x: verified ภายในขอบเขต evidence ที่บันทึกไว้ใน repository (15 real-device tests + profile generation)
 - Shadowrocket: partial
 - WireGuard: partial
-- Target อื่น ๆ: reference/template จนกว่าจะมีหลักฐานจริงเพียงพอ
+- Mihomo/Loon/Stash/Quantumult X: template/reference; WireGuard/Shadowrocket: partial-tested; Target อื่น ๆ ยังไม่ควรอ้าง supported เกิน evidence ที่มี
 
 เมื่อได้รับผลการทดสอบใหม่ ให้เพิ่มผลที่สังเกตได้จริงลงในบันทึกหลักฐานของ Target ก่อนปรับสถานะ
 
