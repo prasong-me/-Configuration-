@@ -1,12 +1,26 @@
 {
   "id": "loon",
   "version": "1.1.0",
-  "platforms": ["ios", "ipados"],
-  "capabilities": ["dns", "proxy", "routing", "rules"],
+  "platforms": [
+    "ios",
+    "ipados"
+  ],
+  "capabilities": [
+    "dns",
+    "proxy",
+    "routing",
+    "rules"
+  ],
   "required": {
-    "proxy": ["<name> = <type>, <server>, <port>"],
-    "proxyGroup": ["<group> = <strategy>, <member>..."],
-    "rule": ["<type>,<value>,<policy>"]
+    "proxy": [
+      "<name> = <type>, <server>, <port>"
+    ],
+    "proxyGroup": [
+      "<group> = <strategy>, <member>..."
+    ],
+    "rule": [
+      "<type>,<value>,<policy>"
+    ]
   },
   "optional": [
     "dns",
