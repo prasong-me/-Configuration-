@@ -145,3 +145,30 @@ A stage never silently converts parse, timeout, or upstream failures into PASS. 
 These two contracts are implementation-side inputs to a future Swift provider generator.
 
 This contract is the implementation-side counterpart to the evidence-backed Apple Chain IR boundary.
+
+## Provider Runtime Generator Contract v1
+
+The generator is a separate boundary after PROVIDER_RUNTIME_IR v1.
+
+PROVIDER_RUNTIME_IR_V1 -> PROVIDER_RUNTIME_GENERATOR_CONTRACT_V1 -> GENERATED_RUNTIME_SOURCE
+
+The generator contract does not contain Swift implementation code. It constrains a future generator so generated source is a mechanical realization of the admitted Runtime IR.
+
+### Generator target
+
+- language: SWIFT
+- runtime target: NETWORK_EXTENSION
+- artifact: GENERATED_RUNTIME_SOURCE
+- default entrypoint: DNSProxyProvider
+
+### Required invariants
+
+The generator must be deterministic, consume only an admitted Provider Runtime IR, preserve stage execution order and dependency semantics, preserve parser/transport/failure/resource/lifecycle semantics, preserve provenance such as sourceChainId, fail closed when an IR component cannot be generated, and never invent an Apple platform capability.
+
+### Forbidden transformations
+
+The generator must not flatten an ordered A->B->C runtime into Apple ServerAddresses, silently drop a runtime component, reorder stages, change failure behavior, erase provenance, or treat native MobileConfig/DDM DNS settings as equivalent to the Provider Runtime execution model.
+
+### Artifact boundary
+
+The contract describes generated-source metadata: language, runtime target, entrypoint, generated files/units, and source-chain provenance. Actual Swift generation is a subsequent implementation step. This keeps the contract testable before committing to a concrete Swift source layout.
