@@ -164,9 +164,9 @@ Web exporter ไม่ถือเป็นหลักฐานว่า native
 เอกสารบางส่วนใช้ flow เก่า แต่ implementation/test ยืนยัน flow 6 ขั้นปัจจุบัน
 สถานะ: VERIFIED CONFLICT
 
-### E-02 — DNS profile count mismatch
-README ระบุ UI ตั้งต้น 3 profiles แต่ WizardApp ตั้งต้น 1 profile ขณะที่ exporter default มี 3
-สถานะ: VERIFIED CONFLICT
+### E-02 — DNS profile count mismatch — RESOLVED
+ก่อนแก้ UI Wizard เริ่ม 1 profile ขณะที่ exporter/core มี baseline 3 profile; ปัจจุบัน UI เริ่มต้น 3 profile และเพิ่ม/ลบ/enable/disable ได้แล้ว โดยยังใช้ canonical dnsProfiles[] เดียวกัน
+สถานะ: RESOLVED
 
 ### E-03 — Surge documentation drift
 target manifest/exporter ระบุ verified + 15 real-device tests แต่ docs/targets/surge.md ยังใช้ถ้อยคำระดับเริ่มออกแบบ serializer
@@ -177,23 +177,20 @@ target manifest/exporter ระบุ verified + 15 real-device tests แต่ 
 ROADMAP ใช้ [x] กับ Apple features ขณะที่ target manifest ใช้ generated/reference-export และ apple-network ระบุว่ายังไม่มี Apple Target Adapter ที่เป็น SUPPORTED
 สถานะ: VERIFIED SEMANTIC AMBIGUITY
 
-### E-05 — duplicate/legacy browser MobileConfig generator
-apps/web/src/mobileconfig.js มี Web Clip MobileConfig generator แยกจาก packages/apple-adapter/src/index.js และยังต้องตรวจ usage ก่อนรวม/ลบ
-สถานะ: PENDING USAGE AUDIT
+### E-05 — duplicate/legacy browser MobileConfig generator — RESOLVED
+ตรวจ repository usage แล้วไม่พบ consumer ของ apps/web/src/mobileconfig.js จึงลบไฟล์ legacy ออกจาก Web App และคง MobileConfig generation ไว้ที่ Apple adapter boundary
+สถานะ: RESOLVED
 
 ### E-06 — exporter != capability verification
 การมี exporter/template ไม่ได้แปลว่า capability ถูก verify และไม่เท่ากับ physical runtime validation
 สถานะ: VERIFIED ARCHITECTURAL RULE
 
 ## 8. ข้อมูลที่ต้องตรวจต่อ
-1. ตรวจ usage ของ apps/web/src/mobileconfig.js
-2. ทำให้ README/PROJECT-STATUS/ROADMAP ใช้ wizard flow เดียวกัน
-3. ทำ DNS preset/catalog ให้ตรงกันระหว่าง UI, core และ exporter
-4. ตรวจ target status ทุกตัวกับ test-evidence.js
-5. แยก implemented / syntax-tested / real-device-tested / runtime-validated ใน roadmap
-6. ตรวจ import/round-trip ว่ามี implementation ซ่อนอยู่หรือไม่
-7. ตรวจ Apple runtime docs กับ latest evidence ไม่ให้ปะปนกับ exporter evidence
-8. หลังแก้ drift ให้อ่านไฟล์ที่แก้ซ้ำอีกรอบ
+1. ตรวจ target status ทุกตัวกับ test-evidence.js
+2. แยก implemented / syntax-tested / real-device-tested / runtime-validated ใน roadmap
+3. ตรวจ import/round-trip ว่ามี implementation ซ่อนอยู่หรือไม่
+4. ตรวจ Apple runtime docs กับ latest evidence ไม่ให้ปะปนกับ exporter evidence
+5. หลังแก้ drift ให้อ่านไฟล์ที่แก้ซ้ำอีกรอบ
 
 ## 9. Roadmap ใหม่หลัง reconciliation
 ### Gate A — Repository/Data Reconciliation
@@ -205,8 +202,9 @@ apps/web/src/mobileconfig.js มี Web Clip MobileConfig generator แยกจ
 - [x] ดึง mobile/PWA UI reference
 - [x] เปรียบเทียบ roadmap เดิมกับ implementation จริง
 - [x] บันทึก conflict และ missing information
-- [ ] แก้ documentation drift ทั้งชุด
-- [ ] ตรวจซ้ำหลังแก้ drift
+- [x] แก้ documentation drift ที่ตรวจพบในรอบนี้
+- [x] ตรวจซ้ำหลังแก้ drift
+- [x] ตรวจ usage ของ legacy browser MobileConfig generator และลบไฟล์ที่ไม่มี consumer
 
 ### Gate B — Canonical Architecture
 - [x] Common Model
@@ -227,8 +225,8 @@ apps/web/src/mobileconfig.js มี Web Clip MobileConfig generator แยกจ
 - [x] Compatibility diagnostics
 - [x] Export/download/share
 - [x] Knowledge page
-- [ ] DNS profile add/remove UI
-- [ ] Web UI fields parity กับ canonical policy
+- [x] DNS profile add/remove UI
+- [x] Web UI fields parity กับ canonical policy
 - [ ] UI capability states ต้องอธิบาย UNKNOWN/UNSUPPORTED/EXTENSION-BACKED
 - [ ] Final mobile-first UI audit
 
@@ -268,7 +266,7 @@ apps/web/src/mobileconfig.js มี Web Clip MobileConfig generator แยกจ
 - [ ] Complete target compatibility matrix
 - [ ] Artifact validation matrix
 - [ ] Regression matrix
-- [ ] Documentation reconciliation
+- [x] Documentation reconciliation (รอบ repository reconciliation นี้)
 - [ ] Final source-of-truth snapshot
 
 ## 10. Status rule
