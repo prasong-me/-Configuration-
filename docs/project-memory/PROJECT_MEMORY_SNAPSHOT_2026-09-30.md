@@ -133,3 +133,42 @@ Recorded corrections:
 
 Phase boundary:
 This closes transport integration, not physical-device validation or end-to-end DNS policy execution.
+
+## Data Reconciliation Incident — 2026-09-30
+
+### Problem
+Project-memory records imported from external conversation/source snapshots were not all from the same point in time as the repository's current state. Older snapshots were therefore being interpreted alongside newer repository evidence as if they were simultaneous current-state records.
+
+### Root cause
+The imported data lacked a mandatory temporal/source reconciliation step:
+- source and capture time were not consistently treated as part of the state;
+- historical snapshots were not explicitly marked as superseded when newer repository evidence existed;
+- current-state selection was therefore vulnerable to stale records;
+- this could trigger repeated external lookup/research even when the project already contained newer authoritative evidence.
+
+### Observed consequence
+A previous PR #26 compile-boundary status remained represented as current uncertainty after PR #28 had already supplied newer repository-side transport-runtime validation. The underlying historical record was not inherently invalid for its original timestamp; it was stale when read as current state.
+
+### Correction applied
+- Reconciled project-memory snapshot against the latest repository evidence.
+- Superseded stale PR #26 current-status wording with PR #28 transport-runtime evidence.
+- Preserved the historical/deferred boundaries instead of deleting them.
+- Recorded Vercel `build-rate-limit` as an external deferred constraint and did not reinterpret it as a project test failure.
+- Added explicit source/time/evidence reconciliation as a required state-management rule.
+- Current repository state remains the authoritative current implementation record.
+
+### New data-state rule
+All future imported project data must be treated as:
+`source → captured_at/state_time → evidence → status → reconciliation → current_state`.
+
+Historical information must remain available for traceability, but it must not override newer authoritative repository/CI evidence.
+
+### Operational prevention
+Before performing a new external lookup:
+1. inspect the project data store/repository records;
+2. identify the newest source/evidence timestamp;
+3. reconcile conflicting snapshots;
+4. only query externally when the existing record is genuinely missing, stale by policy, or requires a fresh normative source;
+5. write the new evidence back with its source/time/status.
+
+This incident is closed at the documentation/reconciliation layer. It does not alter the separately deferred physical Apple runtime, entitlement/signing, packaged extension, upstream E2E, performance/reliability, or universal DNS semantic-roundtrip gates.
