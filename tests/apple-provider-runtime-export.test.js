@@ -44,6 +44,19 @@ test("provider runtime export blocks when explicit Provider Runtime IR is absent
 
   assert.equal(result.status, "BLOCKED");
   assert.equal(result.artifact, null);
+  assert.equal(result.diagnostics[0].code, "CAPABILITY_UNKNOWN");
+});
+
+
+test("provider runtime export reports missing explicit runtime IR after capability admission", () => {
+  const result = createConfigurationExporter().export({
+    status: "SUCCESS",
+    policy: {},
+    resultMetadata: { status: "SUCCESS", timestamp: "t0" },
+  }, "apple-dns-proxy-provider-runtime");
+
+  assert.equal(result.status, "BLOCKED");
+  assert.equal(result.artifact, null);
   assert.equal(result.diagnostics[0].code, "PROVIDER_RUNTIME_IR_REQUIRED");
 });
 
