@@ -127,6 +127,6 @@ export function compile(policyInput,targetId,adapter){
     };
   }
 
-  const artifact=adapter.compile(report.policy);
+  const artifact=adapter.compile(report.policy,semantic);
   return {ok:true,report,semantic,artifact};
 }
