@@ -90,6 +90,29 @@ export function mapPolicySemantics(policyInput,targetId){
     });
   }
 
+  const semanticFields=[
+    ["proxyServer","proxy.server","PROXY_ENDPOINT"],
+    ["blocklists","blocking.blocklists","BLOCKLIST_SOURCES"],
+    ["dnsResolution","dns.resolution","DNS_RESOLUTION_POLICY"],
+    ["dnsPipeline","dns.pipeline","DNS_PIPELINE"],
+    ["finalPolicy","routing.final","FINAL_POLICY"],
+    ["bypassSystem","routing.bypassSystem","SYSTEM_BYPASS"],
+    ["commands","runtime.commands","RUNTIME_COMMANDS"],
+    ["webEntry","web.entry","WEB_ENTRY"],
+    ["providers","policy.providers","PROVIDER_METADATA"]
+  ];
+
+  for(const [source,feature,semantic] of semanticFields){
+    if(policy[source]===undefined) continue;
+    mappings.push({
+      feature,
+      source,
+      target:targetId,
+      semantic,
+      value:stable(policy[source])
+    });
+  }
+
   return {
     contract:CompilerContract.version,
     targetId,
