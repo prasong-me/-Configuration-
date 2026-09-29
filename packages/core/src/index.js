@@ -11,6 +11,7 @@ export { CapabilityState, DiagnosticLevel, diagnostic, hasBlockingDiagnostics, r
 export { DnsStageResult, normalizeDnsPipeline, processDnsQuery } from "./dns-pipeline.js";
 export { DnsController, createDnsController } from "./dns-controller.js";
 export { buildSearchIndex, searchRecords, SearchContract } from "./search.js";
+export { getTargetManifest, listTargetManifests } from "../../targets/src/index.js";
 
 export function normalizePolicy(input) {
   const source=input ?? {};
