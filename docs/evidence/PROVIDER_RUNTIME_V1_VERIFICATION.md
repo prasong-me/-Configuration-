@@ -98,3 +98,17 @@ These were implementation defects, not accepted semantics. They are closed by th
 
 ### Remaining boundary
 This phase does not claim byte-identical encode(decode(wire)). v1 establishes semantic round-trip only for explicitly represented fields. Full wire-preservation/compression reconstruction remains a separate contract. Physical Apple Network Extension execution remains outside this phase.
+
+
+## Apple NetworkExtension Compile Phase — Evidence Boundary
+
+A dedicated macOS Swift Package compile fixture and GitHub Actions workflow were added:
+- `Package.swift`
+- `apple-runtime/GeneratedDNSProxyProvider.swift`
+- `.github/workflows/apple-networkextension.yml`
+
+The workflow uses GitHub-hosted `macos-26` and invokes the installed Swift/Xcode toolchain. GitHub documents `macos-26` as an available macOS runner. citeturn0search12
+
+The fixture imports `NetworkExtension` and subclasses `NEDNSProxyProvider`, implementing the documented `startProxy`, `stopProxy`, and `handleNewFlow` boundary. Apple documents these methods as required for a DNS proxy provider. citeturn0search0turn0search2
+
+The compile fixture is intentionally not a signed Network Extension app and does not claim entitlement, provisioning, device execution, or DNS forwarding. Those remain separate evidence gates.
