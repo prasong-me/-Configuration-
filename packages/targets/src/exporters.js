@@ -45,7 +45,7 @@ export const exportFormats=[
  {id:"wireguard",label:"WireGuard",extension:".conf",mime:"text/plain",status:"partial-tested",description:"WireGuard configuration; secrets are emitted only when supplied."},
  {id:"shadowrocket",label:"Shadowrocket",extension:".conf",mime:"text/plain",status:"partial-tested",description:"Shadowrocket profile configuration."},
  {id:"loon",label:"Loon",extension:".lcf",mime:"text/plain",status:"template-export",description:"Loon section-based configuration."},
- {id:"stash",label:"Stash",extension:".yaml",mime:"text/yaml",status:"template-export",description:"Stash YAML configuration."},
+ {id:"stash",label:"Stash",extension:".yaml",mime:"application/yaml",status:"template-export",description:"Stash YAML configuration."},
  {id:"quantumult-x",label:"Quantumult X",extension:".conf",mime:"text/plain",status:"template-export",description:"Quantumult X configuration."},
  {id:"apple-mobileconfig",label:"Apple iOS MobileConfig",extension:".mobileconfig",mime:"application/x-apple-aspen-config",status:"generated",description:"Apple configuration profile."},
  {id:"apple-dns-declaration",label:"Apple Network DNS Settings",extension:".json",mime:"application/json",status:"reference-export",description:"Declarative DNS configuration data."},
