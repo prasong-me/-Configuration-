@@ -231,3 +231,5 @@ export { createProviderRuntimeGeneratorContract, validateProviderRuntimeGenerato
 
 export { generateProviderRuntimeSwift, validateGeneratedProviderRuntimeSwift } from "./provider-runtime-swift-generator.js";
 export { decodeDnsWireMessage, encodeDnsWireMessage } from "./dns-wire-runtime.js";
+
+export { createProviderStageExecutionEngine, FAILURE_TYPES } from "./provider-stage-execution.js";
