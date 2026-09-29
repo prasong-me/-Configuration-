@@ -200,3 +200,5 @@ export { createDnsWireParserContract, validateDnsWireParserContract } from "./dn
 export { createProviderStageContract, validateProviderStageContract, resolveProviderStageExecutionOrder } from "./provider-stage-contract.js";
 export { createProviderTransportContract, validateProviderTransportContract, ProviderTransportMode } from "./provider-transport-contract.js";
 export { createProviderRuntimeIR, validateProviderRuntimeIR, isProviderRuntimeIRAdmissionAllowed, canonicalizeProviderRuntimeIR } from "./provider-runtime-ir.js";
+
+export { createProviderRuntimeGeneratorContract, validateProviderRuntimeGeneratorContract, isProviderRuntimeGeneratorAdmissionAllowed, GeneratorLanguage, GeneratorRuntimeTarget, GeneratorUnit } from "./provider-runtime-generator-contract.js";
