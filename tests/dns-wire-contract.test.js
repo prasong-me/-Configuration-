@@ -42,6 +42,7 @@ test("DNS wire contract keeps record type semantics explicit", () => {
   const contract = createDnsWireParserContract({
     inspect: [DnsWireRecordType.A, DnsWireRecordType.AAAA, DnsWireRecordType.HTTPS],
     mutate: [DnsWireRecordType.A],
+    limits: { maxMessageBytes: 4096, maxNameLength: 255, maxRecords: 256 },
   });
   assert.deepEqual(contract.inspect, ["A", "AAAA", "HTTPS"]);
   assert.deepEqual(contract.mutate, ["A"]);
