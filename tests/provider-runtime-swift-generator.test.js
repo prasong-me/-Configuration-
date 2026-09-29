@@ -14,6 +14,8 @@ test("Swift generator produces admitted deterministic source", () => {
   assert.equal(result.artifact.runtimeTarget, "NETWORK_EXTENSION");
   assert.equal(result.artifact.sourceChainId, "dns-chain-a");
   assert.ok(result.artifact.files[0].content.includes("class DNSProxyProvider: NEDNSProxyProvider"));
+  assert.ok(result.artifact.files[0].content.includes("handleNewFlow(_ flow: NEAppProxyFlow) -> Bool"));
+  assert.ok(result.artifact.files[0].content.includes("return false"));
   assert.ok(result.artifact.files[0].content.indexOf('GeneratedStage(id: "a"') < result.artifact.files[0].content.indexOf('GeneratedStage(id: "b"'));
   assert.equal(validateGeneratedProviderRuntimeSwift(result).valid, true);
 });
