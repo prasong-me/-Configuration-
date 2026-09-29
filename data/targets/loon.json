@@ -1,0 +1,64 @@
+{
+  "id": "loon",
+  "version": "1.0.0",
+  "platforms": [
+    "ios",
+    "ipados"
+  ],
+  "capabilities": [
+    "dns",
+    "proxy",
+    "routing",
+    "rules"
+  ],
+  "required": {
+    "dns": [
+      "dns.configuration"
+    ],
+    "proxy": [
+      "proxy.id",
+      "proxy.type",
+      "proxy.server",
+      "proxy.port"
+    ],
+    "proxyGroup": [
+      "proxyGroup.id",
+      "proxyGroup.members"
+    ],
+    "rule": [
+      "rule.match",
+      "rule.action"
+    ]
+  },
+  "optional": [
+    "policy-groups",
+    "dns.fallback",
+    "proxy.credentials"
+  ],
+  "unsupported": [
+    "unresolved-proxy-reference"
+  ],
+  "constraints": [
+    "Proxy rules must resolve to an existing proxy or proxy group.",
+    "Do not silently replace an unavailable proxy action with DIRECT."
+  ],
+  "validation": [
+    "section-syntax",
+    "proxy-reference-resolution",
+    "proxy-group-resolution",
+    "dns-syntax",
+    "rule-syntax"
+  ],
+  "output": {
+    "format": "text",
+    "extension": ".conf",
+    "mime": "text/plain"
+  },
+  "artifactStatus": {
+    "complete": "runnable",
+    "missingRuntimeData": "template",
+    "partialMapping": "partial",
+    "unsupportedCapability": "rejected",
+    "invalidSyntax": "invalid"
+  }
+}
