@@ -5,46 +5,25 @@ Target Data reference: data/targets/surge.json
 
 ## Evidence state
 - Target-data status: specification-only
-- Normative source verification: pending
-- Project constraints: recorded in Target Data
+- Normative source verification: SOURCE_VERIFIED
 - Runtime verification: pending
 
-## Evidence requirements
-Before freeze, record authoritative target documentation/specification evidence for native syntax, required and optional fields, policy/reference semantics, capability boundaries, output format, and version/platform restrictions.
+## Source evidence
+- https://manual.nssurge.com/profile/format.html
+- https://manual.nssurge.com/rules/overview.html
+- https://manual.nssurge.com/rules/final.html
+
+Evidence note: Surge official manual confirms INI-like profile sections, [Proxy]/[Proxy Group]/[Rule], rule TYPE/VALUE/POLICY, and FINAL semantics.
 
 ## Test vectors
-
-### VALID_MINIMAL
-Minimum configuration containing every required field and sufficient runtime data for a runnable artifact.
-Expected: validation succeeds.
-
-### VALID_FULL
-Representative configuration exercising supported optional features.
-Expected: validation succeeds and all references resolve.
-
-### MISSING_REQUIRED
-Remove one required field.
-Expected: MISSING_REQUIRED; never runnable.
-
-### INVALID_SYNTAX
-Introduce malformed target-native syntax, delimiter, section, type, or value.
-Expected: INVALID_SYNTAX.
-
-### UNRESOLVED_REFERENCE
-Reference a node/group/policy that is not defined.
-Expected: UNRESOLVED_REFERENCE; never silently substitute DIRECT.
-
-### UNSUPPORTED_CAPABILITY
-Request a canonical capability not represented by the target.
-Expected: UNSUPPORTED_CAPABILITY or an explicitly documented partial result.
-
-### PARTIAL_MAPPING
-Request semantics for which only a documented subset is representable.
-Expected: PARTIAL_MAPPING and non-runnable status unless completeness is independently established.
-
-### NO_RUNTIME_DATA
-Omit required runtime-specific credentials, keys, endpoints, or equivalent values.
-Expected: template status, not runnable.
+- VALID_MINIMAL — minimum required configuration; expected validation success.
+- VALID_FULL — supported optional features; expected validation success.
+- MISSING_REQUIRED — remove a required field; expected MISSING_REQUIRED.
+- INVALID_SYNTAX — malformed native syntax/type/value; expected INVALID_SYNTAX.
+- UNRESOLVED_REFERENCE — missing node/group/policy; expected UNRESOLVED_REFERENCE.
+- UNSUPPORTED_CAPABILITY — unsupported canonical capability; expected UNSUPPORTED_CAPABILITY or documented partial result.
+- PARTIAL_MAPPING — only documented subset is representable; expected PARTIAL_MAPPING.
+- NO_RUNTIME_DATA — missing runtime-specific values; expected template, not runnable.
 
 ## Freeze gate
-This package is not evidence-complete until authoritative sources are attached and every test vector has an observed result.
+Evidence is not runtime verification. Freeze requires observed results for the test vectors and no unresolved normative-source ambiguity.
