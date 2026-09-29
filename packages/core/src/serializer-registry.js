@@ -1,4 +1,4 @@
-const ALLOWED_FORMATS=Object.freeze(["plist","json","yaml","ini","text"]);
+const ALLOWED_FORMATS=Object.freeze(["plist","json","yaml","ini","text"]);\n\nfunction stable(value){\n  if(Array.isArray(value)) return value.map(stable);\n  if(value&&typeof value==="object") return Object.fromEntries(Object.keys(value).sort().map(key=>[key,stable(value[key])]));\n  return value;\n}
 
 function assertFormat(format){
   if(typeof format!=="string"||!ALLOWED_FORMATS.includes(format)) throw new TypeError("Unsupported output format: "+format);
@@ -31,7 +31,7 @@ export const SerializerFormat=Object.freeze({
 });
 
 export const defaultSerializerRegistry=createSerializerRegistry([
-  {format:"json",serialize(value){ return typeof value==="string" ? value : JSON.stringify(value,null,2); }},
+  {format:"json",serialize(value){ return typeof value==="string" ? value : JSON.stringify(stable(value),null,2); }},
   {format:"plist",serialize(value){ return typeof value==="string" ? value : String(value); }},
   {format:"yaml",serialize(value){ return typeof value==="string" ? value : String(value); }},
   {format:"ini",serialize(value){ return typeof value==="string" ? value : String(value); }},
