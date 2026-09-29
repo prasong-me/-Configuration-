@@ -1,0 +1,17 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://example.invalid/configuration-platform/schemas/profile.schema.json",
+  "title":"Canonical Profile",
+  "type":"object",
+  "required":["id","name","enabled","order"],
+  "properties":{
+    "id":{"type":"string","minLength":1},
+    "name":{"type":"string","minLength":1},
+    "enabled":{"type":"boolean"},
+    "order":{"type":"integer"},
+    "metadata":{"type":"object","additionalProperties":true},
+    "components":{"type":"array","items":{"type":"object","required":["type","data"],"properties":{"type":{"type":"string","minLength":1},"data":{"type":"object","additionalProperties":true}},"additionalProperties":false}},
+    "requirements":{"type":"array","items":{"type":"object","required":["featureKey","requirementLevel","supportedByDefault"],"properties":{"featureKey":{"type":"string","minLength":1},"requirementLevel":{"type":"string","enum":["REQUIRED","OPTIONAL"]},"supportedByDefault":{"type":"boolean"}},"additionalProperties":false}}
+  },
+  "additionalProperties":false
+}

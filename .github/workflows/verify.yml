@@ -28,5 +28,8 @@ jobs:
       - name: Run core tests
         run: npm test
 
+      - name: Validate repository models
+        run: npm run validate:models
+
       - name: Build web
         run: npm run build:web

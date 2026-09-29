@@ -1,0 +1,16 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://example.invalid/configuration-platform/schemas/target-profile.schema.json",
+  "title":"Target Profile Contract",
+  "type":"object",
+  "required":["contractVersion","targetId","targetVersion","profile","capabilities"],
+  "properties":{
+    "contractVersion":{"const":"1.0"},
+    "targetId":{"type":"string","minLength":1},
+    "targetVersion":{"type":"string","minLength":1},
+    "profile":{"$ref":"profile.schema.json"},
+    "capabilities":{"type":"array","items":{"type":"object","required":["featureKey","state","decision"],"properties":{"featureKey":{"type":"string","minLength":1},"state":{"type":"string","enum":["SUPPORTED","LIMITED","TRANSFORMABLE","LOSSY","UNSUPPORTED","UNKNOWN"]},"decision":{"type":"string","enum":["ALLOW","ALLOW_WITH_WARNING","BLOCK"]},"evidenceRefs":{"type":"array","items":{"type":"string"}},"notes":{"type":"array","items":{"type":"string"}}},"additionalProperties":false}},
+    "adapterData":{"type":"object","additionalProperties":true}
+  },
+  "additionalProperties":false
+}
