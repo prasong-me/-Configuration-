@@ -1,12 +1,30 @@
 {
   "id": "wireguard",
   "version": "1.1.0",
-  "platforms": ["ios", "ipados", "macos", "android", "windows", "linux"],
-  "capabilities": ["vpn", "routing", "dns"],
+  "platforms": [
+    "ios",
+    "ipados",
+    "macos",
+    "android",
+    "windows",
+    "linux"
+  ],
+  "capabilities": [
+    "vpn",
+    "routing",
+    "dns"
+  ],
   "required": {
-    "interface": ["PrivateKey"],
-    "peer": ["PublicKey", "AllowedIPs"],
-    "wgQuickClient": ["Address"]
+    "interface": [
+      "PrivateKey"
+    ],
+    "peer": [
+      "PublicKey",
+      "AllowedIPs"
+    ],
+    "wgQuickClient": [
+      "Address"
+    ]
   },
   "optional": [
     "Interface.DNS",
@@ -34,12 +52,34 @@
   ],
   "syntax": {
     "container": "INI-like text",
-    "sections": ["[Interface]", "[Peer]"],
+    "sections": [
+      "[Interface]",
+      "[Peer]"
+    ],
     "interfaceEntry": "Key = Value",
     "peerEntry": "Key = Value",
-    "coreInterfaceKeys": ["PrivateKey", "ListenPort", "FwMark"],
-    "corePeerKeys": ["PublicKey", "PresharedKey", "AllowedIPs", "Endpoint", "PersistentKeepalive"],
-    "wgQuickKeys": ["Address", "DNS", "MTU", "Table", "PreUp", "PostUp", "PreDown", "PostDown"],
+    "coreInterfaceKeys": [
+      "PrivateKey",
+      "ListenPort",
+      "FwMark"
+    ],
+    "corePeerKeys": [
+      "PublicKey",
+      "PresharedKey",
+      "AllowedIPs",
+      "Endpoint",
+      "PersistentKeepalive"
+    ],
+    "wgQuickKeys": [
+      "Address",
+      "DNS",
+      "MTU",
+      "Table",
+      "PreUp",
+      "PostUp",
+      "PreDown",
+      "PostDown"
+    ],
     "keySyntax": "Case-sensitive canonical field names with '=' assignment"
   },
   "validation": [
