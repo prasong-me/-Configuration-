@@ -44,6 +44,16 @@ for (const target of targets) {
   try {
     result = compileTargetExport(target.id, input);
   } catch (error) {
+    if (target.id === "wireguard" && String(error?.message ?? error).includes("UNSUPPORTED_CAPABILITY")) {
+      artifacts.push({
+        scenarioId,
+        targetId: target.id,
+        declaredCapabilities: target.capabilities,
+        rejected: true,
+        rejection: String(error.message ?? error)
+      });
+      continue;
+    }
     fail(target.id, "COMPILE_FAILED", error instanceof Error ? error.message : String(error));
     continue;
   }
