@@ -37,7 +37,7 @@ export function createConfigurationExporter({targets={resolve:defaultTargetResol
     catch(error){ exportDiagnostics.push(fail("SEMANTIC_COMPILE_FAILED",error?.message||"Semantic compilation failed.",{target:targetId})); return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics,admission}; }
     let compiled;
     try { compiled=target.adapter.compile(processingResult.policy,semantic); }
-    catch(error){ exportDiagnostics.push(fail("COMPILE_FAILED",error?.message||"Target adapter compilation failed.",{target:targetId})); return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics,admission,semantic}; }
+    catch(error){ exportDiagnostics.push(fail(typeof error?.code==="string"&&error.code.trim()?error.code:"COMPILE_FAILED",error?.message||"Target adapter compilation failed.",{target:targetId,errorDetails:error?.details})); return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics,admission,semantic}; }
     const expectedFormat=target.adapter.outputFormat??target.manifest?.outputFormat;
     if(!expectedFormat){ exportDiagnostics.push(fail("TARGET_OUTPUT_FORMAT_MISMATCH","Target adapter has no declared output format.",{target:targetId})); return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics,admission,semantic}; }
     const structuralError=inspectCompileResult(compiled,targetId,expectedFormat);
