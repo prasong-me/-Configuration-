@@ -43,7 +43,7 @@ test("Provider Runtime Contract rejects an unresolved stage dependency", () => {
   assert.equal(isProviderRuntimeAdmissionAllowed(contract), false);
 });
 
-test("Provider Runtime Contract requires explicit resource budgets without hard-coding a platform memory ceiling", () => {
+test("Provider Runtime Contract supports explicit resource budgets without hard-coding a platform memory ceiling", () => {
   const contract = createProviderRuntimeContract({
     stages: [{ id: "a", order: 1, timeoutMs: 1000 }],
     transports: [ProviderTransport.TCP],
