@@ -102,3 +102,35 @@ Do not merge platform runtime claims into the existing contract/compile evidence
 ## Error/lesson record
 
 Memory-management lesson: test results, errors, evidence gaps, and corrections are first-class project state. Never collapse them into generic project knowledge.
+
+
+## PR #28 — Apple DNS Proxy Transport Runtime v1
+
+Status: MERGED.
+Merge commit: `8294457c6e25c824eb95f1357fbac98f96bff6e4`.
+Implementation:
+- concrete NEDNSProxyProvider UDP/TCP flow handling;
+- retained flow sessions;
+- current UDP API selectors through a small Objective-C bridge because the tested Swift importer did not expose the current selector directly;
+- TCP read/write through NetworkExtension;
+- Network.framework NWConnection upstream transport;
+- terminal close/error handling;
+- Swift test target and macOS CI validation.
+
+Final evidence:
+- Apple NetworkExtension workflow #18: PASS;
+- Xcode 26.6 / Swift 6.3.3;
+- compile PASS;
+- Swift tests PASS: 3/3;
+- core CI PASS;
+- platform verification PASS;
+- Apple style guide PASS.
+
+Recorded corrections:
+- package deployment/API availability mismatch;
+- Swift importer visibility of current UDP selector;
+- Swift 6 sendability boundary;
+- zero-port validation gap.
+
+Phase boundary:
+This closes transport integration, not physical-device validation or end-to-end DNS policy execution.
