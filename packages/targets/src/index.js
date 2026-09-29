@@ -5,6 +5,7 @@ export { exportFormats, getExportArtifact, getExportWarnings, compileTargetExpor
 export { getSerializer, listSerializers, registerSerializer, serializeRepresentation } from "./serializer-registry.js";
 export { exportConfiguration } from "./exporter-bridge.js";
 export { getPlatformManifest, listPlatformManifests, getPlatformTargets, isTargetCompatible, assertTargetCompatible } from "./platform-registry.js";
+export { getTargetData, listTargetData, hasTargetData, getTargetConditions } from "./target-data.js";
 
 const UNKNOWN_CAPABILITIES=Object.freeze({
   vpn:CapabilityState.UNKNOWN,
