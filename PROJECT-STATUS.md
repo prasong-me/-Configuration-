@@ -27,11 +27,7 @@ DNS profile คือชุดที่ผู้ใช้ตั้งชื่�
 
 Core รองรับจำนวน dnsProfiles[] ได้มากกว่า 3 และไม่ได้ล็อกจำนวนไว้ที่ 3 การใช้ 1–3 ชุดเป็นเพียงแนวทางสำหรับผู้ใช้ทั่วไป ไม่ใช่ข้อจำกัดของ data model
 
-UI ปัจจุบันตั้งต้นด้วย 3 ชุด:
-
-1. Privacy DNS · Cloudflare 1.1.1.1 · 1.1.1.1, 1.0.0.1
-2. Security DNS · Quad9 Secure · 9.9.9.9, 149.112.112.112
-3. Backup DNS · Google Public DNS · 8.8.8.8, 8.8.4.4
+Exporter/core มี baseline preset 3 ชุด แต่ Wizard UI ปัจจุบันเริ่มต้นเพียง 1 profile: Privacy DNS / Cloudflare 1.1.1.1. UI เพิ่ม/ลบ profile แบบอิสระยังไม่เสร็จ
 
 ค่าตั้งต้นเหล่านี้เป็น preset ไม่ใช่การบังคับให้ทุก configuration ต้องมี 3 ชุด
 
@@ -77,9 +73,9 @@ Certificate ไม่ใช่ dependency กลาง ต้องใช้เ�
 
 ## 7. Wizard/UI
 
-รูปแบบ UX ที่ตกลงกันสำหรับระยะต่อไป: DNS → Wi-Fi → VPN → Proxy → Web App → Review / Export
+Wizard implementation ปัจจุบันเป็น 6 ขั้น: Intent → Source → DNS / Policy → Target → Compatibility → Review / Export
 
-แต่ละขั้นควรมีปุ่ม ข้ามขั้นตอน และเมื่อข้ามขั้นตอนต้องไม่สร้าง payload หรือ configuration component ของขั้นนั้น
+แต่ละขั้นมี semantics ของตัวเอง; ขั้นที่ข้ามได้ต้องไม่สร้าง network/configuration semantics ของขั้นนั้น
 
 ทุก input ที่มี standard options ควรมี preset ที่ใช้ค่าจริง และมี Custom เมื่อเหมาะสม
 
