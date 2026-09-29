@@ -26,8 +26,7 @@
       "DNSSettings"
     ],
     "dnsSettings": [
-      "DNSProtocol",
-      "ServerURL"
+      "DNSProtocol"
     ]
   },
   "optional": [
@@ -36,9 +35,11 @@
     "PayloadDescription",
     "OnDemandRules",
     "ProhibitDisablement",
+    "DNSSettings.ServerURL",
+    "DNSSettings.ServerAddresses",
+    "DNSSettings.ServerName",
     "DNSSettings.AllowFailover",
     "DNSSettings.PayloadCertificateUUID",
-    "DNSSettings.ServerAddresses",
     "DNSSettings.SupplementalMatchDomains"
   ],
   "unsupported": [
@@ -51,6 +52,7 @@
     "This target uses the legacy com.apple.dnsSettings.managed configuration-profile payload.",
     "Legacy DNSSettings semantics are distinct from the declarative DNS model.",
     "Do not alias this target to the declarative DNS schema.",
+    "DNSProtocol is required. ServerURL is required when DNSProtocol is HTTPS; ServerName is required when DNSProtocol is TLS. ServerAddresses may be supplied as the resolver address list.",
     "This payload is deprecated on current Apple OS releases and must be treated as a legacy compatibility target."
   ],
   "syntax": {
@@ -69,7 +71,8 @@
     "uuid",
     "payload-nesting",
     "platform-compatibility",
-    "deprecation-status"
+    "deprecation-status",
+    "protocol-conditional-fields"
   ],
   "output": {
     "format": "plist",
