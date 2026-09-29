@@ -14,7 +14,7 @@ public struct DNSProxyUpstreamConfiguration: Sendable {
     public let port: Network.NWEndpoint.Port
 
     public init(host: String, port: UInt16) throws {
-        guard !host.isEmpty, let port = Network.NWEndpoint.Port(rawValue: port) else {
+        guard !host.isEmpty, port > 0, let port = Network.NWEndpoint.Port(rawValue: port) else {
             throw DNSProxyTransportRuntimeError.invalidConfiguration
         }
         self.host = NWEndpoint.Host(host)
