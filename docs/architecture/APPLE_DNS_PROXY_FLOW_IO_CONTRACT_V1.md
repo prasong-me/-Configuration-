@@ -1,6 +1,6 @@
 # Apple DNS Proxy Flow I/O Contract v1
 
-Status: IMPLEMENTED / CONTRACT-VALIDATED / PLATFORM-RUNTIME-PENDING
+Status: IMPLEMENTED / TEST-EVIDENCE-PENDING / PLATFORM-RUNTIME-PENDING
 
 ## Scope
 This contract closes the platform-independent Flow I/O boundary between an admitted Provider Runtime and Apple's NEDNSProxyProvider flow model.
