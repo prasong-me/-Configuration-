@@ -1,5 +1,11 @@
 import { CapabilityState } from "../../capabilities/src/index.js";
 import { getTargetTestEvidence } from "./test-evidence.js";
+export { getTargetAdapter, listTargetAdapters } from "./adapters.js";
+export { exportFormats, getExportArtifact, getExportWarnings, compileTargetExport } from "./exporters.js";
+export { getSerializer, listSerializers, registerSerializer, serializeRepresentation } from "./serializer-registry.js";
+export { exportConfiguration } from "./exporter-bridge.js";
+export { getPlatformManifest, listPlatformManifests, getPlatformTargets, isTargetCompatible, assertTargetCompatible } from "./platform-registry.js";
+export { getTargetData, listTargetData, hasTargetData, getTargetConditions } from "./target-data.js";
 
 const UNKNOWN_CAPABILITIES=Object.freeze({
   vpn:CapabilityState.UNKNOWN,

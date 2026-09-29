@@ -1,0 +1,107 @@
+{
+  "id": "wireguard",
+  "version": "1.1.0",
+  "platforms": [
+    "ios",
+    "ipados",
+    "macos",
+    "android",
+    "windows",
+    "linux"
+  ],
+  "capabilities": [
+    "vpn",
+    "routing",
+    "dns"
+  ],
+  "required": {
+    "interface": [
+      "PrivateKey"
+    ],
+    "peer": [
+      "PublicKey",
+      "AllowedIPs"
+    ],
+    "wgQuickClient": [
+      "Address"
+    ]
+  },
+  "optional": [
+    "Interface.DNS",
+    "Interface.ListenPort",
+    "Interface.MTU",
+    "Peer.PresharedKey",
+    "Peer.Endpoint",
+    "Peer.PersistentKeepalive",
+    "Interface.PreUp",
+    "Interface.PostUp",
+    "Interface.PreDown",
+    "Interface.PostDown",
+    "Interface.Table"
+  ],
+  "unsupported": [
+    "proxy-rule-syntax",
+    "third-party-policy-sections"
+  ],
+  "constraints": [
+    "WireGuard core requires PrivateKey on the interface and PublicKey plus AllowedIPs for each peer.",
+    "Endpoint is optional in the WireGuard protocol and must not be treated as universally required.",
+    "Address and DNS are wg-quick extensions used for interface setup and resolver configuration; they are not part of the core wg configuration fields.",
+    "A runnable client profile normally needs interface Address plus usable peer data, while a core wg configuration may omit Address.",
+    "Key material must never be invented."
+  ],
+  "syntax": {
+    "container": "INI-like text",
+    "sections": [
+      "[Interface]",
+      "[Peer]"
+    ],
+    "interfaceEntry": "Key = Value",
+    "peerEntry": "Key = Value",
+    "coreInterfaceKeys": [
+      "PrivateKey",
+      "ListenPort",
+      "FwMark"
+    ],
+    "corePeerKeys": [
+      "PublicKey",
+      "PresharedKey",
+      "AllowedIPs",
+      "Endpoint",
+      "PersistentKeepalive"
+    ],
+    "wgQuickKeys": [
+      "Address",
+      "DNS",
+      "MTU",
+      "Table",
+      "PreUp",
+      "PostUp",
+      "PreDown",
+      "PostDown"
+    ],
+    "keySyntax": "Case-sensitive canonical field names with '=' assignment"
+  },
+  "validation": [
+    "ini-structure",
+    "private-key-format",
+    "public-key-format",
+    "endpoint",
+    "allowed-ips",
+    "address",
+    "peer-structure",
+    "cidr"
+  ],
+  "output": {
+    "format": "text",
+    "extension": ".conf",
+    "mime": "text/plain"
+  },
+  "artifactStatus": {
+    "complete": "runnable",
+    "missingRuntimeData": "template",
+    "partialMapping": "partial",
+    "unsupportedCapability": "rejected",
+    "invalidSyntax": "invalid"
+  }
+}

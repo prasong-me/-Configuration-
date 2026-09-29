@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "feature/app-export-endpoint"]
   pull_request:
 jobs:
   core:
@@ -12,6 +12,11 @@ jobs:
         with:
           node-version: 22
       - run: npm test
+      - run: npm run test:export:routing-rules
+      - run: npm run test:export:vpn
+      - run: npm run test:export:apple
+      # DNS export capability and rejection coverage (target-safe fixtures, final scenario scope)
+      - run: npm run test:export:dns
   web:
     runs-on: ubuntu-latest
     steps:

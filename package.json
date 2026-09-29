@@ -1,1 +1,20 @@
-{"name":"configuration-platform","private":true,"version":"0.1.0","type":"module","scripts":{"test":"node --test tests/**/*.test.js","test:core":"node --test tests/core.test.js","build:web":"npm --prefix apps/web install && npm --prefix apps/web run build","test:mobileconfig":"node scripts/validate-mobileconfig.mjs"},"workspaces":["packages/*","apps/*"]}
+{
+  "name": "configuration-platform",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/**/*.test.js",
+    "test:core": "node --test tests/core.test.js",
+    "build:web": "npm --prefix apps/web install && npm --prefix apps/web run build",
+    "test:mobileconfig": "node scripts/validate-mobileconfig.mjs",
+    "test:export:routing-rules": "node scripts/inspect-export-artifacts.mjs",
+    "test:export:vpn": "node scripts/inspect-vpn-export-artifacts.mjs",
+    "test:export:apple": "node scripts/inspect-apple-export-artifacts.mjs",
+    "test:export:dns": "node scripts/inspect-dns-export-artifacts.mjs"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
+}

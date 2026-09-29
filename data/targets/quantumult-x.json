@@ -1,0 +1,82 @@
+{
+  "id": "quantumult-x",
+  "version": "1.1.0",
+  "platforms": [
+    "ios",
+    "ipados"
+  ],
+  "capabilities": [
+    "dns",
+    "proxy",
+    "routing",
+    "rules"
+  ],
+  "required": {
+    "dns": [
+      "[dns].server"
+    ],
+    "proxy": [
+      "[server_local]"
+    ],
+    "policy": [
+      "[policy]"
+    ],
+    "rule": [
+      "[filter_local]"
+    ]
+  },
+  "optional": [
+    "[server_remote]",
+    "[filter_remote]",
+    "[general]",
+    "proxy.credentials",
+    "server-check-url"
+  ],
+  "unsupported": [
+    "unresolved-proxy-reference"
+  ],
+  "constraints": [
+    "Quantumult X uses an INI-like configuration with lower-case section names and native key/value or comma-delimited resource syntax.",
+    "Local proxy nodes are defined in [server_local]; policies are defined in [policy]; routing filters are defined in [filter_local].",
+    "DNS servers are defined in [dns] using repeated server= entries.",
+    "A routing policy must resolve to a defined server tag or policy name, except explicit built-in policies.",
+    "Do not silently convert a proxy policy to DIRECT."
+  ],
+  "validation": [
+    "section-syntax",
+    "dns-syntax",
+    "server-entry-syntax",
+    "policy-resolution",
+    "filter-syntax",
+    "proxy-reference-resolution"
+  ],
+  "output": {
+    "format": "text",
+    "extension": ".conf",
+    "mime": "text/plain"
+  },
+  "artifactStatus": {
+    "complete": "runnable",
+    "missingRuntimeData": "template",
+    "partialMapping": "partial",
+    "unsupportedCapability": "rejected",
+    "invalidSyntax": "invalid"
+  },
+  "syntax": {
+    "container": "INI-like text",
+    "sections": [
+      "[general]",
+      "[dns]",
+      "[policy]",
+      "[server_remote]",
+      "[server_local]",
+      "[filter_remote]",
+      "[filter_local]"
+    ],
+    "dnsEntry": "server = <server>[, <option>...]",
+    "serverEntry": "<protocol> = <host>:<port>, <parameter>=<value>..., tag=<tag>",
+    "policyEntry": "<type> = <policy-name>, <server-tag>..., <option>=<value>...",
+    "filterEntry": "<type>, <value>, <policy>[, <option>...]",
+    "comment": "; comment or # comment or // comment"
+  }
+}

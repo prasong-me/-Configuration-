@@ -17,5 +17,13 @@ test("target adapter registry exposes only adapter identity", () => {
   assert.deepEqual(listTargetAdapters(), [
     { targetId: "apple-mobileconfig" },
     { targetId: "apple-dns-declaration" },
+    { targetId: "apple-mobileconfig-legacy" },
+    { targetId: "surge" },
+    { targetId: "mihomo" },
+    { targetId: "wireguard" },
+    { targetId: "shadowrocket" },
+    { targetId: "loon" },
+    { targetId: "stash" },
+    { targetId: "quantumult-x" },
   ]);
 });
