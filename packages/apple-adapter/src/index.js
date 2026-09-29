@@ -128,6 +128,9 @@ export function compileAppleMobileConfig(input={}){
       IsRemovable:true,
       Precomposed:true
     };
+    if(isNonEmptyString(policy.webAppIconData)&&/^[A-Za-z0-9+/]+={0,2}$/.test(policy.webAppIconData.trim())){
+      webClip.Icon={__plistData:true,base64:policy.webAppIconData.trim()};
+    }
     const icon=webClipIcon(policy);
     if(icon) warnings.push({code:"APPLE_WEBCLIP_ICON_REQUIRES_DATA",message:"Apple Web Clip กำหนด Icon เป็น PNG data จึงไม่ใส่ URL เป็น Icon"});
     else if(policy.webAppIconUrl||policy.webAppIconData) warnings.push({code:"APPLE_WEBCLIP_ICON_URL_INVALID",message:"Web Clip Icon ต้องเป็น URL แบบ HTTPS; ระบบจะสร้าง Web Clip โดยไม่ใส่ Icon หาก URL ไม่ถูกต้อง"});
