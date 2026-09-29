@@ -2,6 +2,7 @@ import {isIP} from "node:net";
 import {createAppleDnsCommandLayers} from "./dns-command-model.js";
 import {compileAppleDnsDeclaration} from "./dns-schema.js";
 import { analyzeAppleChainTopology, classifyAppleDnsChain, createAppleChainIR, isAppleChainAdmissionAllowed, AppleClassification, AppleTopology } from "./apple-chain-ir.js";
+import { generateProviderRuntimeSwift, validateGeneratedProviderRuntimeSwift } from "./provider-runtime-swift-generator.js";
 
 const xmlEscape=value=>String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;");
 
@@ -183,6 +184,23 @@ export function compileAppleMobileConfig(input={}){
   };
 }
 
+export function compileAppleDnsProxyProviderRuntime(input={}){
+  const policy=input?.policy??input;
+  const runtimeIR=policy?.providerRuntimeIR;
+  if(!runtimeIR){
+    return {targetId:"apple-dns-proxy-provider-runtime",outputFormat:"text",representation:"",diagnostics:[{code:"PROVIDER_RUNTIME_IR_REQUIRED",message:"Provider Runtime IR is required; native DNS pipeline is never flattened into provider runtime source."}]};
+  }
+  const result=generateProviderRuntimeSwift({runtimeIR});
+  if(result.status!=="GENERATED"){
+    return {targetId:"apple-dns-proxy-provider-runtime",outputFormat:"text",representation:"",diagnostics:[{code:"PROVIDER_RUNTIME_GENERATION_BLOCKED",message:"Provider Runtime generation was blocked by contract admission.",details:result.admission}]};
+  }
+  const validation=validateGeneratedProviderRuntimeSwift(result);
+  if(!validation.valid){
+    return {targetId:"apple-dns-proxy-provider-runtime",outputFormat:"text",representation:"",diagnostics:[{code:"PROVIDER_RUNTIME_GENERATED_ARTIFACT_INVALID",message:"Generated Provider Runtime artifact failed structural validation.",details:validation.errors}]};
+  }
+  return {targetId:"apple-dns-proxy-provider-runtime",outputFormat:"text",representation:result.artifact.files[0].content,diagnostics:[]};
+}
+
 export function compileAppleDeclarativeDns(input={}){
   const policy=input?.policy??input;
   const commands=createAppleDnsCommandLayers(policy);
@@ -204,3 +222,4 @@ export { createProviderRuntimeIR, validateProviderRuntimeIR, isProviderRuntimeIR
 export { createProviderRuntimeGeneratorContract, validateProviderRuntimeGeneratorContract, isProviderRuntimeGeneratorAdmissionAllowed, GeneratorLanguage, GeneratorRuntimeTarget, GeneratorUnit } from "./provider-runtime-generator-contract.js";
 
 export { generateProviderRuntimeSwift, validateGeneratedProviderRuntimeSwift } from "./provider-runtime-swift-generator.js";
+export { compileAppleDnsProxyProviderRuntime } from "./index.js";
