@@ -398,3 +398,10 @@ Post-boundary hardening ที่ทำเพิ่ม:
 
 - Apple Adapter: ไม่แตะใน Contract v2.1 batch
 - DNS Runtime / DnsController: ไม่แตะใน Contract v2.1 batch
+
+
+## 2026-09-30 Completion Reconciliation
+
+Repository implementation scope is closed. Remaining items that require physical devices, Apple signing/entitlements, upstream runtime observation, performance measurement, target-specific external syntax specifications, or an owner brand decision are explicitly DEFERRED and skipped for this implementation pass. They are not treated as failures and are not represented as completed evidence.
+
+Closure rule: implementation complete → constrained gates deferred → final repository verification → snapshot.
