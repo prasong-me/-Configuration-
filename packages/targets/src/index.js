@@ -67,10 +67,7 @@ const manifests=new Map([
   ],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["Configuration template is available; exact runtime behavior must be tested in the installed app version."]}],
   ["apple-dns-proxy-provider-runtime",{id:"apple-dns-proxy-provider-runtime",version:"provider-runtime-v1",status:"generated-source",evidence:[],capabilities:{
     ...UNKNOWN_CAPABILITIES,
-    dns:CapabilityState.SUPPORTED,
-    "dns.pipeline":CapabilityState.SUPPORTED,
-    "runtime.commands":CapabilityState.SUPPORTED,
-    "policy.providers":CapabilityState.SUPPORTED
+    dns:CapabilityState.SUPPORTED
   },limitations:["Generates a Swift Network Extension provider runtime source artifact from an explicitly supplied admitted Provider Runtime IR; it does not prove native MobileConfig/DDM DNS pipeline support."]}],
   ["apple-mobileconfig",{id:"apple-mobileconfig",version:"current-profile",status:"generated",evidence:[],capabilities:{
     ...UNKNOWN_CAPABILITIES,dns:CapabilityState.SUPPORTED,
