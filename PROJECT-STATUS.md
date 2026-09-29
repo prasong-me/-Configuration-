@@ -27,7 +27,7 @@ DNS profile คือชุดที่ผู้ใช้ตั้งชื่�
 
 Core รองรับจำนวน dnsProfiles[] ได้มากกว่า 3 และไม่ได้ล็อกจำนวนไว้ที่ 3 การใช้ 1–3 ชุดเป็นเพียงแนวทางสำหรับผู้ใช้ทั่วไป ไม่ใช่ข้อจำกัดของ data model
 
-Exporter/core มี baseline preset 3 ชุด แต่ Wizard UI ปัจจุบันเริ่มต้นเพียง 1 profile: Privacy DNS / Cloudflare 1.1.1.1. UI เพิ่ม/ลบ profile แบบอิสระยังไม่เสร็จ
+Exporter/core มี baseline preset 3 ชุด Wizard UI ปัจจุบันเริ่มต้น 3 profiles: Privacy DNS / Security DNS / Backup DNS และรองรับเพิ่ม/ลบ profile แบบอิสระ
 
 ค่าตั้งต้นเหล่านี้เป็น preset ไม่ใช่การบังคับให้ทุก configuration ต้องมี 3 ชุด
 
