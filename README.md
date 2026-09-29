@@ -77,3 +77,8 @@ Protocol and role remain independent. DoH, DoT, DoQ, DNSCrypt, and plain DNS des
 ## Generic Web Entry
 
 The core policy can carry an optional webEntry object containing a name, URL, and optional icon. Target adapters decide how to represent it. For Apple this can map to a Web Clip payload when that capability is supported. It is not an Apple-only core concept.
+
+
+## Completion Scope
+
+The current release closes the repository-side Configuration Platform implementation and verification scope. Physical-device/runtime evidence, Apple signing/entitlement validation, performance measurements, target-specific import/round-trip specifications, and final product branding are explicitly deferred until their prerequisites are available. Deferred items are not represented as completed runtime evidence.
