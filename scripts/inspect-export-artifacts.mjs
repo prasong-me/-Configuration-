@@ -106,6 +106,32 @@ for (const target of targets) {
   }
 }
 
+const fs = await import("node:fs/promises");
+const path = await import("node:path");
+const outputDir = path.resolve("artifacts/export-inspection");
+await fs.rm(outputDir, { recursive: true, force: true });
+await fs.mkdir(outputDir, { recursive: true });
+
+for (const item of artifacts) {
+  const targetDir = path.join(outputDir, item.targetId);
+  await fs.mkdir(targetDir, { recursive: true });
+  await fs.writeFile(path.join(targetDir, item.filename), item.content, "utf8");
+  await fs.writeFile(path.join(targetDir, "manifest.json"), JSON.stringify({
+    targetId: item.targetId,
+    filename: item.filename,
+    mime: item.mime,
+    outputFormat: item.outputFormat,
+    declaredFormat: item.declaredFormat,
+    status: item.status,
+    bytes: item.bytes
+  }, null, 2) + "\n", "utf8");
+}
+await fs.writeFile(path.join(outputDir, "manifest.json"), JSON.stringify({
+  inspection: "target-export-artifacts",
+  generatedTargets: artifacts.length,
+  files: artifacts.map(({ content, ...item }) => item)
+}, null, 2) + "\n", "utf8");
+
 const report = {
   inspection: "target-export-artifacts",
   targetCount: targets.length,
