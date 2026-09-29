@@ -97,7 +97,7 @@ test("target exporters preserve explicit DNS input and do not invent a resolver"
 
 test("all target exporters generate non-empty artifacts", () => {
   for (const id of targets) {
-    const result = compileTargetExport(id, policy);
+    const result = compileTargetExport(id, inputForTarget(id));
     assert.equal(result.targetId, id);
     assert.equal(typeof result.outputFormat, "string");
     assert.equal(typeof result.filename, "string");
