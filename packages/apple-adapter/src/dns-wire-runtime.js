@@ -343,6 +343,7 @@ function encodeRecord(record) {
     encodeName(record.name),
     u16Bytes(typeCode),
     u16Bytes(recordClass),
+    u32Bytes(ttl),
     u16Bytes(rdata.length),
     rdata,
   ]);
