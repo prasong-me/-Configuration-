@@ -5,14 +5,13 @@ Target Data reference: data/targets/wireguard.json
 
 ## Evidence state
 - Target-data status: specification-only
-- Normative source verification: SOURCE_PARTIAL
+- Normative source verification: SOURCE_VERIFIED
 - Runtime verification: pending
 
 ## Source evidence
 - https://www.wireguard.com/quickstart/
-- https://www.wireguard.com/xplatform/
 
-Evidence note: WireGuard protocol/config semantics require protocol-specific verification; wg-quick extensions must remain distinguished from core WireGuard fields.
+Evidence note: Official WireGuard documentation confirms private/public keys, peer AllowedIPs, endpoint, PersistentKeepalive, and the distinction between core wg configuration and wg-quick automation.
 
 ## Test vectors
 - VALID_MINIMAL — minimum required configuration; expected validation success.
