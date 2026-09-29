@@ -18,3 +18,26 @@
 
 ## Rule
 A test implementation is not test evidence. A configured workflow is not a successful workflow run. Only runner/device evidence closes the corresponding validation state. The recorded Apple transport workflow evidence closes repository/macOS compile-and-test validation only; it does not close device/runtime gates.
+
+## Data Reconciliation / Error Record — 2026-09-30
+
+### Error
+External project snapshots were imported from different points in time and were temporarily treated as if they represented one current state.
+
+### Why it happened
+The data record did not enforce source/time/evidence reconciliation before current-state interpretation. As the repository advanced, older snapshots remained present without an explicit superseded relationship.
+
+### Effect
+Stale status wording could conflict with newer repository evidence and could cause unnecessary repeated external research.
+
+### Fix
+- Reconciled the project-memory records against current repository and CI evidence.
+- Corrected stale PR #26 wording using the newer PR #28 transport-runtime evidence.
+- Preserved historical information and deferred boundaries rather than deleting them.
+- Kept the Vercel rate-limit item explicitly deferred and separate from project test failures.
+- Established the rule that imported records require source, capture/state time, evidence, status, and reconciliation before being treated as current.
+
+### Current data rule
+Historical record != Current state.
+
+Current state is selected by reconciled authoritative repository/evidence records; older records remain traceable but cannot override newer evidence.
