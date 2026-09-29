@@ -165,18 +165,167 @@ export function decodeDnsWireMessage(input, options = {}) {
   return Object.freeze(message);
 }
 
-export function encodeDnsWireMessage(message) {
+function assertUint(value, max, code, message) {
+  if (!Number.isInteger(value) || value < 0 || value > max) fail(code, message);
+}
+
+function encodeName(name, maxNameLength = 255) {
+  if (typeof name !== "string") fail("DNS_WIRE_NAME_INVALID", "DNS name must be a string.");
+  const normalized = name.trim().replace(/\\.$/, "");
+  if (normalized.length === 0) return Uint8Array.of(0);
+  const labels = normalized.split(".");
+  let total = 1;
+  const chunks = [];
+  for (const label of labels) {
+    const bytes = new TextEncoder().encode(label);
+    if (bytes.length === 0 || bytes.length > 63) fail("DNS_WIRE_NAME_INVALID", "DNS label length must be 1..63 octets.");
+    total += 1 + bytes.length;
+    chunks.push(Uint8Array.of(bytes.length), bytes);
+  }
+  if (total > maxNameLength + 1 || total > 255) fail("DNS_WIRE_NAME_INVALID", "DNS name length limit exceeded.");
+  return concatBytes([...chunks, Uint8Array.of(0)]);
+}
+
+function concatBytes(parts) {
+  const length = parts.reduce((sum, part) => sum + part.length, 0);
+  const output = new Uint8Array(length);
+  let offset = 0;
+  for (const part of parts) {
+    output.set(part, offset);
+    offset += part.length;
+  }
+  return output;
+}
+
+function u16Bytes(value) {
+  assertUint(value, 0xffff, "DNS_WIRE_FIELD_INVALID", "DNS 16-bit field is invalid.");
+  return Uint8Array.of((value >> 8) & 0xff, value & 0xff);
+}
+
+function u32Bytes(value) {
+  assertUint(value, 0xffffffff, "DNS_WIRE_FIELD_INVALID", "DNS 32-bit field is invalid.");
+  return Uint8Array.of((value >>> 24) & 0xff, (value >>> 16) & 0xff, (value >>> 8) & 0xff, value & 0xff);
+}
+
+function bytesFrom(value, code = "DNS_WIRE_RDATA_INVALID") {
+  if (value instanceof Uint8Array) return value;
+  if (ArrayBuffer.isView(value)) return new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+  if (value instanceof ArrayBuffer) return new Uint8Array(value);
+  if (Array.isArray(value) && value.every(byte => Number.isInteger(byte) && byte >= 0 && byte <= 255)) return Uint8Array.from(value);
+  fail(code, "DNS RDATA must be a byte sequence.");
+}
+
+function encodeRdata(record) {
+  const type = record.type || (Number.isInteger(record.typeCode) ? TYPE_BY_CODE[record.typeCode] : undefined);
+  const rdata = record.rdata;
+  if (type === "A" || type === "AAAA" || type === "TXT") {
+    const bytes = bytesFrom(rdata);
+    const expected = type === "A" ? 4 : type === "AAAA" ? 16 : null;
+    if (expected !== null && bytes.length !== expected) fail("DNS_WIRE_RDATA_INVALID", `${type} RDATA must contain ${expected} octets.`);
+    return bytes.slice();
+  }
+
+  if (type === "CNAME" || type === "NS" || type === "PTR") {
+    const target = record.target ?? record.rdataName;
+    if (typeof target !== "string") fail("DNS_WIRE_RDATA_STRUCTURED_REQUIRED", `${type} requires a structured target name for deterministic encoding.`);
+    return encodeName(target);
+  }
+
+  if (type === "MX") {
+    const exchange = record.exchange ?? record.rdataName;
+    if (typeof exchange !== "string") fail("DNS_WIRE_RDATA_STRUCTURED_REQUIRED", "MX requires a structured exchange name.");
+    return concatBytes([u16Bytes(record.preference), encodeName(exchange)]);
+  }
+
+  if (type === "SRV") {
+    const target = record.target ?? record.rdataName;
+    if (typeof target !== "string") fail("DNS_WIRE_RDATA_STRUCTURED_REQUIRED", "SRV requires a structured target name.");
+    return concatBytes([
+      u16Bytes(record.priority),
+      u16Bytes(record.weight),
+      u16Bytes(record.port),
+      encodeName(target),
+    ]);
+  }
+
+  if (type === "SVCB" || type === "HTTPS") {
+    const target = record.target ?? record.rdataName;
+    if (typeof target !== "string") fail("DNS_WIRE_RDATA_STRUCTURED_REQUIRED", `${type} requires a structured target name.`);
+    const parameters = Array.isArray(record.parameters) ? record.parameters : [];
+    const encodedParameters = parameters.map(parameter => {
+      if (!Number.isInteger(parameter?.key) || parameter.key < 0 || parameter.key > 0xffff) {
+        fail("DNS_WIRE_RDATA_INVALID", `${type} parameter key is invalid.`);
+      }
+      const value = bytesFrom(parameter.value, "DNS_WIRE_RDATA_INVALID");
+      return concatBytes([u16Bytes(parameter.key), u16Bytes(value.length), value]);
+    });
+    return concatBytes([u16Bytes(record.priority), encodeName(target), ...encodedParameters]);
+  }
+
+  fail("DNS_WIRE_RECORD_TYPE_UNSUPPORTED", `DNS wire encoder does not support record type: ${type || "UNKNOWN"}.`);
+}
+
+function encodeQuestion(question) {
+  if (!question || typeof question.name !== "string") fail("DNS_WIRE_QUESTION_INVALID", "DNS question is invalid.");
+  const typeCode = Number.isInteger(question.typeCode) ? question.typeCode : CODE_BY_TYPE[question.type];
+  assertUint(typeCode, 0xffff, "DNS_WIRE_QUESTION_INVALID", "DNS question type is invalid.");
+  return concatBytes([encodeName(question.name), u16Bytes(typeCode), u16Bytes(question.class)]);
+}
+
+function encodeRecord(record) {
+  if (!record || typeof record.name !== "string") fail("DNS_WIRE_RECORD_INVALID", "DNS record owner name is invalid.");
+  const typeCode = Number.isInteger(record.typeCode) ? record.typeCode : CODE_BY_TYPE[record.type];
+  if (!Number.isInteger(typeCode)) fail("DNS_WIRE_RECORD_TYPE_UNSUPPORTED", "DNS record type is unsupported.");
+  const rdata = encodeRdata(record);
+  if (rdata.length > 0xffff) fail("DNS_WIRE_RDATA_INVALID", "DNS RDATA exceeds the 16-bit wire length.");
+  return concatBytes([
+    encodeName(record.name),
+    u16Bytes(typeCode),
+    u16Bytes(record.class),
+    u32Bytes(record.ttl),
+    u16Bytes(rdata.length),
+    rdata,
+  ]);
+}
+
+export function encodeDnsWireMessage(message, options = {}) {
   if (!message || !Number.isInteger(message.transactionId) || !Number.isInteger(message.flags)) {
     fail("DNS_WIRE_MESSAGE_INVALID", "DNS message header is invalid.");
   }
-  const all = [...(message.questions || []), ...(message.answers || []), ...(message.authority || []), ...(message.additional || [])];
-  if (all.length > 65535) fail("DNS_WIRE_MESSAGE_INVALID", "Too many DNS records.");
-  const bytes = new Uint8Array(12);
-  bytes[0] = (message.transactionId >> 8) & 255; bytes[1] = message.transactionId & 255;
-  bytes[2] = (message.flags >> 8) & 255; bytes[3] = message.flags & 255;
-  const sections = [message.questions || [], message.answers || [], message.authority || [], message.additional || []];
-  sections.forEach((section, index) => { bytes[4 + index * 2] = (section.length >> 8) & 255; bytes[5 + index * 2] = section.length & 255; });
-  fail("DNS_WIRE_ENCODE_UNIMPLEMENTED", "Encoding parsed DNS messages requires an explicit wire-preservation implementation.");
+  assertUint(message.transactionId, 0xffff, "DNS_WIRE_MESSAGE_INVALID", "DNS transaction ID is invalid.");
+  assertUint(message.flags, 0xffff, "DNS_WIRE_MESSAGE_INVALID", "DNS flags are invalid.");
+
+  const limits = { ...DEFAULT_LIMITS, ...(options.limits || {}) };
+  for (const key of Object.keys(DEFAULT_LIMITS)) {
+    if (!Number.isInteger(limits[key]) || limits[key] <= 0) fail("DNS_WIRE_LIMIT_INVALID", `Invalid DNS wire limit: ${key}.`);
+  }
+
+  const sections = [
+    message.questions || [],
+    message.answers || [],
+    message.authority || [],
+    message.additional || [],
+  ];
+  if (!sections.every(Array.isArray)) fail("DNS_WIRE_MESSAGE_INVALID", "DNS message sections must be arrays.");
+  const totalRecords = sections.slice(1).reduce((sum, section) => sum + section.length, 0);
+  if (totalRecords > limits.maxRecords) fail("DNS_WIRE_LIMIT_EXCEEDED", "DNS record count limit exceeded.");
+  if (sections.some(section => section.length > 0xffff)) fail("DNS_WIRE_MESSAGE_INVALID", "DNS section count exceeds the 16-bit wire limit.");
+
+  const encodedSections = [
+    sections[0].map(encodeQuestion),
+    sections[1].map(encodeRecord),
+    sections[2].map(encodeRecord),
+    sections[3].map(encodeRecord),
+  ];
+  const body = concatBytes(encodedSections.flat());
+  const bytes = concatBytes([
+    u16Bytes(message.transactionId),
+    u16Bytes(message.flags),
+    ...sections.map(section => u16Bytes(section.length)),
+    body,
+  ]);
+  if (bytes.length > limits.maxMessageBytes) fail("DNS_WIRE_LIMIT_EXCEEDED", "Encoded DNS message exceeds the configured size limit.");
+  return bytes;
 }
 
 export { CODE_BY_TYPE };
