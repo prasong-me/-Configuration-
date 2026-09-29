@@ -1,12 +1,31 @@
 {
   "id": "shadowrocket",
   "version": "1.1.0",
-  "platforms": ["ios", "ipados"],
-  "capabilities": ["dns", "proxy", "routing", "rules"],
+  "platforms": [
+    "ios",
+    "ipados"
+  ],
+  "capabilities": [
+    "dns",
+    "proxy",
+    "routing",
+    "rules"
+  ],
   "required": {
-    "proxy": ["name", "type", "server", "port"],
-    "rule": ["type", "value", "policy"],
-    "finalRule": ["policy"]
+    "proxy": [
+      "name",
+      "type",
+      "server",
+      "port"
+    ],
+    "rule": [
+      "type",
+      "value",
+      "policy"
+    ],
+    "finalRule": [
+      "policy"
+    ]
   },
   "optional": [
     "proxy.credentials",
@@ -28,7 +47,12 @@
   ],
   "syntax": {
     "container": "INI-like text",
-    "sections": ["[General]", "[Proxy]", "[Proxy Group]", "[Rule]"],
+    "sections": [
+      "[General]",
+      "[Proxy]",
+      "[Proxy Group]",
+      "[Rule]"
+    ],
     "proxyEntry": "<name> = <type>, <server>, <port>[, <parameter>...]",
     "proxyGroupEntry": "<group> = <type>, <member>...",
     "ruleEntry": "TYPE,VALUE,POLICY[,OPTION...]",
