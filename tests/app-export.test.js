@@ -236,3 +236,21 @@ test("platform compatibility fails closed", () => {
     /Unknown device platform/
   );
 });
+
+test("export bridge enforces device platform compatibility when requested", () => {
+  const android = exportConfiguration(
+    { policy: policy.policy, resultMetadata: { status: "SUCCEEDED", diagnostics: [] } },
+    { platformId: "android", targetId: "wireguard" }
+  );
+  assert.equal(android.ok, true);
+  assert.equal(android.targetId, "wireguard");
+
+  const incompatible = exportConfiguration(
+    { policy: policy.policy, resultMetadata: { status: "SUCCEEDED", diagnostics: [] } },
+    { platformId: "android", targetId: "surge" }
+  );
+  assert.equal(incompatible.ok, false);
+  assert.equal(incompatible.blocked, true);
+  assert.equal(incompatible.artifact, null);
+  assert.equal(incompatible.diagnostics[0].code, "PLATFORM_TARGET_INCOMPATIBLE");
+});
