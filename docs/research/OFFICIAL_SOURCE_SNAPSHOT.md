@@ -284,28 +284,114 @@ The repository may store endpoint URLs, authentication schema, capability metada
 
 **Official sources**
 - Repository: https://github.com/wanghongenpin/proxypin
+- Official wiki: https://github.com/wanghongenpin/proxypin/wiki
 - Releases: https://github.com/wanghongenpin/proxypin/releases
 - App Store: https://apps.apple.com/app/proxypin/id6450932949
 
-**Officially documented capabilities**
-- HTTP(S) traffic interception/inspection/rewrite.
-- Windows, macOS, Android, iOS, and Linux support.
+### Platform / client scope
+
+The official repository describes ProxyPin as open-source HTTP(S) traffic capture software supporting Windows, macOS, Android, iOS, and Linux. The official App Store listing identifies the iPhone/iPad client and describes interception, inspection, and rewriting of HTTP(S) traffic.
+
+This establishes client/platform capability, not that every feature has identical behavior on every platform.
+
+### Traffic interception architecture
+
+The official ProxyPin wiki documents a local proxy-server architecture. The documented default local proxy listener is port **9099**. For HTTPS interception, ProxyPin uses a self-signed SSL certificate and requires the corresponding root certificate to be installed so the client can complete the TLS interception handshake.
+
+For desktop traffic, the official documentation describes using the system network proxy to forward traffic to ProxyPin. Applications that do not honor system proxy settings may require an additional traffic-redirection mechanism.
+
+**Modeling rule:** interception mechanism, local listener, certificate trust, and platform-specific traffic routing are CLIENT/PLATFORM capabilities; they are not generic HTTP configuration fields.
+
+### Officially documented inspection / manipulation capabilities
+
+The official README and wiki document:
 - Domain filtering.
+- Request/response search.
 - JavaScript scripting for request/response processing.
-- Request rewrite and request mapping.
-- Request blocking.
-- AES request-body decryption.
+- Request rewrite.
+- Request mapping using local configuration or scripts instead of contacting the remote service.
+- Request blocking by URL.
+- AES-based HTTP message-body decryption.
+- Request breakpoints for editing traffic before forwarding.
 - HAR import/export.
-- QR/configuration synchronization.
+- QR-based connection/configuration synchronization.
+- WebSocket/SSE-related tooling and capture support.
+- Environment variables used by rules/scripts.
+- Advanced repeat/replay and request editing.
 
-**Release observation**
-- v1.3.1 is marked Latest on the official releases page.
-- v1.3.2 is marked Pre-release on the official releases page.
-- This is release-channel information, not device-runtime validation.
+The official scripting documentation exposes request/response hooks and shows that scripts can inspect and modify request URLs, query parameters, headers, and bodies.
 
-**Status:** VERIFIED — official repository/release evidence.
+### Rewrite / debugging model
 
----
+The official wiki documents rewrite operations for modifying or replacing requests/responses and redirection. It also documents breakpoint-style interception where a request or response can be edited before it continues.
+
+These are **traffic-debugging capabilities**, not the same abstraction as a static network-policy generator. The Configuration Platform should therefore keep ProxyPin's debugging/rewrite feature set in a client-specific adapter rather than promoting it into the common DNS/VPN/proxy schema.
+
+### Current official release evidence
+
+The official releases page currently shows:
+- **v1.3.1 — Latest**
+- **v1.3.2 — Pre-release**
+
+The v1.3.2 pre-release notes add a built-in MCP server for AI-assisted traffic inspection/debugging, dynamic environment variables, request-rewrite rule reordering, and fixes involving HTTP/2, certificate validation, iOS 13 stability, and Android VPN destination-port recording.
+
+Release-channel status is official evidence, but it is not a substitute for runtime validation on the user's device.
+
+### Configuration-model boundary for this project
+
+Recommended normalized boundary:
+
+```text
+ProxyPinTarget
+├── CLIENT_CAPABILITY
+│   ├── HTTP(S) interception
+│   ├── inspection/search
+│   ├── rewrite
+│   ├── mapping
+│   ├── blocking
+│   ├── scripting
+│   └── debugging/breakpoints
+├── PLATFORM_CAPABILITY
+│   ├── iOS/iPadOS
+│   ├── Android
+│   ├── macOS
+│   ├── Windows
+│   └── Linux
+├── FORMAT_CAPABILITY
+│   └── HAR import/export
+├── SECURITY_CAPABILITY
+│   └── local CA / TLS interception trust
+└── RUNTIME_EVIDENCE
+    └── separate real-device validation
+```
+
+Do not infer that ProxyPin is a VPN protocol, WireGuard implementation, or generic DNS resolver. Its official evidence establishes an HTTP(S) traffic interception/debugging client.
+
+### Security boundary
+
+Do not commit:
+- ProxyPin private certificates/keys
+- user-specific CA material
+- captured traffic containing personal credentials
+- subscription or service secrets
+- user-specific proxy credentials
+
+Repository research may contain capability schemas, official source URLs, release metadata, and non-secret examples only.
+
+### Evidence classification
+
+- **HTTP(S) capture/interception:** VERIFIED — official repository/wiki.
+- **Request rewrite/mapping/blocking:** VERIFIED — official repository/wiki.
+- **JavaScript request/response scripting:** VERIFIED — official wiki.
+- **HAR import/export:** VERIFIED — official repository.
+- **TLS interception / local CA architecture:** VERIFIED — official wiki.
+- **Platform availability:** VERIFIED — official repository/App Store.
+- **Specific iOS runtime behavior:** RUNTIME_UNVERIFIED.
+- **Integration into this project's export formats:** PENDING target-adapter implementation.
+
+**Status:** VERIFIED — official repository/wiki/release/App Store evidence.
+**Runtime status:** RUNTIME_UNVERIFIED.
+
 
 ## 4. Clash Mi
 
