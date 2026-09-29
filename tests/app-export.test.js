@@ -138,3 +138,28 @@ test("export bridge fails closed on an unknown target", () => {
   assert.equal(result.artifact, null);
   assert.equal(result.diagnostics[0].code, "TARGET_NOT_REGISTERED");
 });
+
+test("export bridge blocks all terminal failure statuses", () => {
+  for (const status of ["FAILED", "BLOCKED", "REJECTED"]) {
+    const result = exportConfiguration(
+      { status, policy: policy.policy },
+      { targetId: "surge" }
+    );
+    assert.equal(result.ok, false, status);
+    assert.equal(result.blocked, true, status);
+    assert.equal(result.artifact, null, status);
+    assert.equal(result.diagnostics[0].code, "PROCESSING_FAILED", status);
+  }
+});
+
+test("legacy Apple MobileConfig is reachable through the export bridge", () => {
+  const result = exportConfiguration(
+    { policy: policy.policy, resultMetadata: { status: "SUCCEEDED", diagnostics: [] } },
+    { targetId: "apple-mobileconfig-legacy" }
+  );
+
+  assert.equal(result.ok, true);
+  assert.equal(result.targetId, "apple-mobileconfig-legacy");
+  assert.equal(result.outputFormat, "plist");
+  assert.match(result.artifact, /com\.apple\.dnsSettings\.managed/);
+});
