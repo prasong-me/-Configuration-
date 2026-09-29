@@ -72,8 +72,8 @@ export function validateDnsWireParserContract(contract) {
 
   for (const field of ["maxMessageBytes", "maxNameLength", "maxRecords"]) {
     const value = contract?.limits?.[field];
-    if (!POSITIVE(value)) errors.push(`DNS_WIRE_LIMIT_REQUIRED:${field}`);
-    else if (value <= 0) errors.push(`DNS_WIRE_LIMIT_INVALID:${field}`);
+    if (value === null || value === undefined) errors.push(`DNS_WIRE_LIMIT_REQUIRED:${field}`);
+    else if (!POSITIVE(value)) errors.push(`DNS_WIRE_LIMIT_INVALID:${field}`);
   }
 
   const allowed = new Set(Object.values(DnsWireRecordType));
