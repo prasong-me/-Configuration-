@@ -1,6 +1,8 @@
 import {isIP} from "node:net";
 import {createAppleDnsCommandLayers} from "./dns-command-model.js";
-import {compileAppleDnsDeclaration} from "./dns-schema.js";\nimport { analyzeAppleChainTopology, classifyAppleDnsChain, createAppleChainIR, isAppleChainAdmissionAllowed, AppleClassification, AppleTopology } from "./apple-chain-ir.js";
+import {compileAppleDnsDeclaration} from "./dns-schema.js";
+import { analyzeAppleChainTopology, classifyAppleDnsChain, createAppleChainIR, isAppleChainAdmissionAllowed, AppleClassification, AppleTopology } from "./apple-chain-ir.js";
+import { generateProviderRuntimeSwift, validateGeneratedProviderRuntimeSwift } from "./provider-runtime-swift-generator.js";
 
 const xmlEscape=value=>String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;");
 
@@ -182,6 +184,31 @@ export function compileAppleMobileConfig(input={}){
   };
 }
 
+export function compileAppleDnsProxyProviderRuntime(input={}){
+  const policy=input?.policy??input;
+  const runtimeIR=policy?.providerRuntimeIR;
+  if(!runtimeIR){
+    const error=new Error("Provider Runtime IR is required; native DNS pipeline is never flattened into provider runtime source.");
+    error.code="PROVIDER_RUNTIME_IR_REQUIRED";
+    throw error;
+  }
+  const result=generateProviderRuntimeSwift({runtimeIR});
+  if(result.status!=="GENERATED"){
+    const error=new Error("Provider Runtime generation was blocked by contract admission.");
+    error.code="PROVIDER_RUNTIME_GENERATION_BLOCKED";
+    error.details=result.admission;
+    throw error;
+  }
+  const validation=validateGeneratedProviderRuntimeSwift(result);
+  if(!validation.valid){
+    const error=new Error("Generated Provider Runtime artifact failed structural validation.");
+    error.code="PROVIDER_RUNTIME_GENERATED_ARTIFACT_INVALID";
+    error.details=validation.errors;
+    throw error;
+  }
+  return {targetId:"apple-dns-proxy-provider-runtime",outputFormat:"text",representation:result.artifact.files[0].content,diagnostics:[]};
+}
+
 export function compileAppleDeclarativeDns(input={}){
   const policy=input?.policy??input;
   const commands=createAppleDnsCommandLayers(policy);
@@ -193,3 +220,16 @@ export function compileAppleDeclarativeDns(input={}){
 }
 
 export { analyzeAppleChainTopology, classifyAppleDnsChain, createAppleChainIR, isAppleChainAdmissionAllowed, AppleClassification, AppleTopology } from "./apple-chain-ir.js";
+
+export { createProviderRuntimeContract, validateProviderRuntimeContract, isProviderRuntimeAdmissionAllowed } from "./provider-runtime-contract.js";
+export { createDnsWireParserContract, validateDnsWireParserContract } from "./dns-wire-contract.js";
+export { createProviderStageContract, validateProviderStageContract, resolveProviderStageExecutionOrder } from "./provider-stage-contract.js";
+export { createProviderTransportContract, validateProviderTransportContract, ProviderTransportMode } from "./provider-transport-contract.js";
+export { createProviderRuntimeIR, validateProviderRuntimeIR, isProviderRuntimeIRAdmissionAllowed, canonicalizeProviderRuntimeIR } from "./provider-runtime-ir.js";
+
+export { createProviderRuntimeGeneratorContract, validateProviderRuntimeGeneratorContract, isProviderRuntimeGeneratorAdmissionAllowed, GeneratorLanguage, GeneratorRuntimeTarget, GeneratorUnit } from "./provider-runtime-generator-contract.js";
+
+export { generateProviderRuntimeSwift, validateGeneratedProviderRuntimeSwift } from "./provider-runtime-swift-generator.js";
+export { decodeDnsWireMessage, encodeDnsWireMessage } from "./dns-wire-runtime.js";
+
+export { createProviderStageExecutionEngine, FAILURE_TYPES } from "./provider-stage-execution.js";

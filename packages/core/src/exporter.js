@@ -25,7 +25,7 @@ export function createConfigurationExporter({targets={resolve:defaultTargetResol
     const target=targets.resolve(targetId);
     if(!target||typeof target.adapter?.compile!=="function"){ exportDiagnostics.push(fail("TARGET_NOT_REGISTERED","Target is not registered with a usable adapter.",{target:targetId})); return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics}; }
     let admission;
-    try { admission=admitTargetCapabilities(processingResult.policy,target.manifest); }
+    try { admission=admitTargetCapabilities(processingResult.policy,{...target.manifest,id:target.manifest.id||targetId}); }
     catch(error){ exportDiagnostics.push(fail("CAPABILITY_ADMISSION_FAILED",error?.message||"Capability admission failed.",{target:targetId})); return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics}; }
     if(admission.decision==="BLOCK"){
       exportDiagnostics.push(...admission.diagnostics.map(item=>fail(item.code,item.message,item.details)));
@@ -37,7 +37,7 @@ export function createConfigurationExporter({targets={resolve:defaultTargetResol
     catch(error){ exportDiagnostics.push(fail("SEMANTIC_COMPILE_FAILED",error?.message||"Semantic compilation failed.",{target:targetId})); return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics,admission}; }
     let compiled;
     try { compiled=target.adapter.compile(processingResult.policy,semantic); }
-    catch(error){ exportDiagnostics.push(fail("COMPILE_FAILED",error?.message||"Target adapter compilation failed.",{target:targetId})); return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics,admission,semantic}; }
+    catch(error){ exportDiagnostics.push(fail(typeof error?.code==="string"&&error.code.trim()?error.code:"COMPILE_FAILED",error?.message||"Target adapter compilation failed.",{target:targetId,errorDetails:error?.details})); return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics,admission,semantic}; }
     const expectedFormat=target.adapter.outputFormat??target.manifest?.outputFormat;
     if(!expectedFormat){ exportDiagnostics.push(fail("TARGET_OUTPUT_FORMAT_MISMATCH","Target adapter has no declared output format.",{target:targetId})); return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics,admission,semantic}; }
     const structuralError=inspectCompileResult(compiled,targetId,expectedFormat);
