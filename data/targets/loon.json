@@ -1,57 +1,47 @@
 {
   "id": "loon",
-  "version": "1.0.0",
-  "platforms": [
-    "ios",
-    "ipados"
-  ],
-  "capabilities": [
-    "dns",
-    "proxy",
-    "routing",
-    "rules"
-  ],
+  "version": "1.1.0",
+  "platforms": ["ios", "ipados"],
+  "capabilities": ["dns", "proxy", "routing", "rules"],
   "required": {
-    "dns": [
-      "dns.configuration"
-    ],
-    "proxy": [
-      "proxy.id",
-      "proxy.type",
-      "proxy.server",
-      "proxy.port"
-    ],
-    "proxyGroup": [
-      "proxyGroup.id",
-      "proxyGroup.members"
-    ],
-    "rule": [
-      "rule.match",
-      "rule.action"
-    ]
+    "proxy": ["<name> = <type>, <server>, <port>"],
+    "proxyGroup": ["<group> = <strategy>, <member>..."],
+    "rule": ["<type>,<value>,<policy>"]
   },
   "optional": [
+    "dns",
     "policy-groups",
-    "dns.fallback",
-    "proxy.credentials"
+    "proxy.credentials",
+    "remote-resources"
   ],
   "unsupported": [
     "unresolved-proxy-reference"
   ],
   "constraints": [
-    "Proxy rules must resolve to an existing proxy or proxy group.",
+    "Proxy nodes and policy groups must use Loon's native comma-delimited configuration syntax.",
+    "Proxy rules must resolve to an existing proxy or policy group.",
     "Do not silently replace an unavailable proxy action with DIRECT."
   ],
+  "syntax": {
+    "container": "INI-like Loon configuration text",
+    "proxyEntry": "<name> = <type>, <server>, <port>[, <parameter>...]",
+    "proxyGroupEntry": "<group> = <strategy>, <member>...,<option>=<value>...",
+    "ruleEntry": "<type>,<value>,<policy>[,<option>...]",
+    "remoteResourceEntry": "<url>, policy=<policy>, tag=<tag>, enabled=<true|false>",
+    "comment": "# comment"
+  },
   "validation": [
     "section-syntax",
+    "proxy-entry-syntax",
     "proxy-reference-resolution",
     "proxy-group-resolution",
     "dns-syntax",
-    "rule-syntax"
+    "rule-syntax",
+    "resource-reference"
   ],
   "output": {
     "format": "text",
-    "extension": ".conf",
+    "extension": ".lcf",
     "mime": "text/plain"
   },
   "artifactStatus": {
