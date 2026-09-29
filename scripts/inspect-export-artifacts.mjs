@@ -1,29 +1,35 @@
 import { compileTargetExport } from "../packages/targets/src/exporters.js";
 import { listTargetData } from "../packages/targets/src/target-data.js";
 
-const scenarioId = "dns";
-const targets = listTargetData().filter(target => target.capabilities.includes("dns"));
+const scenarioId = "proxy";
+const targets = listTargetData().filter(target => target.capabilities.includes("proxy"));
 
-const dnsServers = ["9.9.9.9", "149.112.112.112"];
+const proxy = {
+  name: "Proxy-Inspection",
+  type: "http",
+  server: "proxy.example.net",
+  port: 8080,
+  username: "inspection-user",
+  password: "inspection-pass",
+  tls: true,
+  udp: true
+};
+
+const proxyGroup = {
+  name: "Inspection-Group",
+  type: "select",
+  proxies: ["Proxy-Inspection", "DIRECT"]
+};
+
 const input = {
   policy: {
-    name: "DNS Export Inspection",
-    dns: true,
-    dnsProtocol: "HTTPS",
-    dnsServers,
-    dnsServerUrl: "https://dns.quad9.net/dns-query",
-    dnsServerName: "dns.quad9.net",
-    dnsDomains: ["example.com", "internal.example"],
-    dnsProfiles: [{
-      id: "inspection-dns",
-      name: "Inspection DoH",
-      protocol: "HTTPS",
-      servers: dnsServers,
-      endpoint: "https://dns.quad9.net/dns-query",
-      serverName: "dns.quad9.net",
-      domains: ["example.com", "internal.example"],
-      enabled: true
-    }]
+    name: "Proxy Export Inspection",
+    proxies: [proxy],
+    proxyGroups: [proxyGroup],
+    rules: [
+      { type: "DOMAIN-SUFFIX", value: "proxy.example", policy: "Proxy-Inspection" }
+    ],
+    finalPolicy: "DIRECT"
   }
 };
 
@@ -44,12 +50,12 @@ function warn(targetId, code, message) {
   warnings.push({ scenarioId, targetId, code, message });
 }
 
-function hasAll(artifact, values) {
-  return values.every(value => artifact.includes(value));
+function requireText(targetId, artifact, value, code, message) {
+  if (!artifact.includes(value)) fail(targetId, code, message);
 }
 
-await fs.rm(outputPath, { recursive: true, force: true });
 await fs.mkdir(outputPath, { recursive: true });
+await fs.rm(path.join(outputPath, scenarioId), { recursive: true, force: true });
 
 for (const target of targets) {
   let result;
@@ -62,7 +68,7 @@ for (const target of targets) {
 
   const artifact = String(result.representation ?? "");
   if (!artifact.trim()) {
-    fail(target.id, "EMPTY_ARTIFACT", "DNS exporter produced an empty artifact.");
+    fail(target.id, "EMPTY_ARTIFACT", "Proxy exporter produced an empty artifact.");
     continue;
   }
 
@@ -74,62 +80,40 @@ for (const target of targets) {
     fail(target.id, "MIME_MISMATCH", `Exporter MIME ${result.mime} differs from target data MIME ${target.output.mime}.`);
   }
 
-  const formatMap = { plist: "plist", json: "json", yaml: "yaml", text: "text", ini: "text" };
-  const expectedOutputFormat = formatMap[target.output.format];
-  if (expectedOutputFormat && result.outputFormat !== expectedOutputFormat) {
-    fail(target.id, "OUTPUT_FORMAT_MISMATCH", `Target data declares ${target.output.format}; exporter reports ${result.outputFormat}.`);
+  requireText(target.id, artifact, proxy.name, "PROXY_NAME_LOSS", "Proxy name was not preserved.");
+  requireText(target.id, artifact, proxy.server, "PROXY_SERVER_LOSS", "Proxy server was not preserved.");
+  requireText(target.id, artifact, String(proxy.port), "PROXY_PORT_LOSS", "Proxy port was not preserved.");
+
+  if (target.id === "surge") {
+    requireText(target.id, artifact, "Proxy-Inspection = http, proxy.example.net, 8080", "SURGE_PROXY_ENTRY_MISSING", "Surge proxy entry was not emitted.");
+    requireText(target.id, artifact, "inspection-user", "SURGE_PROXY_USERNAME_LOSS", "Surge proxy username was not emitted.");
+    requireText(target.id, artifact, "inspection-pass", "SURGE_PROXY_PASSWORD_LOSS", "Surge proxy password was not emitted.");
+    requireText(target.id, artifact, "tls=true", "SURGE_PROXY_TLS_LOSS", "Surge proxy TLS option was not emitted.");
+    requireText(target.id, artifact, "udp=true", "SURGE_PROXY_UDP_LOSS", "Surge proxy UDP option was not emitted.");
   }
 
-  if (!hasAll(artifact, dnsServers)) {
-    fail(target.id, "DNS_SERVER_LOSS", "One or more canonical DNS server values were not preserved.");
+  if (["mihomo", "stash"].includes(target.id)) {
+    requireText(target.id, artifact, "proxies:", "PROXY_SECTION_MISSING", "YAML proxy section is missing.");
+    requireText(target.id, artifact, "name", "PROXY_NAME_FIELD_MISSING", "YAML proxy name field is missing.");
+    requireText(target.id, artifact, "server", "PROXY_SERVER_FIELD_MISSING", "YAML proxy server field is missing.");
+    requireText(target.id, artifact, "port", "PROXY_PORT_FIELD_MISSING", "YAML proxy port field is missing.");
+    requireText(target.id, artifact, "proxy-groups:", "PROXY_GROUP_SECTION_MISSING", "YAML proxy group section is missing.");
+    requireText(target.id, artifact, "Inspection-Group", "PROXY_GROUP_LOSS", "Proxy group was not preserved.");
   }
 
-  if (target.id === "apple-dns-declaration") {
-    try {
-      const declaration = JSON.parse(artifact);
-      const settings = declaration.Payload?.DNSSettings;
-      if (declaration.Type !== "com.apple.configuration.network.dns-settings") {
-        fail(target.id, "APPLE_DNS_TYPE", "Unexpected Apple declarative DNS Type.");
-      }
-      if (settings?.DNSProtocol !== "HTTPS") {
-        fail(target.id, "APPLE_DNS_PROTOCOL", "Apple DNS declaration did not preserve DNSProtocol=HTTPS.");
-      }
-      if (settings?.ServerURL !== "https://dns.quad9.net/dns-query") {
-        fail(target.id, "APPLE_DNS_SERVER_URL", "Apple DNS declaration did not preserve the DoH ServerURL.");
-      }
-      if (settings?.ServerName !== "dns.quad9.net") {
-        fail(target.id, "APPLE_DNS_SERVER_NAME", "Apple DNS declaration did not preserve ServerName.");
-      }
-      if (!hasAll(JSON.stringify(settings?.SupplementalMatchDomains ?? []), input.policy.dnsDomains)) {
-        warn(target.id, "DNS_DOMAINS_NOT_EMITTED", "Supplemental DNS domains were not preserved by the declarative DNS exporter.");
-      }
-    } catch {
-      fail(target.id, "JSON_INVALID", "Apple DNS declaration artifact is not valid JSON.");
-    }
-  } else if (["apple-mobileconfig", "apple-mobileconfig-legacy"].includes(target.id)) {
-    if (!artifact.includes("dns.quad9.net")) {
-      fail(target.id, "DNS_ENDPOINT_LOSS", "Apple MobileConfig artifact did not preserve the configured DNS endpoint.");
-    }
-    if (!hasAll(artifact, dnsServers)) {
-      fail(target.id, "DNS_SERVER_LOSS", "Apple MobileConfig artifact did not preserve all DNS server values.");
-    }
-    if (!artifact.includes("HTTPS")) {
-      warn(target.id, "DNS_PROTOCOL_NOT_VISIBLE", "The serialized MobileConfig does not visibly contain the HTTPS protocol token; inspect the DNS payload structure before acceptance.");
-    }
-  } else {
-    if (artifact.includes("dns-server") || artifact.includes("nameserver") || artifact.includes("server =")) {
-      if (!artifact.includes("9.9.9.9") || !artifact.includes("149.112.112.112")) {
-        fail(target.id, "DNS_SERVER_LOSS", "Target has a DNS field but did not preserve all DNS servers.");
-      }
-    } else {
-      fail(target.id, "DNS_FIELD_MISSING", "Target is DNS-capable but exporter emitted no recognizable DNS field.");
-    }
+  if (["shadowrocket", "loon"].includes(target.id)) {
+    requireText(target.id, artifact, "Proxy-Inspection", "PROXY_ENTRY_MISSING", "Proxy entry was not emitted.");
+    requireText(target.id, artifact, "proxy.example.net", "PROXY_SERVER_LOSS", "Proxy server was not emitted.");
+    requireText(target.id, artifact, "8080", "PROXY_PORT_LOSS", "Proxy port was not emitted.");
+    requireText(target.id, artifact, "Inspection-Group", "PROXY_GROUP_LOSS", "Proxy group was not emitted.");
+  }
 
-    if (artifact.includes("dns.quad9.net")) {
-      warn(target.id, "DNS_ENDPOINT_TRANSFORMED", "The DoH endpoint hostname is present, but target-specific protocol semantics require separate validation.");
-    } else {
-      warn(target.id, "DNS_PROTOCOL_METADATA_NOT_EMITTED", "DNS server values were exported, but DoH endpoint/protocol metadata was not emitted.");
-    }
+  if (target.id === "quantumult-x") {
+    requireText(target.id, artifact, "[server_local]", "QX_SERVER_SECTION_MISSING", "Quantumult X server_local section is missing.");
+    requireText(target.id, artifact, "Proxy-Inspection", "QX_PROXY_ENTRY_MISSING", "Quantumult X proxy entry was not emitted.");
+    requireText(target.id, artifact, "proxy.example.net", "QX_PROXY_SERVER_LOSS", "Quantumult X proxy server was not emitted.");
+    requireText(target.id, artifact, "8080", "QX_PROXY_PORT_LOSS", "Quantumult X proxy port was not emitted.");
+    requireText(target.id, artifact, "[policy]", "QX_POLICY_SECTION_MISSING", "Quantumult X policy section is missing.");
   }
 
   const targetDir = path.join(outputPath, scenarioId, target.id);
@@ -147,11 +131,17 @@ for (const target of targets) {
     verifiedStatus: result.verifiedStatus,
     bytes: Buffer.byteLength(artifact, "utf8"),
     inputCoverage: {
-      dnsServers,
-      dnsProtocol: input.policy.dnsProtocol,
-      dnsServerUrl: input.policy.dnsServerUrl,
-      dnsServerName: input.policy.dnsServerName,
-      dnsDomains: input.policy.dnsDomains
+      proxy: {
+        name: proxy.name,
+        type: proxy.type,
+        server: proxy.server,
+        port: proxy.port,
+        username: true,
+        password: true,
+        tls: proxy.tls,
+        udp: proxy.udp
+      },
+      proxyGroup
     }
   };
 
