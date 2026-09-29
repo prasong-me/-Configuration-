@@ -2,14 +2,46 @@ import { DiagnosticLevel, diagnostic } from "../../diagnostics/src/index.js";
 import { defaultSerializerRegistry } from "./serializer-registry.js";
 import { getTargetManifest } from "../../targets/src/index.js";
 import { getTargetAdapter } from "../../targets/src/adapters.js";
+import { compileSurge } from "../../surge-adapter/src/index.js";
+import { getExportArtifact } from "../../targets/src/exporters.js";
 
-const targetRegistry={
-  resolve(targetId){
-    const manifest=getTargetManifest(targetId);
-    if(!manifest) return null;
-    return {targetId,manifest,adapter:getTargetAdapter(targetId)};
-  }
-};
+const OUTPUT_FORMATS=Object.freeze({
+  "apple-mobileconfig":"plist",
+  "apple-dns-declaration":"json",
+  "apple-mobileconfig-legacy":"plist",
+  surge:"text",
+  mihomo:"yaml",
+  wireguard:"text",
+  shadowrocket:"text",
+  loon:"text",
+  "quantumult-x":"text",
+  stash:"yaml"
+});
+
+function defaultTargetResolver(targetId){
+  const manifest=getTargetManifest(targetId);
+  if(!manifest) return null;
+  const registered=getTargetAdapter(targetId);
+  if(registered) return {targetId,manifest,adapter:registered};
+  if(targetId==="surge") return {
+    targetId,
+    manifest,
+    adapter:{targetId,compile(policy){
+      const legacy=compileSurge({policy});
+      return {targetId,outputFormat:"text",representation:legacy.content};
+    }}
+  };
+  const outputFormat=OUTPUT_FORMATS[targetId];
+  if(outputFormat) return {
+    targetId,
+    manifest:{...manifest,outputFormat},
+    adapter:{targetId,compile(policy){
+      const representation=getExportArtifact(targetId,{policy});
+      return {targetId,outputFormat,representation};
+    }}
+  };
+  return {targetId,manifest,adapter:null};
+}
 
 function fail(code,message,details){
   return diagnostic(DiagnosticLevel.CRITICAL,code,message,details);
@@ -31,7 +63,7 @@ function validateCompileResult(result,targetId,expectedFormat){
   return null;
 }
 
-export function createConfigurationExporter({targets=targetRegistry,serializers=defaultSerializerRegistry}={}){
+export function createConfigurationExporter({targets={resolve:defaultTargetResolver},serializers=defaultSerializerRegistry}={}){
   return {
     export(processingResult,targetId){
       const exportDiagnostics=[];
@@ -50,13 +82,18 @@ export function createConfigurationExporter({targets=targetRegistry,serializers=
         exportDiagnostics.push(fail("COMPILE_FAILED",error?.message||"Target adapter compilation failed.",{target:targetId}));
         return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics};
       }
-      const expectedFormat=target.manifest?.outputFormat;
+      const expectedFormat=target.manifest?.outputFormat??OUTPUT_FORMATS[targetId];
       const structuralError=validateCompileResult(compiled,targetId,expectedFormat);
       if(structuralError){
         exportDiagnostics.push(structuralError);
         return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics};
       }
-      const serializer=serializers.resolve(compiled.outputFormat);
+      let serializer;
+      try{ serializer=serializers.resolve(compiled.outputFormat); }
+      catch(error){
+        exportDiagnostics.push(fail("SERIALIZER_NOT_REGISTERED",error?.message||"Unsupported output format.",{format:compiled.outputFormat,target:targetId}));
+        return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics};
+      }
       if(!serializer){
         exportDiagnostics.push(fail("SERIALIZER_NOT_REGISTERED","No serializer is registered for the compile output format.",{format:compiled.outputFormat,target:targetId}));
         return {status:"BLOCKED",artifact:null,diagnostics:exportDiagnostics};
