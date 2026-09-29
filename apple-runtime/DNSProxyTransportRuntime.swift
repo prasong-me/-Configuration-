@@ -9,11 +9,11 @@ public enum DNSProxyTransportRuntimeError: Error {
 }
 
 public struct DNSProxyUpstreamConfiguration: Sendable {
-    public let host: NWEndpoint.Host
-    public let port: NWEndpoint.Port
+    public let host: Network.NWEndpoint.Host
+    public let port: Network.NWEndpoint.Port
 
     public init(host: String, port: UInt16) throws {
-        guard !host.isEmpty, let port = NWEndpoint.Port(rawValue: port) else {
+        guard !host.isEmpty, let port = Network.NWEndpoint.Port(rawValue: port) else {
             throw DNSProxyTransportRuntimeError.invalidConfiguration
         }
         self.host = NWEndpoint.Host(host)
