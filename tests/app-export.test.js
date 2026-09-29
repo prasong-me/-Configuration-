@@ -26,6 +26,7 @@ const policy = {
   policy: {
     name: "Test",
     dns: true,
+    dnsProtocol: "HTTPS",
     dnsServers: ["1.1.1.1", "1.0.0.1"],
     dnsProfiles: [{
       id: "dns",
