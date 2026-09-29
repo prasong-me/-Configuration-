@@ -1,6 +1,6 @@
 {
   "id": "quantumult-x",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "platforms": [
     "ios",
     "ipados"
@@ -13,43 +13,42 @@
   ],
   "required": {
     "dns": [
-      "dns.configuration"
+      "[dns].server"
     ],
     "proxy": [
-      "proxy.id",
-      "proxy.type",
-      "proxy.server",
-      "proxy.port"
+      "[server_local]"
     ],
     "policy": [
-      "policy.id",
-      "policy.action"
+      "[policy]"
     ],
     "rule": [
-      "rule.match",
-      "rule.action"
+      "[filter_local]"
     ]
   },
   "optional": [
-    "filter",
-    "rewrite",
-    "server-check-url",
-    "proxy.credentials"
+    "[server_remote]",
+    "[filter_remote]",
+    "[general]",
+    "proxy.credentials",
+    "server-check-url"
   ],
   "unsupported": [
     "unresolved-proxy-reference"
   ],
   "constraints": [
-    "A PROXY action must resolve to a defined policy/node.",
-    "Do not silently convert PROXY to DIRECT."
+    "Quantumult X uses an INI-like configuration with lower-case section names and native key/value or comma-delimited resource syntax.",
+    "Local proxy nodes are defined in [server_local]; policies are defined in [policy]; routing filters are defined in [filter_local].",
+    "DNS servers are defined in [dns] using repeated server= entries.",
+    "A routing policy must resolve to a defined server tag or policy name, except explicit built-in policies.",
+    "Do not silently convert a proxy policy to DIRECT."
   ],
   "validation": [
     "section-syntax",
-    "proxy-reference-resolution",
-    "policy-resolution",
     "dns-syntax",
+    "server-entry-syntax",
+    "policy-resolution",
     "filter-syntax",
-    "rule-syntax"
+    "proxy-reference-resolution"
   ],
   "output": {
     "format": "text",
@@ -62,5 +61,22 @@
     "partialMapping": "partial",
     "unsupportedCapability": "rejected",
     "invalidSyntax": "invalid"
+  },
+  "syntax": {
+    "container": "INI-like text",
+    "sections": [
+      "[general]",
+      "[dns]",
+      "[policy]",
+      "[server_remote]",
+      "[server_local]",
+      "[filter_remote]",
+      "[filter_local]"
+    ],
+    "dnsEntry": "server = <server>[, <option>...]",
+    "serverEntry": "<protocol> = <host>:<port>, <parameter>=<value>..., tag=<tag>",
+    "policyEntry": "<type> = <policy-name>, <server-tag>..., <option>=<value>...",
+    "filterEntry": "<type>, <value>, <policy>[, <option>...]",
+    "comment": "; comment or # comment or // comment"
   }
 }
