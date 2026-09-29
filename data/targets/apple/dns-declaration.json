@@ -1,23 +1,27 @@
 {
   "id": "apple-dns-declaration",
-  "version": "1.0.0",
-  "platforms": [
-    "ios",
-    "ipados",
-    "macos"
-  ],
-  "capabilities": [
-    "dns"
-  ],
-  "required": [
-    "declaration.identifier",
-    "dns.configuration"
-  ],
+  "version": "1.1.0",
+  "platforms": ["ios", "ipados", "macos"],
+  "capabilities": ["dns"],
+  "required": {
+    "declaration": [
+      "Type",
+      "Identifier",
+      "ServerToken",
+      "Payload.VisibleName",
+      "Payload.DNSSettings"
+    ],
+    "dnsSettings": [
+      "Payload.DNSSettings.DNSProtocol",
+      "Payload.DNSSettings.ServerURL"
+    ]
+  },
   "optional": [
-    "name",
-    "description",
-    "activation-conditions",
-    "additional-metadata"
+    "Payload.OnDemandRules",
+    "Payload.ProhibitDisablement",
+    "Payload.DNSSettings.ServerAddresses",
+    "Payload.DNSSettings.AllowFailover",
+    "Payload.DNSSettings.SupplementalMatchDomains"
   ],
   "unsupported": [
     "proxy",
@@ -26,14 +30,27 @@
     "third-party-syntax"
   ],
   "constraints": [
-    "This target is a declarative DNS configuration model, not a general-purpose proxy or VPN profile."
+    "This target is a declarative DNS configuration model, not a general-purpose proxy or VPN profile.",
+    "The declaration must use the common Apple declaration keys Type, Identifier, ServerToken, and Payload.",
+    "The declaration type for this target is com.apple.configuration.network.dns-settings."
   ],
+  "syntax": {
+    "container": "JSON object",
+    "declarationKeys": "Type, Identifier, ServerToken, Payload",
+    "type": "com.apple.configuration.network.dns-settings",
+    "payloadKeys": "VisibleName, DNSSettings, OnDemandRules?, ProhibitDisablement?",
+    "dnsSettingsKeys": "DNSProtocol, ServerURL and/or ServerAddresses, AllowFailover?, SupplementalMatchDomains?"
+  },
   "validation": [
+    "json-structure",
     "declaration-schema",
+    "declaration-type",
     "required-fields",
     "identifier",
+    "server-token",
     "dns-configuration",
-    "data-types"
+    "data-types",
+    "platform-compatibility"
   ],
   "output": {
     "format": "json",
