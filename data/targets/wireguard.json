@@ -1,0 +1,65 @@
+{
+  "id": "wireguard",
+  "version": "1.0.0",
+  "platforms": [
+    "ios",
+    "ipados",
+    "macos",
+    "android",
+    "windows",
+    "linux"
+  ],
+  "capabilities": [
+    "vpn",
+    "routing",
+    "dns"
+  ],
+  "required": {
+    "interface": [
+      "privateKey",
+      "address"
+    ],
+    "peer": [
+      "publicKey",
+      "endpoint",
+      "allowedIPs"
+    ]
+  },
+  "optional": [
+    "dns",
+    "mtu",
+    "persistentKeepalive",
+    "preUp",
+    "postUp"
+  ],
+  "unsupported": [
+    "proxy-rule-syntax",
+    "third-party-policy-sections"
+  ],
+  "constraints": [
+    "A runnable peer requires the required peer fields.",
+    "A configuration without runtime keys or peer data is a template, not a runnable profile.",
+    "Key material must never be invented."
+  ],
+  "validation": [
+    "private-key-format",
+    "public-key-format",
+    "endpoint",
+    "allowed-ips",
+    "address",
+    "peer-structure",
+    "cidr"
+  ],
+  "output": {
+    "format": "text",
+    "extension": ".conf",
+    "mime": "text/plain"
+  },
+  "artifactStatus": {
+    "complete": "runnable",
+    "missingRuntimeData": "template",
+    "partialMapping": "partial",
+    "unsupportedCapability": "rejected",
+    "invalidSyntax": "invalid"
+  }
+}
