@@ -1,0 +1,66 @@
+{
+  "id": "quantumult-x",
+  "version": "1.0.0",
+  "platforms": [
+    "ios",
+    "ipados"
+  ],
+  "capabilities": [
+    "dns",
+    "proxy",
+    "routing",
+    "rules"
+  ],
+  "required": {
+    "dns": [
+      "dns.configuration"
+    ],
+    "proxy": [
+      "proxy.id",
+      "proxy.type",
+      "proxy.server",
+      "proxy.port"
+    ],
+    "policy": [
+      "policy.id",
+      "policy.action"
+    ],
+    "rule": [
+      "rule.match",
+      "rule.action"
+    ]
+  },
+  "optional": [
+    "filter",
+    "rewrite",
+    "server-check-url",
+    "proxy.credentials"
+  ],
+  "unsupported": [
+    "unresolved-proxy-reference"
+  ],
+  "constraints": [
+    "A PROXY action must resolve to a defined policy/node.",
+    "Do not silently convert PROXY to DIRECT."
+  ],
+  "validation": [
+    "section-syntax",
+    "proxy-reference-resolution",
+    "policy-resolution",
+    "dns-syntax",
+    "filter-syntax",
+    "rule-syntax"
+  ],
+  "output": {
+    "format": "text",
+    "extension": ".conf",
+    "mime": "text/plain"
+  },
+  "artifactStatus": {
+    "complete": "runnable",
+    "missingRuntimeData": "template",
+    "partialMapping": "partial",
+    "unsupportedCapability": "rejected",
+    "invalidSyntax": "invalid"
+  }
+}
