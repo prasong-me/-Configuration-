@@ -13,7 +13,7 @@ Target Data reference: data/targets/surge.json
 - https://manual.nssurge.com/rules/overview.html
 - https://manual.nssurge.com/rules/final.html
 
-Evidence note: Surge official manual confirms INI-like profile sections, [Proxy]/[Proxy Group]/[Rule], rule TYPE/VALUE/POLICY, and FINAL semantics.
+Evidence note: Surge official manual confirms INI-like profile syntax, proxy/group/rule sections, rule policy references, and FINAL semantics.
 
 ## Test vectors
 - VALID_MINIMAL — minimum required configuration; expected validation success.
