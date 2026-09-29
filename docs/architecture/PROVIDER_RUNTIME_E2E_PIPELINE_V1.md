@@ -19,3 +19,6 @@ RAW DNS DATA → DNS wire decode → DNS_CONTEXT → ordered provider stages →
 ## Not included
 
 This phase does not claim physical Apple device execution, NetworkExtension entitlement/signing/provisioning, upstream network connectivity, production policy definitions, or device DNS interception.
+
+
+Validation trigger: CI must execute the repository test suite for this phase before merge.
