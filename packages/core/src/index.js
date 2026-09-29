@@ -135,30 +135,22 @@ export function compatibilityReport(policyInput,targetId){
     const requested=Boolean(read(policy.policy));
     const state=requested
       ? (manifest.capabilities[feature] ?? CapabilityState.UNKNOWN)
-      : "NOT_REQUESTED";
-    capabilities[feature]={requested,state};
+      : CapabilityState.UNKNOWN;
+    capabilities[feature]=evaluateCapability(state,requested);
+  }
 
-    if(requested&&state===CapabilityState.UNSUPPORTED){
-      diagnostics.push(
-        diagnostic(
-          DiagnosticLevel.HIGH,
-          "FEATURE_UNSUPPORTED",
-          `${feature} is not supported by target ${targetId}.`,
-          {target:targetId,feature}
-        )
-      );
-    }
-
-    if(requested&&state===CapabilityState.UNKNOWN){
-      diagnostics.push(
-        diagnostic(
-          DiagnosticLevel.CRITICAL,
-          "CAPABILITY_UNKNOWN",
-          `Capability for ${feature} is not verified for target ${targetId}.`,
-          {target:targetId,feature}
-        )
-      );
-    }
+  for(const item of capabilityDiagnostics(capabilities,{target:targetId})){
+    diagnostics.push(
+      diagnostic(
+        item.level==="CRITICAL" ? DiagnosticLevel.CRITICAL :
+          item.level==="HIGH" ? DiagnosticLevel.HIGH :
+          item.level==="WARNING" ? DiagnosticLevel.WARNING :
+          DiagnosticLevel.INFO,
+        item.code,
+        item.message,
+        item.details
+      )
+    );
   }
 
   return {
