@@ -222,8 +222,26 @@ export function getExportWarnings(targetId,policyInput={}) {
   return [];
 }
 
+function normalizeSurgeRules(policy={}) {
+  return (Array.isArray(policy.rules)?policy.rules:[])
+    .map(rule=>{
+      if(rule&&typeof rule.type==="string"&&typeof rule.value==="string"&&typeof rule.policy==="string") {
+        return rule;
+      }
+      const match=typeof rule?.match==="string"?rule.match.trim():"";
+      const action=typeof rule?.action==="string"?rule.action.trim():"";
+      if(!match||!action) throw new TypeError("Surge rule requires match/action or type/value/policy.");
+      if(match==="*"||match==="*.*") return null;
+      if(match.startsWith("*.")) return {type:"DOMAIN-SUFFIX",value:match.slice(2),policy:action};
+      if(/^[A-Za-z0-9.-]+$/.test(match)) return {type:"DOMAIN",value:match,policy:action};
+      throw new TypeError("Unsupported generic rule for Surge: "+match);
+    })
+    .filter(Boolean);
+}
+
 export function exportSurge(policyInput = {}) {
-  const input = policyInput?.policy ? policyInput : {policy:defaultPolicy};
-  return compileSurge(input).content;
+  const source=policyInput?.policy ? policyInput.policy : policyInput;
+  const policy={...defaultPolicy,...source,rules:normalizeSurgeRules(source)};
+  return compileSurge({policy}).content;
 }
 
