@@ -137,3 +137,5 @@ public final class DNSProxyFlowSession {
         flow.closeWriteWithError(error)
     }
 }
+
+// Runtime validation boundary: current NetworkExtension APIs are compile-tested by macOS CI.
