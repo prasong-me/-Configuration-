@@ -235,3 +235,5 @@ export { generateProviderRuntimeSwift, validateGeneratedProviderRuntimeSwift } f
 export { decodeDnsWireMessage, encodeDnsWireMessage } from "./dns-wire-runtime.js";
 
 export { createProviderStageExecutionEngine, FAILURE_TYPES } from "./provider-stage-execution.js";
+export { createProviderFlowIoContract, validateProviderFlowIoContract, isProviderFlowIoAdmissionAllowed, ProviderFlowTransport, ProviderFlowState, ProviderFlowOwnership, ProviderFlowIoMode } from "./provider-flow-io-contract.js";
+export { createProviderFlowIoEngine } from "./provider-flow-io-runtime.js";
