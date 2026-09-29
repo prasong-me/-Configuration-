@@ -1,0 +1,32 @@
+name: Apple NetworkExtension Compile
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "apple-runtime/**"
+      - "Package.swift"
+      - ".github/workflows/apple-networkextension.yml"
+      - "packages/apple-adapter/src/provider-runtime-swift-generator.js"
+      - "packages/apple-adapter/src/provider-runtime-generator-contract.js"
+  push:
+    branches: [main]
+    paths:
+      - "apple-runtime/**"
+      - "Package.swift"
+      - ".github/workflows/apple-networkextension.yml"
+permissions:
+  contents: read
+jobs:
+  compile:
+    runs-on: macos-26
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Show Xcode toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+      - name: Resolve package
+        run: swift package resolve
+      - name: Compile NetworkExtension target
+        run: swift build -v
