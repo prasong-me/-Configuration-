@@ -1,13 +1,35 @@
 {
   "id": "mihomo",
   "version": "1.1.0",
-  "platforms": ["android", "windows", "linux"],
-  "capabilities": ["dns", "proxy", "routing", "rules"],
+  "platforms": [
+    "android",
+    "windows",
+    "linux"
+  ],
+  "capabilities": [
+    "dns",
+    "proxy",
+    "routing",
+    "rules"
+  ],
   "required": {
-    "dns": ["dns.nameserver"],
-    "proxy": ["proxies[].name", "proxies[].type", "proxies[].server", "proxies[].port"],
-    "proxyGroup": ["proxy-groups[].name", "proxy-groups[].type", "proxy-groups[].proxies|use"],
-    "rule": ["rules[]"]
+    "dns": [
+      "dns.nameserver"
+    ],
+    "proxy": [
+      "proxies[].name",
+      "proxies[].type",
+      "proxies[].server",
+      "proxies[].port"
+    ],
+    "proxyGroup": [
+      "proxy-groups[].name",
+      "proxy-groups[].type",
+      "proxy-groups[].proxies|use"
+    ],
+    "rule": [
+      "rules[]"
+    ]
   },
   "optional": [
     "dns.fake-ip",
@@ -30,7 +52,16 @@
   ],
   "syntax": {
     "container": "YAML",
-    "topLevelKeys": ["dns", "proxies", "proxy-groups", "proxy-providers", "rule-providers", "rules", "tun", "sniffer"],
+    "topLevelKeys": [
+      "dns",
+      "proxies",
+      "proxy-groups",
+      "proxy-providers",
+      "rule-providers",
+      "rules",
+      "tun",
+      "sniffer"
+    ],
     "proxyEntry": "proxies[]: {name: <name>, type: <type>, server: <server>, port: <port>, ...}",
     "proxyGroupEntry": "proxy-groups[]: {name: <name>, type: <type>, proxies: [<name>...]|use: [<provider>...]}",
     "ruleEntry": "rules[]: TYPE,VALUE,POLICY[,OPTION...]",
