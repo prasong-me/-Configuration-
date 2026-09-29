@@ -1,49 +1,47 @@
 {
   "id": "shadowrocket",
-  "version": "1.0.0",
-  "platforms": [
-    "ios",
-    "ipados"
-  ],
-  "capabilities": [
-    "dns",
-    "proxy",
-    "routing",
-    "rules"
-  ],
+  "version": "1.1.0",
+  "platforms": ["ios", "ipados"],
+  "capabilities": ["dns", "proxy", "routing", "rules"],
   "required": {
-    "dns": [
-      "dns.configuration"
-    ],
-    "proxy": [
-      "proxy.id",
-      "proxy.type",
-      "proxy.server",
-      "proxy.port"
-    ],
-    "rule": [
-      "rule.match",
-      "rule.action"
-    ]
+    "proxy": ["name", "type", "server", "port"],
+    "rule": ["type", "value", "policy"],
+    "finalRule": ["policy"]
   },
   "optional": [
     "proxy.credentials",
+    "proxy.tls",
+    "proxy.udp",
     "bypass-system",
-    "policy-groups"
+    "proxy-groups"
   ],
   "unsupported": [
     "unresolved-proxy-reference"
   ],
   "constraints": [
-    "A PROXY rule must reference an actual proxy node or group.",
+    "A proxy entry belongs in [Proxy] and uses <name> = <type>, <server>, <port> plus protocol-specific parameters.",
+    "A proxy group belongs in [Proxy Group] and is referenced by policy name.",
+    "A rule belongs in [Rule] and uses TYPE,VALUE,POLICY with optional parameters.",
+    "The final fallback is FINAL,POLICY.",
+    "A proxy policy must reference a defined node or group unless it is an explicit built-in policy.",
     "Do not emit an empty proxy section for a policy that requires a proxy."
   ],
+  "syntax": {
+    "container": "INI-like text",
+    "sections": ["[General]", "[Proxy]", "[Proxy Group]", "[Rule]"],
+    "proxyEntry": "<name> = <type>, <server>, <port>[, <parameter>...]",
+    "proxyGroupEntry": "<group> = <type>, <member>...",
+    "ruleEntry": "TYPE,VALUE,POLICY[,OPTION...]",
+    "finalRule": "FINAL,POLICY"
+  },
   "validation": [
     "section-structure",
+    "proxy-entry-syntax",
     "proxy-reference-resolution",
     "dns-syntax",
     "rule-syntax",
-    "proxy-fields"
+    "proxy-fields",
+    "final-rule"
   ],
   "output": {
     "format": "text",
