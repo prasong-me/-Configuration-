@@ -1,4 +1,5 @@
 import { normalizePolicy } from "./policy-normalizer.js";
+import { CapabilityId } from "../../capabilities/src/index.js";
 
 export const CompilerContract = Object.freeze({
   version:"1.0",
@@ -42,7 +43,13 @@ export function inspectCompileResult(result,targetId,expectedFormat){
   return null;
 }
 
-const FEATURE_ORDER=Object.freeze(["vpn","dns","routing","blocking.malware","blocking.trackers"]);
+const FEATURE_ORDER=Object.freeze([
+  CapabilityId.VPN,
+  CapabilityId.DNS,
+  CapabilityId.ROUTING,
+  CapabilityId.BLOCKING_MALWARE,
+  CapabilityId.BLOCKING_TRACKERS
+]);
 
 function stable(value){
   if(Array.isArray(value)) return value.map(stable);
