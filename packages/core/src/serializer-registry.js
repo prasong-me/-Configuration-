@@ -1,4 +1,10 @@
-const ALLOWED_FORMATS=Object.freeze(["plist","json","yaml","ini","text"]);\n\nfunction stable(value){\n  if(Array.isArray(value)) return value.map(stable);\n  if(value&&typeof value==="object") return Object.fromEntries(Object.keys(value).sort().map(key=>[key,stable(value[key])]));\n  return value;\n}
+const ALLOWED_FORMATS=Object.freeze(["plist","json","yaml","ini","text"]);
+
+function stable(value){
+  if(Array.isArray(value)) return value.map(stable);
+  if(value&&typeof value==="object") return Object.fromEntries(Object.keys(value).sort().map(key=>[key,stable(value[key])]));
+  return value;
+}
 
 function assertFormat(format){
   if(typeof format!=="string"||!ALLOWED_FORMATS.includes(format)) throw new TypeError("Unsupported output format: "+format);
