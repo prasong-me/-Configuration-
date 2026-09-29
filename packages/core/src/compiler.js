@@ -1,4 +1,4 @@
-import { normalizePolicy } from "./index.js";
+import { normalizePolicy } from "./policy-normalizer.js";
 
 export const CompilerContract = Object.freeze({
   version:"1.0",
