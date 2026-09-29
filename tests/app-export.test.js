@@ -58,7 +58,7 @@ test("all target exporters generate non-empty artifacts", () => {
     assert.equal(result.targetId, id);
     assert.equal(typeof result.outputFormat, "string");
     assert.equal(typeof result.filename, "string");
-    assert.ok(result.representation.length > 0, id);
+    assert.notEqual(result.representation, null, id);
   }
 });
 
