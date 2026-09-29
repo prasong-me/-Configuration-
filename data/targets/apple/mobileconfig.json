@@ -1,8 +1,16 @@
 {
   "id": "apple-mobileconfig",
   "version": "1.1.0",
-  "platforms": ["ios", "ipados", "macos"],
-  "capabilities": ["dns", "vpn", "mobileconfig"],
+  "platforms": [
+    "ios",
+    "ipados",
+    "macos"
+  ],
+  "capabilities": [
+    "dns",
+    "vpn",
+    "mobileconfig"
+  ],
   "required": {
     "profile": [
       "PayloadType",
