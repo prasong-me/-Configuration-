@@ -1,6 +1,7 @@
 import Foundation
 import Network
-import NetworkExtension
+@preconcurrency import NetworkExtension
+import ConfigurationNetworkExtensionShim
 
 public enum DNSProxyTransportRuntimeError: Error {
     case unsupportedFlow
@@ -21,11 +22,12 @@ public struct DNSProxyUpstreamConfiguration: Sendable {
     }
 }
 
-public final class DNSProxyFlowSession {
+public final class DNSProxyFlowSession: @unchecked Sendable {
     private let flow: NEAppProxyFlow
     private let upstream: DNSProxyUpstreamConfiguration
     private var connection: NWConnection?
     private var closed = false
+    private let udpBridge = ConfigurationNetworkExtensionShim()
 
     public init(flow: NEAppProxyFlow, upstream: DNSProxyUpstreamConfiguration) {
         self.flow = flow
@@ -59,14 +61,17 @@ public final class DNSProxyFlowSession {
 
     private func readUDP(_ flow: NEAppProxyUDPFlow) {
         guard !closed else { return }
-        flow.readDatagramsAndFlowEndpoints { [weak self] datagrams, endpoints, error in
+        udpBridge.readDatagrams(from: flow) { [weak self] datagrams, endpoints, error in
             guard let self else { return }
             if let error { self.close(error); return }
             guard let datagrams, let endpoints, datagrams.count == endpoints.count else {
                 self.close(DNSProxyTransportRuntimeError.upstreamFailed)
                 return
             }
-            for (data, endpoint) in zip(datagrams, endpoints) {
+            let endpointArray = endpoints as NSArray
+            for index in 0..<datagrams.count {
+                let data = datagrams[index]
+                let endpoint = endpointArray.object(at: index)
                 self.connection?.send(content: data, completion: .contentProcessed { [weak self] sendError in
                     if let sendError { self?.close(sendError) }
                 })
@@ -74,7 +79,7 @@ public final class DNSProxyFlowSession {
                     guard let self else { return }
                     if let receiveError { self.close(receiveError); return }
                     guard let response else { self.close(DNSProxyTransportRuntimeError.upstreamFailed); return }
-                    flow.writeDatagrams([response], sentByFlowEndpoints: [endpoint]) { [weak self] writeError in
+                    self.udpBridge.writeDatagrams([response], flowEndpoints: [endpoint], to: flow) { [weak self] writeError in
                         if let writeError { self?.close(writeError) }
                     }
                 }
