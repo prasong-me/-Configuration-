@@ -197,3 +197,42 @@ test("legacy Apple MobileConfig is reachable through the export bridge", () => {
   assert.equal(result.outputFormat, "plist");
   assert.match(result.artifact, /com\.apple\.dnsSettings\.managed/);
 });
+
+import {
+  getPlatformManifest,
+  listPlatformManifests,
+  getPlatformTargets,
+  isTargetCompatible,
+  assertTargetCompatible
+} from "../packages/targets/src/platform-registry.js";
+
+test("device platform registry covers mobile and PC families", () => {
+  const ids = listPlatformManifests().map(x => x.id);
+  assert.deepEqual(ids, ["ios", "ipados", "macos", "android", "windows", "linux"]);
+
+  assert.ok(getPlatformManifest("android"));
+  assert.ok(getPlatformManifest("windows"));
+  assert.ok(getPlatformManifest("linux"));
+  assert.ok(getPlatformManifest("macos"));
+});
+
+test("Android and PC platforms expose only explicitly compatible exporters", () => {
+  assert.deepEqual(getPlatformTargets("android"), ["wireguard"]);
+  assert.deepEqual(getPlatformTargets("windows"), ["wireguard", "mihomo"]);
+  assert.deepEqual(getPlatformTargets("linux"), ["wireguard", "mihomo", "stash"]);
+  assert.equal(isTargetCompatible("android", "wireguard"), true);
+  assert.equal(isTargetCompatible("android", "surge"), false);
+  assert.equal(isTargetCompatible("windows", "wireguard"), true);
+  assert.equal(isTargetCompatible("linux", "mihomo"), true);
+});
+
+test("platform compatibility fails closed", () => {
+  assert.throws(
+    () => assertTargetCompatible("android", "surge"),
+    /not registered for platform android/
+  );
+  assert.throws(
+    () => assertTargetCompatible("chromeos", "wireguard"),
+    /Unknown device platform/
+  );
+});
