@@ -76,7 +76,7 @@ test("each target artifact satisfies its target-specific structural contract", (
   };
 
   for (const id of targets) {
-    const result = compileTargetExport(id, policy);
+    const result = compileTargetExport(id, inputForTarget(id));
     const artifact = String(result.representation);
     assert.ok(artifact.trim().length > 0, id);
     for (const pattern of expected[id]) {
@@ -197,7 +197,7 @@ test("export bridge blocks all terminal failure statuses", () => {
 
 test("legacy Apple MobileConfig is reachable through the export bridge", () => {
   const result = exportConfiguration(
-    { policy: genericPolicy.policy, resultMetadata: { status: "SUCCEEDED", diagnostics: [] } },
+    { policy: policy.policy, resultMetadata: { status: "SUCCEEDED", diagnostics: [] } },
     { targetId: "apple-mobileconfig-legacy" }
   );
 
