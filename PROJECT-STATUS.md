@@ -372,7 +372,7 @@ Post-boundary hardening ที่ทำเพิ่ม:
 - Surge exporter รองรับ generic UI rules (`match`/`action`) โดยแปลงเฉพาะ semantics ที่กำหนดได้ชัดเจน และไม่แปลง catch-all `*.*` เพราะ `FINAL` เป็นผู้กำหนด default policy
 
 สิ่งที่ยังเป็นงานอนาคต ไม่ใช่ blocker ของ Export Boundary:
-- เพิ่ม/ลบ DNS profile ใน UI แบบอิสระ
+- เพิ่ม/ลบ DNS profile ใน UI แบบอิสระ — DONE ใน repository reconciliation 2026-09-30
 - target-specific real-device evidence เพิ่มเติม
 - Apple declarative DNS evidence/version matrix
 - certificate/signing เฉพาะ target ที่จำเป็น
