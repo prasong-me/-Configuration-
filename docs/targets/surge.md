@@ -24,9 +24,11 @@ Surge มีเอกสาร syntax สำหรับ WireGuard policy แย
 
 ## สถานะของโครงการ
 
-หลักฐานมีเพียงพอสำหรับเริ่มออกแบบ Surge serializer แต่ยังไม่เพียงพอที่จะทำเครื่องหมายว่าทุกฟีเจอร์รองรับ
+สถานะปัจจุบันของ repository ระบุ Surge 5.x เป็น verified ภายในขอบเขต evidence ที่บันทึกไว้: มี real-device tests 15 รายการและ profile-generation test ผ่าน
 
-Adapter รุ่นแรกต้องเริ่มจาก subset ขนาดเล็กที่มี fixture รองรับ และต้องปฏิเสธ field ที่อยู่นอกขอบเขตดังกล่าว
+สถานะนี้ไม่หมายความว่า capability ทุก field ของ Surge ถูกยืนยันแล้ว โดยเฉพาะ field ที่ manifest ยังเป็น UNKNOWN หรือ UNSUPPORTED
+
+Adapter ต้องรักษา fail-closed behavior สำหรับ field ที่อยู่นอกขอบเขต evidence และไม่สร้างพฤติกรรมที่ไม่มี specification
 
 ## ขอบเขตความปลอดภัยที่ทราบ
 
