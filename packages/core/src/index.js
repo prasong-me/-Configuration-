@@ -6,6 +6,7 @@ import { validatePolicy } from "../../validator/src/index.js";
 import { getTargetManifest } from "../../targets/src/index.js";
 import { normalizeDnsPipeline } from "./dns-pipeline.js";
 import { DnsController, createDnsController } from "./dns-controller.js";
+import { normalizePolicy } from "./policy-normalizer.js";
 
 export { CapabilityState, CapabilityId, DiagnosticLevel, diagnostic, hasBlockingDiagnostics, redact, evaluateCapability, capabilityDiagnostics };
 export { DnsStageResult, normalizeDnsPipeline, processDnsQuery } from "./dns-pipeline.js";
