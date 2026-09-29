@@ -622,14 +622,21 @@ MihomoCore
 
 **Identity:** UNRESOLVED
 
-**Current state**
-- No official source has yet been accepted that uniquely identifies the intended Clash Live client.
-- Do not substitute Clash Mi or Clash Lite.
-- Do not infer identity from third-party app aggregators.
+### Official-source resolution attempt
+
+A targeted official-source search was performed for an iOS/network-proxy product named **Clash Live**. The returned official App Store results did not identify a network-proxy client matching this target, and no uniquely attributable official GitHub repository was established.
+
+Because the project requires official-source identity before freezing a target profile:
+
+- Do **not** substitute Clash Mi.
+- Do **not** substitute Clash Lite.
+- Do **not** infer that "Clash Live" means a generic Mihomo/Clash client.
+- Do **not** use third-party app aggregators as Source of Truth.
 
 **Status:** PENDING_IDENTITY_RESOLUTION
 
----
+**Roadmap disposition:** Identity resolution is blocked by insufficient official evidence. The target remains explicitly unresolved rather than being guessed.
+
 
 ## Normalized capability model
 
