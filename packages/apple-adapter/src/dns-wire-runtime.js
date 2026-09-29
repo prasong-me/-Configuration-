@@ -285,6 +285,7 @@ function encodeRdata(record) {
 
   if (type === "OPT") {
     if (record.name !== "" && record.name !== ".") fail("DNS_WIRE_RDATA_INVALID", "OPT owner name must be root.");
+    if (record.version !== 0) fail("DNS_WIRE_EDNS_VERSION_UNSUPPORTED", "Only EDNS version 0 is supported.");
     assertUint(record.udpPayloadSize, 0xffff, "DNS_WIRE_RDATA_INVALID", "OPT UDP payload size is invalid.");
     assertUint(record.extendedRcode, 0xff, "DNS_WIRE_RDATA_INVALID", "OPT extended RCODE is invalid.");
     assertUint(record.version, 0xff, "DNS_WIRE_RDATA_INVALID", "OPT version is invalid.");
@@ -368,6 +369,8 @@ export function encodeDnsWireMessage(message, options = {}) {
   if (!sections.every(Array.isArray)) fail("DNS_WIRE_MESSAGE_INVALID", "DNS message sections must be arrays.");
   const totalRecords = sections.slice(1).reduce((sum, section) => sum + section.length, 0);
   if (totalRecords > limits.maxRecords) fail("DNS_WIRE_LIMIT_EXCEEDED", "DNS record count limit exceeded.");
+  const optCount = sections[3].filter(record => record?.type === "OPT" || record?.typeCode === 41).length;
+  if (optCount > 1) fail("DNS_WIRE_EDNS_INVALID", "A DNS message may contain at most one OPT record.");
   if (sections.some(section => section.length > 0xffff)) fail("DNS_WIRE_MESSAGE_INVALID", "DNS section count exceeds the 16-bit wire limit.");
 
   const encodedSections = [
