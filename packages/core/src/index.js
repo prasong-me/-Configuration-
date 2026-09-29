@@ -1,13 +1,13 @@
 import { analyzePolicy } from "../../threat/src/index.js";
 import { redact } from "../../opsec/src/index.js";
-import { CapabilityState } from "../../capabilities/src/index.js";
+import { CapabilityState, evaluateCapability, capabilityDiagnostics } from "../../capabilities/src/index.js";
 import { diagnostic, DiagnosticLevel, hasBlockingDiagnostics } from "../../diagnostics/src/index.js";
 import { validatePolicy } from "../../validator/src/index.js";
 import { getTargetManifest } from "../../targets/src/index.js";
 import { normalizeDnsPipeline } from "./dns-pipeline.js";
 import { DnsController, createDnsController } from "./dns-controller.js";
 
-export { CapabilityState, DiagnosticLevel, diagnostic, hasBlockingDiagnostics, redact };
+export { CapabilityState, DiagnosticLevel, diagnostic, hasBlockingDiagnostics, redact, evaluateCapability, capabilityDiagnostics };
 export { DnsStageResult, normalizeDnsPipeline, processDnsQuery } from "./dns-pipeline.js";
 export { DnsController, createDnsController } from "./dns-controller.js";
 export { buildSearchIndex, searchRecords, SearchContract } from "./search.js";
