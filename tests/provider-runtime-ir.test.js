@@ -66,3 +66,10 @@ test("Runtime IR canonicalization is deterministic", () => {
   });
   assert.equal(canonicalizeProviderRuntimeIR(a), canonicalizeProviderRuntimeIR(b));
 });
+
+
+test("canonicalization is stable for reordered dependency and parser sets", () => {
+  const a = createProviderRuntimeIR({ sourceChainId: "x", parser: { limits: { maxMessageBytes: 4096, maxNameLength: 255, maxRecords: 10 }, inspect: ["AAAA", "A"], mutate: ["CNAME", "A"] }, stages: [{ id: "a", order: 1, dependsOn: [] }, { id: "b", order: 2, dependsOn: ["a"] }] });
+  const b = createProviderRuntimeIR({ sourceChainId: "x", parser: { limits: { maxRecords: 10, maxNameLength: 255, maxMessageBytes: 4096 }, inspect: ["A", "AAAA"], mutate: ["A", "CNAME"] }, stages: [{ id: "a", order: 1, dependsOn: [] }, { id: "b", order: 2, dependsOn: ["a"] }] });
+  assert.equal(canonicalizeProviderRuntimeIR(a), canonicalizeProviderRuntimeIR(b));
+});
