@@ -638,6 +638,90 @@ Because the project requires official-source identity before freezing a target p
 **Roadmap disposition:** Identity resolution is blocked by insufficient official evidence. The target remains explicitly unresolved rather than being guessed.
 
 
+## Research reconciliation — target adapters and capability boundaries
+
+This section freezes the research-layer reconciliation after the per-target official-source passes.
+
+### Target-specific adapter boundary
+
+| Target | Shared core that may be reused | Target-specific adapter data | Current evidence |
+|---|---|---|---|
+| WireGuard | WireGuard interface/peer protocol model | Platform addressing, routes, DNS, UI/import/export | VERIFIED |
+| Surge | None from proxy/VPN core | Hosting API, auth, deployment/revision semantics | VERIFIED |
+| ProxyPin | HTTP(S) concepts only | Interception, local CA, rewrite, mapping, scripting, debugging, HAR | VERIFIED |
+| Mihomo | Mihomo core schema | Platform/TUN/UI/API exposure | VERIFIED |
+| Clash Mi | Mihomo configuration subset | Clash Mi configuration lifecycle, UI, platform behavior | VERIFIED/PARTIAL |
+| Clash Lite | Mihomo configuration subset | iOS client lifecycle, UI, supported subset | VERIFIED/PARTIAL |
+| Rocket Proxy | Compatible Mihomo/Clash YAML syntax where documented | Independent engine/parser/platform behavior | VERIFIED/PARTIAL |
+| Clash Live | None frozen | Identity and all target fields | BLOCKED / PENDING_IDENTITY_RESOLUTION |
+
+### Normalized target field extraction
+
+The common model may safely expose only fields that have an explicit normalized meaning across targets.
+
+**Common candidates**
+- proxy endpoint identity: server / port
+- transport/protocol identity where the target explicitly supports it
+- DNS resolver endpoints
+- ordered routing rules
+- proxy groups/selectors
+- subscription/provider references
+- platform capability flags
+- capability status
+
+**Target-specific fields must remain in adapters**
+- Mihomo fake-IP modes and DNS policy controls.
+- Mihomo-specific rule-provider and proxy-provider controls.
+- Mihomo TUN/dns-hijack/auto-route behavior.
+- ProxyPin local interception CA and breakpoint/rewrite controls.
+- Surge deployment/API authentication metadata.
+- WireGuard peer/interface protocol fields.
+- Clash Mi / Clash Lite UI and platform-specific controls.
+- Rocket Proxy parser/engine-specific limitations.
+
+### Capability promotion rule
+
+A field is promoted from a target adapter into the common model only when:
+1. Its semantics are stable across the participating targets.
+2. The target mapping is explicit and documented.
+3. Unsupported targets can fail closed with `UNSUPPORTED_CAPABILITY`.
+4. Secret-bearing values remain protected and are never committed as live credentials.
+
+Format compatibility is not sufficient evidence of shared implementation.
+
+### Platform/version reconciliation
+
+- Mihomo core is documented independently of clients.
+- Clash Mi explicitly uses Mihomo-based configuration/core behavior; its client lifecycle remains separate.
+- Clash Lite explicitly identifies itself as a Mihomo-based iOS client and requires a user-provided compatible configuration.
+- Rocket Proxy's own developer disclosure states that it reads Mihomo/Clash YAML but does not embed Mihomo; its engine is independent.
+- ProxyPin is an HTTP(S) interception/debugging client and must not be merged into the Mihomo/WireGuard core capability layer.
+- WireGuard protocol semantics remain independent from client UI/platform configuration.
+- Surge hosting API semantics remain independent from network proxy/VPN semantics.
+
+### Roadmap completion state
+
+| Roadmap item | Result |
+|---|---|
+| 1. Resolve Clash Live identity from official source | **BLOCKED** — no unique official network-client identity found; target deliberately left unresolved |
+| 2. Expand official Mihomo core evidence | **DONE** — official repository + documentation captured |
+| 3. Extract target-specific configuration fields into adapters | **DONE at research/schema level** — boundaries frozen; implementation adapters are downstream work |
+| 4. Keep shared protocol/core fields in common model | **DONE** — promotion rule and boundaries recorded |
+| 5. Reconcile platform/version differences | **DONE at evidence level** — client/core/engine distinctions recorded |
+| 6. Runtime-test targets separately | **NOT CLAIMED** — requires actual target runtime/device execution; documentation research cannot substitute for runtime evidence |
+
+### Final research-layer disposition
+
+The research roadmap is complete to the maximum supported by official-source evidence.
+
+Two items remain explicitly non-finished rather than guessed:
+- **Clash Live identity:** unresolved due to insufficient official evidence.
+- **Runtime validation:** unperformed; status remains `RUNTIME_UNVERIFIED`.
+
+No unsupported target capability is promoted into the common model.
+
+---
+
 ## Normalized capability model
 
 The repository must keep these dimensions separate:
