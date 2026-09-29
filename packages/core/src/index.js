@@ -14,7 +14,7 @@ export { buildSearchIndex, searchRecords, SearchContract } from "./search.js";
 export { getTargetManifest, listTargetManifests } from "../../targets/src/index.js";
 export { createSerializerRegistry, defaultSerializerRegistry, SerializerFormat, listSupportedSerializerFormats } from "./serializer-registry.js";
 export { createConfigurationExporter, configurationExporter } from "./exporter.js";
-export { CompilerContract, CompileResultContract, createCompileResult, inspectCompileResult, mapPolicySemantics, compileToTargetIR, compileSemanticModel, listCompilerCapabilityMappings } from "./compiler.js";
+export { CompilerContract, CompileResultContract, createCompileResult, inspectCompileResult, mapPolicySemantics, admitTargetCapabilities, compileToTargetIR, compileSemanticModel } from "./compiler.js";
 
 export { normalizePolicy } from "./policy-normalizer.js";
 
@@ -27,7 +27,9 @@ const SEMANTIC_CAPABILITY_PATHS={
   [CapabilityId.BLOCKLISTS]:p=>p.blocklists,
   [CapabilityId.SYSTEM_BYPASS]:p=>p.bypassSystem,
   [CapabilityId.WEB_ENTRY]:p=>p.webEntry,
-  [CapabilityId.RUNTIME_COMMANDS]:p=>p.commands
+  [CapabilityId.RUNTIME_COMMANDS]:p=>p.commands,
+  [CapabilityId.ROUTING_FINAL]:p=>p.finalPolicy,
+  [CapabilityId.PROVIDER_METADATA]:p=>p.providers
 };
 
 const FEATURE_PATHS={
@@ -71,7 +73,7 @@ export function compatibilityReport(policyInput,targetId){
   }
 
   for(const [feature,read] of Object.entries(SEMANTIC_CAPABILITY_PATHS)){
-    const requested=read(policy.policy)!==undefined;
+    const value=read(policy.policy);\n    const requested=Array.isArray(value) ? value.length>0 : value!==undefined;
     const state=requested
       ? (manifest.capabilities[feature] ?? CapabilityState.UNKNOWN)
       : CapabilityState.UNKNOWN;
