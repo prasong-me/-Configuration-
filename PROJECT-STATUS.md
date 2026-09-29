@@ -1,6 +1,6 @@
 # Configuration Platform · Project Status
 
-อัปเดต: 2026-09-29
+อัปเดต: 2026-09-30
 
 > **Baseline:** Contract v2.1 Finalized / Baseline Locked
 
@@ -87,7 +87,7 @@ Skip semantics ถูกผูกกับ policy ก่อน compatibility/exp
 
 CI, Verify Configuration Platform และ Apple Style Guide checks ผ่านบน PR #14 final head ก่อน merge
 
-DNS UI มี profile cards หลายชุดและแก้ชื่อ/provider/protocol/role/server/endpoint/enabled ได้ แต่ยังไม่มี UI เพิ่ม/ลบ profile แบบอิสระ แม้ Core รองรับจำนวนไม่จำกัด
+DNS UI มี profile cards หลายชุดและแก้ชื่อ/provider/protocol/role/server/endpoint/enabled ได้ พร้อมเพิ่ม/ลบ profile แบบอิสระ โดย Core รองรับจำนวนไม่จำกัด
 
 ## 8. Target/export behavior
 
@@ -136,14 +136,9 @@ README ถูก sync สถานะเป็น commit 4e286ea8d2ee654c19b6f69
 
 ## 12. สิ่งที่ยังต้องทำ
 
-1. เพิ่มการเพิ่ม/ลบ DNS profile แบบอิสระใน UI
-2. ตรวจ exporter ของแต่ละ Target ว่ารักษา DNS profiles ได้ครบตาม semantics จริง
-5. เพิ่ม compatibility diagnostics เมื่อ Target แทนหลาย profile หรือ pipeline ได้ไม่ครบ
-6. ตรวจ Apple declarative DNS ให้ตรงกับ capability/version ที่ Target รองรับจริง
-7. ทำ certificate/signing เฉพาะจุดที่ Target ต้องการ หลัง core/export semantics นิ่ง
-8. ขยาย benchmark จาก browser-load benchmark ไปสู่ resolver-level measurement ที่วัดสิ่งที่ต้องการจริง
-9. ขยาย Pyto Shortcut จาก smoke test ไปสู่ workflow benchmark ที่พิสูจน์บน iPhone จริง
-10. รันและบันทึกผลทดสอบจริงของ Target ก่อนเลื่อน evidence status
+รายการที่ยังไม่ปิดถูกจัดเป็น DEFERRED ใน Completion Reconciliation ด้านล่าง เนื่องจากต้องใช้อุปกรณ์จริง, signing/entitlement, upstream runtime observation, performance measurement, external target specifications หรือ owner decision
+
+รายการที่ทำได้ภายใน repository implementation scope ถูกปิดแล้วและผ่าน GitHub Actions verification
 
 ## 13. สิ่งที่ไม่ควรทำ
 
@@ -372,7 +367,7 @@ Post-boundary hardening ที่ทำเพิ่ม:
 - Surge exporter รองรับ generic UI rules (`match`/`action`) โดยแปลงเฉพาะ semantics ที่กำหนดได้ชัดเจน และไม่แปลง catch-all `*.*` เพราะ `FINAL` เป็นผู้กำหนด default policy
 
 สิ่งที่ยังเป็นงานอนาคต ไม่ใช่ blocker ของ Export Boundary:
-- เพิ่ม/ลบ DNS profile ใน UI แบบอิสระ — DONE ใน repository reconciliation 2026-09-30
+- เพิ่ม/ลบ DNS profile ใน UI แบบอิสระ — DONE
 - target-specific real-device evidence เพิ่มเติม
 - Apple declarative DNS evidence/version matrix
 - certificate/signing เฉพาะ target ที่จำเป็น
