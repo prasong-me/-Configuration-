@@ -12,6 +12,8 @@ export { DnsStageResult, normalizeDnsPipeline, processDnsQuery } from "./dns-pip
 export { DnsController, createDnsController } from "./dns-controller.js";
 export { buildSearchIndex, searchRecords, SearchContract } from "./search.js";
 export { getTargetManifest, listTargetManifests } from "../../targets/src/index.js";
+export { createSerializerRegistry, defaultSerializerRegistry, SerializerFormat, listSupportedSerializerFormats } from "./serializer-registry.js";
+export { createConfigurationExporter, configurationExporter } from "./exporter.js";
 
 export function normalizePolicy(input) {
   const source=input ?? {};
