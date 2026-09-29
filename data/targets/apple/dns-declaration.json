@@ -1,8 +1,14 @@
 {
   "id": "apple-dns-declaration",
   "version": "1.1.0",
-  "platforms": ["ios", "ipados", "macos"],
-  "capabilities": ["dns"],
+  "platforms": [
+    "ios",
+    "ipados",
+    "macos"
+  ],
+  "capabilities": [
+    "dns"
+  ],
   "required": {
     "declaration": [
       "Type",
