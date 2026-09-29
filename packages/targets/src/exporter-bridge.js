@@ -1,5 +1,6 @@
 import { getTargetAdapter } from "./adapters.js";
 import { getSerializer, serializeRepresentation } from "./serializer-registry.js";
+import { assertTargetCompatible } from "./platform-registry.js";
 
 const allowedFormats = new Set(["plist", "json", "yaml", "ini", "text"]);
 const blockedStatuses = new Set(["FAILED", "BLOCKED", "REJECTED"]);
@@ -8,7 +9,7 @@ function diagnostic(code, message) {
   return { code, message };
 }
 
-export function exportConfiguration(processingResult, { targetId } = {}) {
+export function exportConfiguration(processingResult, { targetId, platformId } = {}) {
   const status = processingResult?.resultMetadata?.status ?? processingResult?.status;
   const diagnostics = Array.isArray(processingResult?.resultMetadata?.diagnostics)
     ? processingResult.resultMetadata.diagnostics
@@ -21,6 +22,19 @@ export function exportConfiguration(processingResult, { targetId } = {}) {
       diagnostics: [diagnostic("PROCESSING_FAILED", `Processing status ${status} blocks export.`)],
       artifact: null
     };
+  }
+
+  if (platformId) {
+    try {
+      assertTargetCompatible(platformId, targetId);
+    } catch (error) {
+      return {
+        ok: false,
+        blocked: true,
+        diagnostics: [diagnostic("PLATFORM_TARGET_INCOMPATIBLE", error instanceof Error ? error.message : String(error))],
+        artifact: null
+      };
+    }
   }
 
   const adapter = getTargetAdapter(targetId);
