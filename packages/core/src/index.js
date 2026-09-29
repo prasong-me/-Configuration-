@@ -1,13 +1,13 @@
 import { analyzePolicy } from "../../threat/src/index.js";
 import { redact } from "../../opsec/src/index.js";
-import { CapabilityState, evaluateCapability, capabilityDiagnostics } from "../../capabilities/src/index.js";
+import { CapabilityState, CapabilityId, evaluateCapability, capabilityDiagnostics } from "../../capabilities/src/index.js";
 import { diagnostic, DiagnosticLevel, hasBlockingDiagnostics } from "../../diagnostics/src/index.js";
 import { validatePolicy } from "../../validator/src/index.js";
 import { getTargetManifest } from "../../targets/src/index.js";
 import { normalizeDnsPipeline } from "./dns-pipeline.js";
 import { DnsController, createDnsController } from "./dns-controller.js";
 
-export { CapabilityState, DiagnosticLevel, diagnostic, hasBlockingDiagnostics, redact, evaluateCapability, capabilityDiagnostics };
+export { CapabilityState, CapabilityId, DiagnosticLevel, diagnostic, hasBlockingDiagnostics, redact, evaluateCapability, capabilityDiagnostics };
 export { DnsStageResult, normalizeDnsPipeline, processDnsQuery } from "./dns-pipeline.js";
 export { DnsController, createDnsController } from "./dns-controller.js";
 export { buildSearchIndex, searchRecords, SearchContract } from "./search.js";
@@ -19,11 +19,11 @@ export { CompilerContract, CompileResultContract, createCompileResult, inspectCo
 export { normalizePolicy } from "./policy-normalizer.js";
 
 const FEATURE_PATHS={
-  vpn:p=>p.vpn,
-  dns:p=>p.dns,
-  routing:p=>p.routing,
-  "blocking.malware":p=>p.blocking?.malware,
-  "blocking.trackers":p=>p.blocking?.trackers
+  [CapabilityId.VPN]:p=>p.vpn,
+  [CapabilityId.DNS]:p=>p.dns,
+  [CapabilityId.ROUTING]:p=>p.routing,
+  [CapabilityId.BLOCKING_MALWARE]:p=>p.blocking?.malware,
+  [CapabilityId.BLOCKING_TRACKERS]:p=>p.blocking?.trackers
 };
 
 export function compatibilityReport(policyInput,targetId){
