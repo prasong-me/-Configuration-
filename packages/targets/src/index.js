@@ -6,13 +6,30 @@ const UNKNOWN_CAPABILITIES=Object.freeze({
   dns:CapabilityState.UNKNOWN,
   routing:CapabilityState.UNKNOWN,
   "blocking.malware":CapabilityState.UNKNOWN,
-  "blocking.trackers":CapabilityState.UNKNOWN
+  "blocking.trackers":CapabilityState.UNKNOWN,
+  "routing.rules":CapabilityState.UNKNOWN,
+  "dns.profiles":CapabilityState.UNKNOWN,
+  "dns.resolution":CapabilityState.UNKNOWN,
+  "dns.pipeline":CapabilityState.UNKNOWN,
+  "proxy.server":CapabilityState.UNKNOWN,
+  "blocking.blocklists":CapabilityState.UNKNOWN,
+  "routing.bypassSystem":CapabilityState.UNKNOWN,
+  "web.entry":CapabilityState.UNKNOWN,
+  "runtime.commands":CapabilityState.UNKNOWN,
+  "routing.final":CapabilityState.UNKNOWN,
+  "policy.providers":CapabilityState.UNKNOWN
 });
 
 const manifests=new Map([
   ["example",{id:"example",version:"0.1",status:"reference-only",evidence:[],capabilities:{
     vpn:CapabilityState.SUPPORTED,dns:CapabilityState.SUPPORTED,routing:CapabilityState.SUPPORTED,
-    "blocking.malware":CapabilityState.SUPPORTED,"blocking.trackers":CapabilityState.SUPPORTED
+    "blocking.malware":CapabilityState.SUPPORTED,"blocking.trackers":CapabilityState.SUPPORTED,
+    "routing.rules":CapabilityState.SUPPORTED,"dns.profiles":CapabilityState.SUPPORTED,
+    "dns.resolution":CapabilityState.SUPPORTED,"dns.pipeline":CapabilityState.SUPPORTED,
+    "proxy.server":CapabilityState.SUPPORTED,"blocking.blocklists":CapabilityState.SUPPORTED,
+    "routing.bypassSystem":CapabilityState.SUPPORTED,"web.entry":CapabilityState.SUPPORTED,
+    "runtime.commands":CapabilityState.UNKNOWN,"routing.final":CapabilityState.SUPPORTED,
+    "policy.providers":CapabilityState.SUPPORTED
   }}],
   ["surge",{id:"surge",version:"5.x",status:"verified",evidence:[
     {level:"OFFICIAL",url:"https://manual.nssurge.com/profile/format.html"},
@@ -20,7 +37,13 @@ const manifests=new Map([
     {level:"REAL_DEVICE",scope:"profile-generation",status:"passed"}
   ],capabilities:{
     vpn:CapabilityState.SUPPORTED,dns:CapabilityState.SUPPORTED,routing:CapabilityState.SUPPORTED,
-    "blocking.malware":CapabilityState.SUPPORTED,"blocking.trackers":CapabilityState.SUPPORTED
+    "blocking.malware":CapabilityState.SUPPORTED,"blocking.trackers":CapabilityState.SUPPORTED,
+    "routing.rules":CapabilityState.SUPPORTED,"dns.profiles":CapabilityState.SUPPORTED,
+    "dns.resolution":CapabilityState.SUPPORTED,"dns.pipeline":CapabilityState.UNKNOWN,
+    "proxy.server":CapabilityState.UNSUPPORTED,"blocking.blocklists":CapabilityState.UNKNOWN,
+    "routing.bypassSystem":CapabilityState.UNKNOWN,"web.entry":CapabilityState.UNKNOWN,
+    "runtime.commands":CapabilityState.UNKNOWN,"routing.final":CapabilityState.SUPPORTED,
+    "policy.providers":CapabilityState.SUPPORTED
   },limitations:["Proxy credentials/endpoints are intentionally not generated or embedded."]}],
   ["mihomo",{id:"mihomo",version:"current-reference",status:"template-export",evidence:[
     {level:"OFFICIAL",url:"https://wiki.metacubex.one/en/config/"}
@@ -42,34 +65,29 @@ const manifests=new Map([
   ["quantumult-x",{id:"quantumult-x",version:"current-reference",status:"template-export",evidence:[
     {level:"REFERENCE",url:"https://github.com/crossutility/Quantumult-X"}
   ],capabilities:{...UNKNOWN_CAPABILITIES},limitations:["Configuration template is available; exact runtime behavior must be tested in the installed app version."]}],
-  ["apple-mobileconfig",{id:"apple-mobileconfig",version:"current-profile",status:"generated",evidence:[],capabilities:{vpn:CapabilityState.UNKNOWN,dns:CapabilityState.SUPPORTED,routing:CapabilityState.UNKNOWN,"blocking.malware":CapabilityState.UNKNOWN,"blocking.trackers":CapabilityState.UNKNOWN},limitations:["Extension-backed capabilities may require a provider app or Network Extension on the device."]}],
+  ["apple-mobileconfig",{id:"apple-mobileconfig",version:"current-profile",status:"generated",evidence:[],capabilities:{
+    ...UNKNOWN_CAPABILITIES,dns:CapabilityState.SUPPORTED,
+    "web.entry":CapabilityState.SUPPORTED
+  },limitations:["Extension-backed capabilities may require a provider app or Network Extension on the device."]}],
   ["apple-dns-declaration",{id:"apple-dns-declaration",version:"current-declarative",status:"reference-export",evidence:[
     {level:"OFFICIAL",url:"https://developer.apple.com/documentation/devicemanagement/networkdnssettings"}
   ],capabilities:{
-    vpn:CapabilityState.UNKNOWN,dns:CapabilityState.SUPPORTED,routing:CapabilityState.UNKNOWN,
-    "blocking.malware":CapabilityState.UNKNOWN,"blocking.trackers":CapabilityState.UNKNOWN
+    ...UNKNOWN_CAPABILITIES,dns:CapabilityState.SUPPORTED,
+    "dns.profiles":CapabilityState.SUPPORTED,
+    "dns.resolution":CapabilityState.SUPPORTED
   },limitations:["This is the current declarative DNS configuration model, not a general-purpose proxy/VPN profile."]}],
   ["apple-mobileconfig-legacy",{id:"apple-mobileconfig-legacy",version:"legacy",status:"legacy-export",evidence:[
     {level:"OFFICIAL",url:"https://developer.apple.com/documentation/devicemanagement/dnssettings"}
   ],capabilities:{
-    vpn:CapabilityState.UNKNOWN,dns:CapabilityState.SUPPORTED,routing:CapabilityState.UNKNOWN,
-    "blocking.malware":CapabilityState.UNKNOWN,"blocking.trackers":CapabilityState.UNKNOWN
+    ...UNKNOWN_CAPABILITIES,dns:CapabilityState.SUPPORTED,
+    "dns.profiles":CapabilityState.SUPPORTED,
+    "dns.resolution":CapabilityState.SUPPORTED
   },limitations:["Legacy DNSSettings payload; Apple documents the declarative network DNS configuration as the replacement on newer OS versions."]}]
 ]);
 
-export function getTargetTestRecord(targetId){
-  return getTargetTestEvidence(targetId);
-}
-
-export function getTargetManifest(targetId){
-  const manifest=manifests.get(targetId);
-  return manifest ? structuredClone(manifest) : null;
-}
-
-export function listTargetManifests(){
-  return [...manifests.values()].map(x=>structuredClone(x));
-}
-
+export function getTargetTestRecord(targetId){ return getTargetTestEvidence(targetId); }
+export function getTargetManifest(targetId){ const manifest=manifests.get(targetId); return manifest ? structuredClone(manifest) : null; }
+export function listTargetManifests(){ return [...manifests.values()].map(x=>structuredClone(x)); }
 export function registerTargetManifest(manifest){
   if(!manifest?.id||!manifest?.capabilities) throw new TypeError("Target manifest requires id and capabilities.");
   manifests.set(manifest.id,structuredClone(manifest));
