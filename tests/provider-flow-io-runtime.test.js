@@ -7,3 +7,29 @@ test("unknown transport is rejected without retention",()=>{const e=createProvid
 test("accepted flow is retained and opened before I/O",async()=>{const calls=[];const e=createProviderFlowIoEngine({contract:createProviderFlowIoContract({}),handlers:{open:async()=>calls.push("open"),read:async()=>{calls.push("read");return "data";},write:async()=>calls.push("write")}});assert.equal(e.accept({id:"f1",transport:"UDP"}).accepted,true);await assert.rejects(()=>e.read("f1"),x=>x.code==="PROVIDER_FLOW_READ_BEFORE_OPEN");assert.equal((await e.open("f1","local")).state,ProviderFlowState.OPEN);assert.equal(await e.read("f1"),"data");await e.write("f1","reply");assert.deepEqual(calls,["open","read","write"]);assert.equal(e.close("f1").state,ProviderFlowState.CLOSED);assert.equal(e.activeCount,0);});
 test("open failure is terminal and releases retained flow",async()=>{const e=createProviderFlowIoEngine({contract:createProviderFlowIoContract({}),handlers:{open:async()=>{throw new Error("open failed");}}});assert.equal(e.accept({id:"f1",transport:"TCP"}).accepted,true);assert.equal((await e.open("f1","local")).state,ProviderFlowState.FAILED);assert.equal(e.activeCount,0);});
 test("invalid contract blocks engine",()=>{const e=createProviderFlowIoEngine({contract:{version:"0"}});assert.equal(e.valid,false);assert.equal(e.accept({id:"f1",transport:"UDP"}).accepted,false);});
+
+test("read and write handler errors fail the flow closed",async()=>{
+  const e=createProviderFlowIoEngine({
+    contract:createProviderFlowIoContract({}),
+    handlers:{open:async()=>{},read:async()=>{throw new Error("read failed");}}
+  });
+  assert.equal(e.accept({id:"f1",transport:"UDP"}).accepted,true);
+  await e.open("f1","local");
+  const result=await e.read("f1");
+  assert.equal(result.state,ProviderFlowState.FAILED);
+  assert.equal(e.activeCount,0);
+});
+
+test("close handler errors are terminal and release the flow",()=>{
+  const e=createProviderFlowIoEngine({
+    contract:createProviderFlowIoContract({}),
+    handlers:{close:()=>{throw new Error("close failed");}}
+  });
+  assert.equal(e.accept({id:"f1",transport:"TCP"}).accepted,true);
+  const open=e.open("f1","local");
+  return open.then(()=>{
+    const result=e.close("f1");
+    assert.equal(result.state,ProviderFlowState.FAILED);
+    assert.equal(e.activeCount,0);
+  });
+});
