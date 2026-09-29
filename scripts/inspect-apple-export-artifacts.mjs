@@ -129,13 +129,13 @@ const scenarios = [
       }
     },
     required: [
-      ""Type": "com.apple.configuration.network.dns-settings"",
-      ""Identifier": "com.example.dns.https"",
-      ""ServerToken": "inspection-token"",
-      ""DNSProtocol": "HTTPS"",
-      ""ServerURL": "https://dns.example.com/dns-query"",
-      ""ServerAddresses": [",
-      ""SupplementalMatchDomains": ["
+      '"Type": "com.apple.configuration.network.dns-settings"',
+      '"Identifier": "com.example.dns.https"',
+      '"ServerToken": "inspection-token"',
+      '"DNSProtocol": "HTTPS"',
+      '"ServerURL": "https://dns.example.com/dns-query"',
+      '"ServerAddresses": ['",
+      '"SupplementalMatchDomains": ['"
     ]
   },
   {
@@ -153,10 +153,10 @@ const scenarios = [
       }
     },
     required: [
-      ""DNSProtocol": "TLS"",
-      ""ServerName": "dns.example.com"",
+      '"DNSProtocol": "TLS"',
+      '"ServerName": "dns.example.com"',
       ""ServerAddresses": [",
-      ""AllowFailover": true"
+      '"AllowFailover": true'"
     ]
   }
 ];
