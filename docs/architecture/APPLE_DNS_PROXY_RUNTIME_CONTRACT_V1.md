@@ -185,3 +185,7 @@ The generator preserves source-chain provenance, stage order/dependencies, failu
 The generated source establishes the `NEDNSProxyProvider` lifecycle boundary and embeds the admitted runtime plan. It does not reinterpret native MobileConfig/DDM DNS settings as an execution pipeline.
 
 Swift source generation is therefore a mechanical compilation step, not an Apple capability inference step.
+
+## Export Boundary Integration
+
+The Apple DNS proxy provider runtime is exposed as a separate target adapter: `apple-dns-proxy-provider-runtime`. Export requires an explicit `providerRuntimeIR`; the adapter never converts native `dnsPipeline` data into Provider Runtime IR. Invalid or missing Provider Runtime IR blocks export. Native MobileConfig/DDM DNS remains a separate configuration engine and does not inherit provider-runtime capability claims.
