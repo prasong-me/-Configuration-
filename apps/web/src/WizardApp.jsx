@@ -1,266 +1,42 @@
 import React,{useMemo,useState} from "react";
-import {compatibilityReport} from "../../../packages/core/src/index.js";
+import {compatibilityReport,listTargetManifests,searchRecords} from "../../../packages/core/src/index.js";
 import {exportFormats,getExportArtifact,getExportWarnings} from "../../../packages/targets/src/exporters.js";
 import {recommendedDnsServices} from "../../../packages/catalog/src/recommended-dns.js";
 import {configurationWizard} from "./wizard.js";
 import {applyWizardSkipSemantics,configurationWizardSteps} from "./wizard-steps.js";
 
-const primaryTargets=["apple-mobileconfig","surge","shadowrocket","quantumult-x","wireguard","loon","stash","mihomo"];
-
-const translations={
-  th:{
-    title:"Configuration Platform",
-    subtitle:"สร้าง configuration ผ่านขั้นตอนที่ชัดเจน แล้วตรวจ compatibility ก่อนส่งออก",
-    profileName:"ชื่อโปรไฟล์",
-    next:"ถัดไป",back:"ย้อนกลับ",skip:"ข้ามขั้นตอน",skipped:"ข้ามแล้ว",reset:"เริ่มใหม่",
-    intent:"Intent",source:"Source",dns:"DNS / Policy",target:"Target",compatibility:"Compatibility",review:"Review / Export",
-    ready:"พร้อมส่งออก",notReady:"ต้องแก้ข้อมูลก่อนส่งออก",warning:"ข้อควรทราบ",
-    apple:"ติดตั้งบน iPhone / iPad",appleDesc:"สร้าง .mobileconfig สำหรับติดตั้งผ่าน iOS Settings",
-    downloadProfile:"ดาวน์โหลดโปรไฟล์ iOS",share:"ส่งไฟล์ไปยังแอป",download:"ดาวน์โหลดไฟล์",
-    knowledge:"คู่มือ"
-  },
-  en:{
-    title:"Configuration Platform",
-    subtitle:"Build a configuration through explicit steps, then verify compatibility before export.",
-    profileName:"Profile name",
-    next:"Next",back:"Back",skip:"Skip step",skipped:"Skipped",reset:"Start over",
-    intent:"Intent",source:"Source",dns:"DNS / Policy",target:"Target",compatibility:"Compatibility",review:"Review / Export",
-    ready:"Ready to export",notReady:"Fix the configuration before exporting",warning:"Important",
-    apple:"Install on iPhone / iPad",appleDesc:"Create a .mobileconfig for installation through iOS Settings.",
-    downloadProfile:"Download iOS profile",share:"Send to app",download:"Download file",
-    knowledge:"Guide"
-  }
-};
-
-function makeBlob(name,text,mime){return new File([text],name,{type:mime});}
-function downloadFile(name,text,mime){
-  const blob=new Blob([text],{type:mime});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),3000);
-}
-async function shareFile(file){
-  if(!navigator.share||!navigator.canShare||!navigator.canShare({files:[file]}))return false;
-  try{await navigator.share({files:[file],title:file.name});return true}
-  catch(error){return error?.name==="AbortError"}
-}
-
+const tr={th:{title:"Configuration Platform",subtitle:"ค้นหา → กำหนดค่า → ตรวจ compatibility → ส่งออก",profileName:"ชื่อโปรไฟล์",next:"ถัดไป",back:"ย้อนกลับ",skip:"ข้ามขั้นตอน",reset:"เริ่มใหม่",search:"ค้นหา Target / DNS / Provider",hint:"เช่น Surge, Shadowrocket, Cloudflare, DoH",noResults:"ไม่พบรายการ",intent:"Intent",source:"Source",dns:"DNS / Policy",target:"Target",compatibility:"Compatibility",review:"Review / Export",ready:"พร้อมส่งออก",notReady:"ต้องแก้ข้อมูลก่อนส่งออก",warning:"ข้อควรทราบ",knowledge:"คู่มือ"},en:{title:"Configuration Platform",subtitle:"Search → Configure → Verify compatibility → Export",profileName:"Profile name",next:"Next",back:"Back",skip:"Skip step",reset:"Start over",search:"Search Target / DNS / Provider",hint:"e.g. Surge, Shadowrocket, Cloudflare, DoH",noResults:"No results",intent:"Intent",source:"Source",dns:"DNS / Policy",target:"Target",compatibility:"Compatibility",review:"Review / Export",ready:"Ready to export",notReady:"Fix the configuration before exporting",warning:"Important",knowledge:"Guide"}};
+function downloadFile(name,text,mime){const u=URL.createObjectURL(new Blob([text],{type:mime}));const a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}
+async function shareFile(file){if(!navigator.share||!navigator.canShare||!navigator.canShare({files:[file]}))return false;try{await navigator.share({files:[file],title:file.name});return true}catch(e){return e?.name==="AbortError"}}
 export function WizardApp(){
-  const [language,setLanguage]=useState("th");
-  const tr=translations[language];
-  const [name,setName]=useState("Configuration Standard");
-  const [vpn,setVpn]=useState(false);
-  const [dns,setDns]=useState(true);
-  const [malware,setMalware]=useState(false);
-  const [trackers,setTrackers]=useState(false);
-  const [dnsProfiles,setDnsProfiles]=useState([
-    {id:"privacy-dns",name:"Privacy DNS",preset:"cloudflare-standard",provider:"Cloudflare 1.1.1.1",protocol:"HTTPS",servers:["1.1.1.1","1.0.0.1"],endpoint:"https://cloudflare-dns.com/dns-query",role:"privacy",enabled:true,order:1},
-    {id:"security-dns",name:"Security DNS",preset:"quad9-secure",provider:"Quad9 Secure",protocol:"HTTPS",servers:["9.9.9.9","149.112.112.112"],endpoint:"https://dns.quad9.net/dns-query",role:"security",enabled:true,order:2},
-    {id:"backup-dns",name:"Backup DNS",preset:"google-public-dns",provider:"Google Public DNS",protocol:"HTTPS",servers:["8.8.8.8","8.8.4.4"],endpoint:"https://dns.google/dns-query",role:"resolver",enabled:true,order:3}
-  ]);
-  const [proxyServer,setProxyServer]=useState("");
-  const [dnsServerUrl,setDnsServerUrl]=useState("https://cloudflare-dns.com/dns-query");
-  const [dnsServerName,setDnsServerName]=useState("");
-  const [target,setTarget]=useState("apple-mobileconfig");
-  const [message,setMessage]=useState("");
-  const [applePayloads,setApplePayloads]=useState({dns:true,webclip:true,wifi:false,vpn:false,globalProxy:false});
-  const [wifiSSID,setWifiSSID]=useState("");
-  const [wifiPassword,setWifiPassword]=useState("");
-  const [wifiHidden,setWifiHidden]=useState(false);
-  const [vpnRemoteAddress,setVpnRemoteAddress]=useState("");
-  const [vpnRemoteIdentifier,setVpnRemoteIdentifier]=useState("");
-  const [vpnLocalIdentifier,setVpnLocalIdentifier]=useState("");
-  const [vpnSharedSecret,setVpnSharedSecret]=useState("");
-  const [blockedDomains,setBlockedDomains]=useState("");
-  const [blockPreset,setBlockPreset]=useState("custom");
-  const [routingAction,setRoutingAction]=useState("DIRECT");
-  const [proxyType,setProxyType]=useState("HTTP");
-  const [skippedSteps,setSkippedSteps]=useState(()=>new Set());
-
-  const policy=useMemo(()=>({
-    version:"0.5",
-    policy:{
-      name,vpn,dns,routing:vpn,
-      blocking:{malware,trackers,separateFromResolver:true},
-      dnsProfiles:dns?dnsProfiles:[],
-      dnsServers:dns&&dnsProfiles[0]?dnsProfiles[0].servers:[],
-      proxyServer:proxyServer.trim(),
-      dnsProtocol:dnsProfiles[0]?.protocol||"HTTPS",
-      dnsServerUrl:dnsProfiles[0]?.endpoint||dnsServerUrl,
-      dnsServerName,
-      webAppUrl:window.location.href.split("#")[0],
-      dnsDomains:[],
-      rules:[{match:"*.*",action:routingAction}],
-      finalPolicy:"DIRECT",bypassSystem:true,
-      webEntry:{name:"Configuration Platform",url:window.location.href.split("#")[0],enabled:true},
-      applePayloads,wifiSSID,wifiPassword,wifiHidden,
-      vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret,
-      blockedDomains:blockedDomains.split(/[\s,]+/).map(x=>x.trim()).filter(Boolean),
-      routingAction,proxyType
-    }
-  }),[name,vpn,dns,dnsProfiles,proxyServer,dnsServerUrl,dnsServerName,routingAction,applePayloads,wifiSSID,wifiPassword,wifiHidden,vpnRemoteAddress,vpnRemoteIdentifier,vpnLocalIdentifier,vpnSharedSecret,blockedDomains,proxyType]);
-
-  const effectivePolicy=useMemo(()=>applyWizardSkipSemantics(policy,skippedSteps),[policy,skippedSteps]);
-  const selectedFormat=exportFormats.find(x=>x.id===target)||exportFormats[0];
-  const artifact=getExportArtifact(selectedFormat.id,effectivePolicy);
-  const warnings=getExportWarnings(selectedFormat.id,effectivePolicy);
-  const report=useMemo(()=>compatibilityReport(effectivePolicy,target),[effectivePolicy,target]);
-  const blocking=report.diagnostics.filter(x=>(x.level==="CRITICAL"||x.level==="HIGH")&&x.code!=="CAPABILITY_UNKNOWN");
-  const capabilityWarnings=report.diagnostics.filter(x=>x.code==="CAPABILITY_UNKNOWN");
-  const exportReady=Boolean(artifact)&&blocking.length===0;
-  const isApple=target==="apple-mobileconfig";
-  const primaryFormats=primaryTargets.map(id=>exportFormats.find(x=>x.id===id)).filter(Boolean);
-  const stepper=configurationWizard.useStepper({linear:true});
-
-  const selectTarget=id=>{setTarget(id);setMessage("")};
-  const doDownload=()=>{downloadFile(`${selectedFormat.id}-config${selectedFormat.extension}`,artifact,selectedFormat.mime);setMessage(language==="th"?"ดาวน์โหลดไฟล์แล้ว":"File downloaded")};
-  const doShare=async()=>{
-    const file=makeBlob(`${selectedFormat.id}-config${selectedFormat.extension}`,artifact,selectedFormat.mime);
-    if(await shareFile(file)){setMessage(language==="th"?"เปิดเมนูแชร์แล้ว":"Share sheet opened");return}
-    doDownload();
-    setMessage(language==="th"?"อุปกรณ์นี้ไม่รองรับการส่งไฟล์เข้าแอปโดยตรง จึงดาวน์โหลดไฟล์แทน":"Direct app sharing is unavailable; the file was downloaded instead.");
-  };
-  const next=async()=>{
-    if(stepper.canNext){await stepper.next()}
-  };
-  const previous=async()=>{
-    const previousStep=stepper.steps[stepper.index-1];
-    if(await stepper.prev() && previousStep?.id){
-      setSkippedSteps(current=>{
-        const nextState=new Set(current);
-        nextState.delete(previousStep.id);
-        return nextState;
-      });
-    }
-  };
-  const goToStep=async id=>{
-    if(indexOfStep(id)<=stepper.index){
-      if(await stepper.goTo(id)){
-        setSkippedSteps(current=>{
-          const nextState=new Set(current);
-          nextState.delete(id);
-          return nextState;
-        });
-      }
-    }
-  };
-  const indexOfStep=id=>configurationWizardSteps.findIndex(step=>step.id===id);
-  const skip=async()=>{
-    if(!stepper.current.skippable||!stepper.canNext)return;
-    setSkippedSteps(previous=>new Set(previous).add(stepper.id));
-    await stepper.next();
-  };
-  const reset=async()=>{
-    await stepper.reset();
-    setSkippedSteps(new Set());
-    setMessage("");
-  };
-
-  const stepTitle=step=>tr[step.id]||step.title;
-
-  return <main>
-    <header className="hero">
-      <div className="language-menu"><label>ภาษา<select value={language} onChange={e=>setLanguage(e.target.value)}><option value="th">ไทย</option><option value="en">English</option></select></label></div>
-      <div className="hero-badge">Configuration Compiler · Wizard</div>
-      <h1>{tr.title}</h1><p>{tr.subtitle}</p>
-      <div className="wizard-meta"><span>Step {stepper.index+1} / {stepper.count}</span><a href="./knowledge.html">{tr.knowledge}</a></div>
-    </header>
-
-    <section className="wizard-shell" aria-label="Configuration wizard">
-      <ol className="wizard-progress">
-        {configurationWizardSteps.map((step,index)=>{
-          const state=index===stepper.index?"active":index<stepper.index?"previous":"upcoming";
-          return <li key={step.id} className={`wizard-step ${state}`}>
-            <button type="button" onClick={()=>index<=stepper.index&&goToStep(step.id)} disabled={index>stepper.index} aria-current={state==="active"?"step":undefined}>
-              <span className="wizard-index">{index+1}</span><span><strong>{stepTitle(step)}</strong><small>{step.description}</small></span>
-            </button>
-            {index<configurationWizardSteps.length-1&&<span className="wizard-connector" aria-hidden="true"/>}
-          </li>
-        })}
-      </ol>
-
-      <section className="card wizard-panel">
-        <div className="section-title">
-          <div><span className="step">{stepper.index+1}</span><div><h2>{stepTitle(stepper.current)}</h2><p>{stepper.current.description}</p></div></div>
-        </div>
-
-        {stepper.is("intent")&&<div className="wizard-content">
-          <p>เริ่มจากความตั้งใจของ configuration ก่อน แล้วค่อยเลือก source, DNS/policy และ target โดยไม่ผูก Core เข้ากับแอปใดแอปหนึ่ง</p>
-          <label>{tr.profileName}<input value={name} onChange={e=>setName(e.target.value)} placeholder="เช่น My DNS Profile"/></label>
-          <div className="info-grid"><div><strong>Core-first</strong><span>เก็บความหมายของ configuration ไว้ใน canonical policy</span></div><div><strong>Target isolation</strong><span>exporter เป็นผู้แปลงตาม capability ของแต่ละ target</span></div><div><strong>Evidence-aware</strong><span>ไม่อ้างว่าใช้งานจริงเพียงเพราะสร้างไฟล์ได้</span></div></div>
-        </div>}
-
-        {stepper.is("source")&&<div className="wizard-content">
-          <p>กำหนด building blocks ที่ configuration อาจใช้ได้ ขั้นนี้ไม่สร้าง payload ใด ๆ จนกว่าจะเลือก target และ capability ที่รองรับ</p>
-          <div className="advanced-grid">
-            <label>Proxy type<select value={proxyType} onChange={e=>setProxyType(e.target.value)}><option>HTTP</option><option>HTTPS</option><option>SOCKS5</option></select></label>
-            <label>Routing action<select value={routingAction} onChange={e=>setRoutingAction(e.target.value)}><option value="DIRECT">DIRECT</option><option value="PROXY">PROXY</option><option value="REJECT">REJECT / BLOCK</option><option value="DNS">DNS</option></select></label>
-          </div>
-          <label>Proxy Server<input value={proxyServer} onChange={e=>setProxyServer(e.target.value)} placeholder="proxy.example.com:8080"/></label>
-          <label>Blocked domains<textarea value={blockedDomains} onChange={e=>setBlockedDomains(e.target.value)} rows="4" placeholder="example.com\nads.example.com\ntracker.example.com"/></label>
-          <label>Blocklist preset<select value={blockPreset} onChange={e=>{setBlockPreset(e.target.value);if(e.target.value!=="custom")setBlockedDomains("")}}><option value="custom">Custom domains</option><option value="oisd-small">OISD Small</option><option value="hagezi-pro">HaGeZi Pro</option><option value="hagezi-tif">HaGeZi Threat Intelligence</option></select></label>
-          <small>Preset เป็นเพียงการเลือกแหล่งรายการ ระบบจะไม่สร้างโดเมนปลอมแทนข้อมูลจากแหล่งภายนอก</small>
-          <label className="check"><input type="checkbox" checked={vpn} onChange={e=>setVpn(e.target.checked)}/>เปิดใช้ VPN / Routing</label>
-          <label className="check"><input type="checkbox" checked={malware} onChange={e=>setMalware(e.target.checked)}/>บล็อก Malware</label>
-          <label className="check"><input type="checkbox" checked={trackers} onChange={e=>setTrackers(e.target.checked)}/>บล็อก Tracker</label>
-        </div>}
-
-        {stepper.is("dns")&&<div className="wizard-content">
-          <label className="check"><input type="checkbox" checked={dns} onChange={e=>setDns(e.target.checked)}/>เปิดใช้ DNS configuration</label>
-          {dnsProfiles.map((profile,index)=><div className="dns-profile-card" key={profile.id}>
-            <div className="advanced-grid">
-              <label>ชื่อชุด DNS<input value={profile.name} onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,name:e.target.value}:p))}/></label>
-              <label>บริการ DNS<select value={profile.preset} onChange={e=>{const preset=recommendedDnsServices.find(x=>x.id===e.target.value);setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,preset:e.target.value,provider:preset?.provider||"Custom",servers:preset?[...preset.ipv4,...preset.ipv6]:p.servers,protocol:preset?.doh?"HTTPS":preset?.dot?"TLS":p.protocol,endpoint:preset?.doh||p.endpoint}:p))}}>{recommendedDnsServices.map(x=><option key={x.id} value={x.id}>{x.provider} · {x.description}</option>)}</select></label>
-              <label>Protocol<select value={profile.protocol} onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,protocol:e.target.value}:p))}><option value="HTTPS">DNS-over-HTTPS</option><option value="TLS">DNS-over-TLS</option><option value="PLAIN">Plain DNS</option></select></label>
-              <label>บทบาท<select value={profile.role} onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,role:e.target.value}:p))}><option value="resolver">Resolver</option><option value="security">Security / Threat</option><option value="privacy">Privacy</option><option value="custom">Custom</option></select></label>
-            </div>
-            <label>DNS Servers<textarea value={profile.servers.join("\n")} rows="2" onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,servers:e.target.value.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean)}:p))}/></label>
-            <label>Endpoint<input value={profile.endpoint} onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,endpoint:e.target.value}:p))} placeholder="https://dns.example/dns-query"/></label>
-            <label className="check"><input type="checkbox" checked={profile.enabled} onChange={e=>setDnsProfiles(list=>list.map((p,i)=>i===index?{...p,enabled:e.target.checked}:p))}/>เปิดใช้ชุดนี้</label>
-          </div>)}
-          <div className="advanced-grid">
-            <label>Encrypted DNS URL<input value={dnsServerUrl} onChange={e=>setDnsServerUrl(e.target.value)} placeholder="https://dns.example.com/dns-query"/></label>
-            <label>DNS-over-TLS Server Name<input value={dnsServerName} onChange={e=>setDnsServerName(e.target.value)} placeholder="dns.quad9.net"/></label>
-          </div>
-        </div>}
-
-        {stepper.is("target")&&<div className="wizard-content">
-          <p>Target เป็น adapter boundary ของระบบ เลือกเฉพาะรูปแบบที่ต้องการส่งออก</p>
-          <div className="target-grid">{primaryFormats.map(format=><button key={format.id} type="button" className={target===format.id?"target-card selected":"target-card"} onClick={()=>selectTarget(format.id)}><strong>{format.label}</strong><span>{format.extension}</span><small>{format.description}</small></button>)}</div>
-          <details open><summary>Apple Payloads</summary>
-            <div className="advanced-grid">
-              {Object.entries({dns:"Encrypted DNS payload",webclip:"Web Clip / Web App payload",wifi:"Wi-Fi payload",vpn:"IKEv2 VPN payload",globalProxy:"Global HTTP Proxy payload"}).map(([key,label])=><label className="check" key={key}><input type="checkbox" checked={applePayloads[key]} onChange={e=>setApplePayloads(x=>({...x,[key]:e.target.checked}))}/>{label}</label>)}
-            </div>
-            {applePayloads.wifi&&<div className="advanced-grid"><label>Wi-Fi SSID<input value={wifiSSID} onChange={e=>setWifiSSID(e.target.value)}/></label><label>Wi-Fi Password<input type="password" value={wifiPassword} onChange={e=>setWifiPassword(e.target.value)}/></label><label className="check"><input type="checkbox" checked={wifiHidden} onChange={e=>setWifiHidden(e.target.checked)}/>Hidden Network</label></div>}
-            {applePayloads.vpn&&<div className="advanced-grid"><label>VPN Remote Address<input value={vpnRemoteAddress} onChange={e=>setVpnRemoteAddress(e.target.value)}/></label><label>VPN Remote Identifier<input value={vpnRemoteIdentifier} onChange={e=>setVpnRemoteIdentifier(e.target.value)}/></label><label>VPN Local Identifier<input value={vpnLocalIdentifier} onChange={e=>setVpnLocalIdentifier(e.target.value)}/></label><label>VPN Shared Secret<input type="password" value={vpnSharedSecret} onChange={e=>setVpnSharedSecret(e.target.value)}/></label></div>}
-          </details>
-        </div>}
-
-        {stepper.is("compatibility")&&<div className="wizard-content">
-          <div className={exportReady?"status ready":"status not-ready"}><strong>{exportReady?tr.ready:tr.notReady}</strong>{blocking.length>0&&<ul>{blocking.map((x,i)=><li key={i}>{x.message}</li>)}</ul>}</div>
-          <div className="compatibility-list">{Object.entries(report.capabilities).map(([key,value])=><div className="row" key={key}><span>{key}</span><strong>{value.requested?value.state:"ไม่เลือก"}</strong></div>)}</div>
-          {(warnings.length>0||capabilityWarnings.length>0)&&<div className="warning"><strong>{tr.warning}</strong><ul>{warnings.map((w,i)=><li key={i}>{w.message}</li>)}{capabilityWarnings.map((w,i)=><li key={"cap-"+i}>{w.message}</li>)}</ul></div>}
-        </div>}
-
-        {stepper.is("review")&&<div className="wizard-content">
-          <div className={exportReady?"status ready":"status not-ready"}><strong>{exportReady?tr.ready:tr.notReady}</strong>{blocking.length>0&&<ul>{blocking.map((x,i)=><li key={i}>{x.message}</li>)}</ul>}</div>
-          <div className="row"><span>Profile</span><strong>{name}</strong></div>
-          <div className="row"><span>Target</span><strong>{selectedFormat.label}</strong></div>
-          <div className="row"><span>Format</span><strong>{selectedFormat.extension}</strong></div>
-          <div className="row"><span>DNS profiles</span><strong>{dns?dnsProfiles.filter(x=>x.enabled).length:0}</strong></div>
-          {isApple?<div className="install-box"><h3>{tr.apple}</h3><p>{tr.appleDesc}</p><button className="primary-action" type="button" disabled={!exportReady} onClick={()=>{downloadFile("configuration-profile.mobileconfig",artifact,"application/x-apple-aspen-config");setMessage(language==="th"?"ดาวน์โหลดโปรไฟล์แล้ว ไปที่ Settings > Profile Downloaded > Install":"Profile downloaded; open Settings > Profile Downloaded > Install")}}>{tr.downloadProfile}</button><ol><li>{tr.downloadProfile}</li><li>Settings &gt; Profile Downloaded &gt; Install</li></ol></div>:<div className="install-box"><h3>{selectedFormat.label}</h3><p>ใช้ Share Sheet ของอุปกรณ์หรือดาวน์โหลดไฟล์เพื่อนำเข้าในแอปปลายทาง</p><button className="primary-action" type="button" disabled={!exportReady} onClick={doShare}>{tr.share}</button><button className="secondary-action" type="button" disabled={!exportReady} onClick={doDownload}>{tr.download}</button></div>}
-          {message&&<div className="message" role="status">{message}</div>}
-          <details className="technical-details"><summary>รายละเอียดทางเทคนิค</summary><pre>{artifact}</pre></details>
-        </div>}
-
-        <footer className="wizard-actions">
-          <button className="secondary-action wizard-button" type="button" disabled={!stepper.canPrev||stepper.isPending} onClick={previous}>{tr.back}</button>
-          <button className="secondary-action wizard-button" type="button" onClick={reset}>{tr.reset}</button>
-          {stepper.current.skippable&&stepper.canNext&&<button className="secondary-action wizard-button" type="button" disabled={stepper.isPending||skippedSteps.has(stepper.id)} onClick={skip}>{skippedSteps.has(stepper.id)?tr.skipped:tr.skip}</button>}
-          {!stepper.isLast&&<button className="primary-action wizard-button" type="button" disabled={!stepper.canNext||stepper.isPending} onClick={next}>{tr.next}</button>}
-        </footer>
-      </section>
-    </section>
-  </main>;
+ const [language,setLanguage]=useState("th"),T=tr[language]; const [name,setName]=useState("Configuration Standard"),[vpn,setVpn]=useState(false),[dns,setDns]=useState(true),[malware,setMalware]=useState(false),[trackers,setTrackers]=useState(false),[proxyServer,setProxyServer]=useState(""),[routingAction,setRoutingAction]=useState("DIRECT"),[proxyType,setProxyType]=useState("HTTP"),[query,setQuery]=useState(""),[target,setTarget]=useState("apple-mobileconfig"),[message,setMessage]=useState(""),[skipped,setSkipped]=useState(()=>new Set());
+ const [dnsProfiles,setDnsProfiles]=useState([{id:"privacy-dns",name:"Privacy DNS",preset:"cloudflare-standard",provider:"Cloudflare 1.1.1.1",protocol:"HTTPS",servers:["1.1.1.1","1.0.0.1"],endpoint:"https://cloudflare-dns.com/dns-query",role:"privacy",enabled:true,order:1}]);
+ const [applePayloads,setApplePayloads]=useState({dns:true,webclip:true,wifi:false,vpn:false,globalProxy:false});
+ const [blockedDomains,setBlockedDomains]=useState("");
+ const manifests=useMemo(()=>listTargetManifests(),[]), formats=useMemo(()=>new Map(exportFormats.map(x=>[x.id,x])),[]), registry=useMemo(()=>new Map(manifests.map(x=>[x.id,x])),[manifests]);
+ const searchIndex=useMemo(()=>[...manifests.map((m,i)=>({id:m.id,name:formats.get(m.id)?.label||m.id,provider:"Target Registry",role:"target",description:(m.limitations||[]).join(" "),tags:[m.status,m.version],sourceIndex:i})),...recommendedDnsServices.map((d,i)=>({id:d.id,name:d.provider,provider:d.provider,protocol:d.doh?"DoH":d.dot?"DoT":"DNS",role:"dns",endpoint:d.doh||d.dot||"",description:d.description,tags:["dns","resolver"],sourceIndex:manifests.length+i}))],[manifests,formats]);
+ const results=useMemo(()=>query.trim()?searchRecords(searchIndex,query).slice(0,8):[],[searchIndex,query]), selected=registry.get(target),format=formats.get(target);
+ const policy=useMemo(()=>({version:"0.6",policy:{name,vpn,dns,routing:vpn,blocking:{malware,trackers,separateFromResolver:true},dnsProfiles:dns?dnsProfiles:[],dnsServers:dns&&dnsProfiles[0]?dnsProfiles[0].servers:[],proxyServer:proxyServer.trim(),dnsProtocol:dnsProfiles[0]?.protocol||"HTTPS",dnsServerUrl:dnsProfiles[0]?.endpoint||"",webAppUrl:window.location.href.split("#")[0],dnsDomains:[],rules:[{match:"*.*",action:routingAction}],finalPolicy:"DIRECT",bypassSystem:true,webEntry:{name:"Configuration Platform",url:window.location.href.split("#")[0],enabled:true},applePayloads,blockedDomains:blockedDomains.split(/[\s,]+/).map(x=>x.trim()).filter(Boolean),routingAction,proxyType}}),[name,vpn,dns,dnsProfiles,proxyServer,routingAction,applePayloads,blockedDomains,proxyType]);
+ const effective=useMemo(()=>applyWizardSkipSemantics(policy,skipped),[policy,skipped]), artifact=format?getExportArtifact(target,effective):"",warnings=format?getExportWarnings(target,effective):[],report=useMemo(()=>compatibilityReport(effective,target),[effective,target]);
+ const blocking=report.diagnostics.filter(x=>(x.level==="CRITICAL"||x.level==="HIGH")&&x.code!=="CAPABILITY_UNKNOWN"),unknown=report.diagnostics.filter(x=>x.code==="CAPABILITY_UNKNOWN"),ready=Boolean(artifact)&&blocking.length===0;
+ const stepper=configurationWizard.useStepper({linear:true}); const index=id=>configurationWizardSteps.findIndex(x=>x.id===id);
+ const select=id=>{if(formats.has(id)){setTarget(id);setMessage("")}}; const next=async()=>stepper.canNext&&stepper.next(); const prev=async()=>stepper.canPrev&&stepper.prev(); const skip=async()=>{if(stepper.current.skippable&&stepper.canNext){setSkipped(s=>new Set(s).add(stepper.current.id));await stepper.next()}}; const reset=async()=>{await stepper.reset();setSkipped(new Set());setMessage("")};
+ const saveDownload=()=>{if(ready){downloadFile(target+"-config"+format.extension,artifact,format.mime);setMessage(language==="th"?"ดาวน์โหลดไฟล์แล้ว":"File downloaded")}};
+ const saveShare=async()=>{if(!ready)return;const f=new File([artifact],target+"-config"+format.extension,{type:format.mime});if(await shareFile(f))setMessage(language==="th"?"เปิดเมนูแชร์แล้ว":"Share sheet opened");else saveDownload()};
+ const title=s=>T[s.id]||s.title;
+ return <main>
+  <header className="hero"><div className="language-menu"><label>ภาษา<select value={language} onChange={e=>setLanguage(e.target.value)}><option value="th">ไทย</option><option value="en">English</option></select></label></div><div className="hero-badge">Configuration Compiler · Extensible UI</div><h1>{T.title}</h1><p>{T.subtitle}</p><div className="wizard-meta"><span>Step {stepper.index+1} / {stepper.count}</span><a href="./knowledge.html">{T.knowledge}</a></div></header>
+  <section className="card search-workspace"><div className="search-heading"><div><span className="eyebrow">DISCOVERY</span><h2>{T.search}</h2><p>{T.hint}</p></div><span className="source-badge">Registry + Catalog</span></div><label className="search-input-wrap"><span>⌕</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={T.hint}/>{query&&<button type="button" onClick={()=>setQuery("")}>×</button>}</label>{query?<div className="search-results">{results.length?results.map(r=><button className="search-result" type="button" key={r.role+r.id} onClick={()=>{if(r.role==="target")select(r.id);setQuery("")}}><span className="result-kind">{r.role}</span><span><strong>{r.name}</strong><small>{r.id} · {r.provider}</small></span></button>):<p className="empty-search">{T.noResults}</p>}</div>:<div className="quick-targets">{manifests.filter(m=>formats.has(m.id)).map(m=><button type="button" key={m.id} className={target===m.id?"quick-target selected":"quick-target"} onClick={()=>select(m.id)}>{formats.get(m.id).label}</button>)}</div>}</section>
+  <section className="wizard-shell"><ol className="wizard-progress">{configurationWizardSteps.map((s,i)=>{const state=i===stepper.index?"active":i<stepper.index?"previous":"upcoming";return <li key={s.id} className={"wizard-step "+state}><button type="button" disabled={i>stepper.index} onClick={()=>i<=stepper.index&&stepper.goTo(s.id)}><span className="wizard-index">{i+1}</span><span><strong>{title(s)}</strong><small>{s.description}</small></span></button></li>})}</ol>
+   <section className="card wizard-panel"><div className="section-title"><div><span className="step">{stepper.index+1}</span><div><h2>{title(stepper.current)}</h2><p>{stepper.current.description}</p></div></div></div>
+   {stepper.is("intent")&&<div className="wizard-content"><p>กำหนดความหมายของ configuration ก่อนเลือก target เพื่อให้ target-specific implementation อยู่ที่ adapter boundary</p><label>{T.profileName}<input value={name} onChange={e=>setName(e.target.value)}/></label><div className="info-grid"><div><strong>Core-first</strong><span>Canonical policy เป็นศูนย์กลาง</span></div><div><strong>Target isolation</strong><span>Registry และ exporter แยกจาก UI</span></div><div><strong>Evidence-aware</strong><span>ไม่อ้าง capability ที่ยังไม่ verified</span></div></div></div>}
+   {stepper.is("source")&&<div className="wizard-content"><div className="advanced-grid"><label>Proxy type<select value={proxyType} onChange={e=>setProxyType(e.target.value)}><option>HTTP</option><option>HTTPS</option><option>SOCKS5</option></select></label><label>Routing action<select value={routingAction} onChange={e=>setRoutingAction(e.target.value)}><option>DIRECT</option><option>PROXY</option><option>REJECT</option><option>DNS</option></select></label></div><label>Proxy Server<input value={proxyServer} onChange={e=>setProxyServer(e.target.value)} placeholder="proxy.example.com:8080"/></label><label>Blocked domains<textarea value={blockedDomains} onChange={e=>setBlockedDomains(e.target.value)} rows="4" placeholder="example.com\nads.example.com"/></label><label className="check"><input type="checkbox" checked={vpn} onChange={e=>setVpn(e.target.checked)}/>เปิดใช้ VPN / Routing</label><label className="check"><input type="checkbox" checked={malware} onChange={e=>setMalware(e.target.checked)}/>บล็อก Malware</label><label className="check"><input type="checkbox" checked={trackers} onChange={e=>setTrackers(e.target.checked)}/>บล็อก Tracker</label></div>}
+   {stepper.is("dns")&&<div className="wizard-content"><label className="check"><input type="checkbox" checked={dns} onChange={e=>setDns(e.target.checked)}/>เปิดใช้ DNS configuration</label>{dnsProfiles.map((p,i)=><div className="dns-profile-card" key={p.id}><div className="advanced-grid"><label>ชื่อชุด DNS<input value={p.name} onChange={e=>setDnsProfiles(a=>a.map((x,j)=>j===i?{...x,name:e.target.value}:x))}/></label><label>บริการ DNS<select value={p.preset} onChange={e=>{const d=recommendedDnsServices.find(x=>x.id===e.target.value);setDnsProfiles(a=>a.map((x,j)=>j===i?{...x,preset:e.target.value,provider:d?.provider||"Custom",servers:d?[...d.ipv4,...d.ipv6]:x.servers,protocol:d?.doh?"HTTPS":d?.dot?"TLS":x.protocol,endpoint:d?.doh||x.endpoint}:x))}}>{recommendedDnsServices.map(d=><option key={d.id} value={d.id}>{d.provider}</option>)}</select></label></div><label>DNS Servers<textarea value={p.servers.join("\n")} rows="2" onChange={e=>setDnsProfiles(a=>a.map((x,j)=>j===i?{...x,servers:e.target.value.split(/[,\s]+/).filter(Boolean)}:x))}/></label><label>Endpoint<input value={p.endpoint} onChange={e=>setDnsProfiles(a=>a.map((x,j)=>j===i?{...x,endpoint:e.target.value}:x))}/></label></div>)}</div>}
+   {stepper.is("target")&&<div className="wizard-content"><div className="selected-target-banner"><div><span className="eyebrow">TARGET REGISTRY</span><h3>{format?.label||target}</h3><p><code>{target}</code> · {selected?.status||"unknown"} · {selected?.version||"n/a"}</p></div><span className="registry-dot">●</span></div><div className="target-grid">{manifests.filter(m=>formats.has(m.id)).map(m=><button type="button" key={m.id} className={target===m.id?"target-card selected":"target-card"} onClick={()=>select(m.id)}><strong>{formats.get(m.id).label}</strong><span>{formats.get(m.id).extension}</span><small>{m.status} · {m.version}</small></button>)}</div>{target==="apple-mobileconfig"&&<details open><summary>Apple Payloads</summary><div className="advanced-grid">{Object.entries({dns:"Encrypted DNS payload",webclip:"Web Clip / Web App payload",wifi:"Wi-Fi payload",vpn:"IKEv2 VPN payload",globalProxy:"Global HTTP Proxy payload"}).map(([k,v])=><label className="check" key={k}><input type="checkbox" checked={applePayloads[k]} onChange={e=>setApplePayloads(x=>({...x,[k]:e.target.checked}))}/>{v}</label>)}</div></details>}</div>}
+   {stepper.is("compatibility")&&<div className="wizard-content"><div className={ready?"status ready":"status not-ready"}><strong>{ready?T.ready:T.notReady}</strong>{blocking.length>0&&<ul>{blocking.map((x,i)=><li key={i}>{x.message}</li>)}</ul>}</div><div className="selected-target-banner compact"><div><span className="eyebrow">TARGET</span><h3>{format?.label||target}</h3><p>{selected?.status||"unknown"} · Evidence {selected?.evidence?.length||0}</p></div></div><div className="compatibility-list">{Object.entries(report.capabilities).map(([k,v])=><div className="row" key={k}><span>{k}</span><strong>{v.requested?v.state:"NOT REQUESTED"}</strong></div>)}</div>{(warnings.length||unknown.length)>0&&<div className="warning"><strong>{T.warning}</strong><ul>{warnings.map((x,i)=><li key={i}>{x.message}</li>)}{unknown.map((x,i)=><li key={"u"+i}>{x.message}</li>)}</ul></div>}</div>}
+   {stepper.is("review")&&<div className="wizard-content"><div className={ready?"status ready":"status not-ready"}><strong>{ready?T.ready:T.notReady}</strong><p>Target: {format?.label||target} · Output: {format?.extension||"—"}</p></div>{selected?.limitations?.length>0&&<div className="warning"><strong>Target limitations</strong><ul>{selected.limitations.map((x,i)=><li key={i}>{x}</li>)}</ul></div>}<div className="review-grid"><div><span>Profile</span><strong>{name}</strong></div><div><span>Target</span><strong>{format?.label||target}</strong></div><div><span>DNS</span><strong>{effective.policy.dns?"Enabled":"Disabled"}</strong></div><div><span>Diagnostics</span><strong>{report.diagnostics.length}</strong></div></div>{ready?<><button type="button" className="primary-action" onClick={saveDownload}>Download {format.extension}</button><button type="button" className="secondary-action" onClick={saveShare}>Share / Send to app</button></>:<div className="fallback">Export is blocked until compatibility diagnostics are resolved.</div>}{message&&<div className="message">{message}</div>}<details className="technical-details"><summary>Technical artifact preview</summary><pre>{artifact||"No artifact generated"}</pre></details></div>}
+   <div className="wizard-actions"><button type="button" className="secondary-action wizard-button" onClick={prev} disabled={!stepper.canPrev}>{T.back}</button>{stepper.current.skippable&&<button type="button" className="secondary-action wizard-button" onClick={skip}>{T.skip}</button>}{stepper.canNext?<button type="button" className="primary-action wizard-button" onClick={next}>{T.next}</button>:<button type="button" className="secondary-action wizard-button" onClick={reset}>{T.reset}</button>}</div>
+   </section>
+  </section>
+ </main>
 }
