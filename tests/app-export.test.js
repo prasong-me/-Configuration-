@@ -76,7 +76,7 @@ test("each target artifact satisfies its target-specific structural contract", (
   };
 
   for (const id of targets) {
-    const result = compileTargetExport(id, inputForTarget(id));
+    const result = compileTargetExport(id, policy);
     const artifact = String(result.representation);
     assert.ok(artifact.trim().length > 0, id);
     for (const pattern of expected[id]) {

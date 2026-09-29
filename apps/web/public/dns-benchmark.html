@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DNS Benchmark · Configuration</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f7fb;color:#18212f;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans Thai","Noto Sans",system-ui,sans-serif}
+main{max-width:760px;margin:auto;padding:18px 14px 40px}
+header,.card{background:#fff;border:1px solid #e1e6ef;border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 6px 22px rgba(25,35,55,.06)}
+h1{margin:0 0 4px;font-size:26px}.muted{color:#667085;font-size:13px}
+.controls{display:grid;gap:10px;margin-top:14px}label{font-weight:700;font-size:14px}
+input,textarea,select,button{font:inherit}input,textarea,select{width:100%;margin-top:6px;padding:10px 12px;border:1px solid #cfd6e2;border-radius:11px;background:#fff}
+textarea{min-height:120px;resize:vertical}
+button{border:0;border-radius:11px;padding:12px 14px;font-weight:800;cursor:pointer}.primary{background:#4f46e5;color:#fff}.secondary{background:#eef1f6;color:#273244}
+.row{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #edf0f4;font-size:13px}.row:last-child{border-bottom:0}
+.badge{display:inline-block;padding:3px 7px;border-radius:999px;background:#eef2ff;color:#4338ca;font-size:11px;font-weight:800}
+pre{white-space:pre-wrap;overflow:auto;background:#111827;color:#e5e7eb;border-radius:11px;padding:12px;font-size:11px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+@media(max-width:480px){.actions{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <span class="badge">Configuration · Browser Benchmark</span>
+  <h1>DNS / Web Benchmark</h1>
+  <div class="muted">ตัวควบคุมการทดสอบจาก iPhone โดยให้ browser driver เปิดเว็บไซต์ทีละหน้าและส่งผลกลับมาที่หน้านี้</div>
+</header>
+
+<section class="card">
+  <div class="controls">
+    <label>รอบทดสอบ <input id="rounds" type="number" min="1" max="100" value="5"></label>
+    <label>Timeout (ms) <input id="timeout" type="number" min="1000" max="30000" value="8000"></label>
+    <label>รายการเว็บไซต์
+      <textarea id="domains">apple.com
+google.com
+github.com
+microsoft.com
+cloudflare.com
+quad9.net
+wikipedia.org</textarea>
+    </label>
+    <label>Browser driver
+      <select id="driver">
+        <option value="user-script">User Script</option>
+      </select>
+    </label>
+    <button class="primary" id="start">เริ่มทดสอบ</button>
+  </div>
+</section>
+
+<section class="card">
+  <strong>สถานะ</strong>
+  <div id="status" class="muted" style="margin-top:7px">พร้อมทดสอบ</div>
+</section>
+
+<section class="card">
+  <strong>ผลลัพธ์</strong>
+  <div id="results" style="margin-top:8px"></div>
+  <div class="actions">
+    <button class="secondary" id="export-json">Export JSON</button>
+    <button class="secondary" id="reset">ล้างผล</button>
+  </div>
+</section>
+
+<section class="card">
+  <strong>ข้อมูลสำหรับ User Script</strong>
+  <div class="muted" style="margin:7px 0">ติดตั้งไฟล์ User Script ที่อยู่ใน <code>/userscripts/dns-benchmark.user.js</code> แล้วเปิดหน้านี้ใน browser ที่รองรับ User Script</div>
+  <pre id="debug">ยังไม่มี session</pre>
+</section>
+</main>
+
+<script>
+(function(){
+  const KEY="configuration-dns-benchmark-v1";
+  const $=id=>document.getElementById(id);
+  const state={session:null,results:[]};
+
+  function load(){
+    try{
+      const saved=JSON.parse(localStorage.getItem(KEY)||"null");
+      if(saved){Object.assign(state,saved);}
+    }catch{}
+    render();
+  }
+  function save(){localStorage.setItem(KEY,JSON.stringify(state));render();}
+
+  function parseDomains(){
+    return $("domains").value.split(/[\s,]+/).map(x=>x.trim().replace(/^https?:\/\//,"").replace(/\/.*$/,"")).filter(Boolean);
+  }
+
+  function buildSession(){
+    return {
+      id:crypto.randomUUID(),
+      createdAt:new Date().toISOString(),
+      round:0,
+      index:0,
+      rounds:Math.max(1,Math.min(100,Number($("rounds").value)||1)),
+      timeout:Math.max(1000,Math.min(30000,Number($("timeout").value)||8000)),
+      domains:parseDomains(),
+      driver:$("driver").value
+    };
+  }
+
+  function controllerUrl(session){
+    const u=new URL(location.href);
+    u.search="";
+    u.hash="";
+    u.searchParams.set("__configuration_bench","controller");
+    u.searchParams.set("session",encodeURIComponent(JSON.stringify(session)));
+    return u.toString();
+  }
+
+  function start(){
+    const session=buildSession();
+    if(!session.domains.length){$("status").textContent="ต้องมีอย่างน้อย 1 โดเมน";return;}
+    state.session=session;state.results=[];save();
+    launch(session);
+  }
+
+  function launch(session){
+    if(session.round>=session.rounds){
+      $("status").textContent="ทดสอบครบทุกโดเมนและทุก รอบแล้ว";
+      return;
+    }
+    const domain=session.domains[session.index];
+    const target=new URL("https://"+domain+"/");
+    target.searchParams.set("__configuration_bench","target");
+    target.searchParams.set("return",location.origin+location.pathname);
+    target.searchParams.set("session",session.id);
+    target.searchParams.set("round",String(session.round));
+    target.searchParams.set("index",String(session.index));
+    target.searchParams.set("timeout",String(session.timeout));
+    $("status").textContent="กำลังเปิด "+domain+" · รอบ "+(session.round+1)+"/"+session.rounds;
+    location.href=target.toString();
+  }
+
+  function receive(){
+    const p=new URLSearchParams(location.search);
+    if(p.get("__configuration_bench")!=="controller")return;
+    const payload=p.get("result");
+    if(!payload)return;
+    try{
+      const result=JSON.parse(decodeURIComponent(payload));
+      if(!state.session || state.session.id!==result.session)return;
+      state.results.push(result);
+      state.session.index=result.index+1;
+      if(state.session.index>=state.session.domains.length){state.session.index=0;state.session.round++;}
+      save();
+      if(state.session.round<state.session.rounds){
+        setTimeout(()=>launch(state.session),150);
+      }else{
+        render();
+      }
+      history.replaceState({},document.title,location.pathname);
+    }catch(error){
+      $("status").textContent="รับผลการทดสอบไม่ได้: "+error.message;
+    }
+  }
+
+  function render(){
+    const s=state.session;
+    if(s){
+      $("status").textContent=(s.round>=s.rounds)
+        ?"เสร็จสิ้น: "+state.results.length+" ผล"
+        :"Session "+s.id+" · "+state.results.length+" ผล";
+      $("debug").textContent=JSON.stringify({session:s,results:state.results.slice(-5)},null,2);
+    }
+    const grouped={};
+    for(const r of state.results){
+      (grouped[r.domain]??=[]).push(r);
+    }
+    $("results").innerHTML=Object.entries(grouped).map(([d,rows])=>{
+      const times=rows.filter(r=>Number.isFinite(r.loadMs)).map(r=>r.loadMs);
+      const avg=times.length?(times.reduce((a,b)=>a+b,0)/times.length).toFixed(1):"-";
+      const ok=rows.filter(r=>r.status==="ok").length;
+      return '<div class="row"><span><strong>'+d+'</strong><br><span class="muted">'+ok+'/'+rows.length+' สำเร็จ</span></span><strong>'+avg+' ms</strong></div>';
+    }).join("")||'<div class="muted">ยังไม่มีผล</div>';
+  }
+
+  $("start").onclick=start;
+  $("reset").onclick=()=>{localStorage.removeItem(KEY);state.session=null;state.results=[];render();};
+  $("export-json").onclick=()=>{
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="dns-benchmark-results.json";a.click();
+  };
+  load();
+  receive();
+})();
+</script>
+</body>
+</html>

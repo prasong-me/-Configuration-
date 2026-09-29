@@ -1,0 +1,79 @@
+{
+  "id": "apple-mobileconfig",
+  "version": "1.1.0",
+  "platforms": [
+    "ios",
+    "ipados",
+    "macos"
+  ],
+  "capabilities": [
+    "dns",
+    "vpn",
+    "mobileconfig"
+  ],
+  "required": {
+    "profile": [
+      "PayloadType",
+      "PayloadVersion",
+      "PayloadIdentifier",
+      "PayloadUUID",
+      "PayloadContent"
+    ],
+    "payload": [
+      "PayloadType",
+      "PayloadVersion",
+      "PayloadIdentifier",
+      "PayloadUUID"
+    ]
+  },
+  "optional": [
+    "PayloadDisplayName",
+    "PayloadOrganization",
+    "PayloadDescription",
+    "PayloadRemovalPassword",
+    "PayloadExpirationDate",
+    "PayloadScope"
+  ],
+  "unsupported": [
+    "surge.syntax",
+    "mihomo.syntax",
+    "shadowrocket.syntax",
+    "loon.syntax",
+    "stash.syntax",
+    "quantumultX.syntax"
+  ],
+  "constraints": [
+    "PayloadType at profile level must be Configuration.",
+    "PayloadVersion is an integer and the profile format version is 1.",
+    "PayloadContent is an array of payload dictionaries.",
+    "Each payload must use the exact PayloadType, PayloadVersion, PayloadIdentifier, and PayloadUUID keys required by its Apple payload schema.",
+    "A capability not represented by an Apple payload must not be silently approximated."
+  ],
+  "syntax": {
+    "container": "XML or binary property list (.mobileconfig)",
+    "profileKeys": "PayloadType, PayloadVersion, PayloadIdentifier, PayloadUUID, PayloadContent",
+    "payloadKeys": "PayloadType, PayloadVersion, PayloadIdentifier, PayloadUUID, <payload-specific keys>",
+    "identifierStyle": "reverse-DNS style string for PayloadIdentifier; UUID string for PayloadUUID"
+  },
+  "validation": [
+    "plist-structure",
+    "profile-payload-type",
+    "payload-version",
+    "uuid",
+    "identifier",
+    "payload-nesting",
+    "payload-schema",
+    "platform-compatibility"
+  ],
+  "output": {
+    "format": "plist",
+    "extension": ".mobileconfig",
+    "mime": "application/x-apple-aspen-config"
+  },
+  "artifactStatus": {
+    "complete": "runnable",
+    "missingRequired": "template",
+    "schemaFailure": "invalid",
+    "unsupportedCapability": "rejected"
+  }
+}

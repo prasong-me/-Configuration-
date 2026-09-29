@@ -1,0 +1,8 @@
+{
+  "name": "Network Configuration",
+  "short_name": "Network Config",
+  "start_url": "./",
+  "display": "standalone",
+  "description": "Configuration Platform สำหรับสร้างและจัดการ Network Configuration",
+  "icons": []
+}

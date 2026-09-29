@@ -1,0 +1,14 @@
+[
+  {
+    "level":"WARNING",
+    "code":"PROVIDER_UNTRUSTED",
+    "message":"External provider metadata has not been verified.",
+    "feature":"providers"
+  },
+  {
+    "level":"HIGH",
+    "code":"SECRET_IN_EXPORT",
+    "message":"Sensitive credential material is present in an export candidate.",
+    "feature":"credentials"
+  }
+]

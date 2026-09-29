@@ -1,0 +1,11 @@
+{
+  "version":"0.1",
+  "policy":{
+    "name":"privacy-example",
+    "description":"Example policy used to demonstrate capability-aware compilation.",
+    "vpn":{"enabled":false},
+    "dns":{"enabled":true},
+    "routing":{"ipv4":true,"ipv6":true},
+    "blocking":{"malware":true,"tracker":true}
+  }
+}
