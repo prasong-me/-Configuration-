@@ -29,10 +29,10 @@ export function createDnsWireEncoderContract(input = {}) {
     compression: source.compression ?? DnsWireEncoderCompression.NONE,
     rdataModes: Object.freeze({ ...DnsWireEncoderRdataMode }),
     supportedRecordTypes: [...SUPPORTED],
-    determinism: true,
-    semanticInvention: false,
-    failClosed: true,
-    preserveTransactionId: true,
+    determinism: source.determinism ?? true,
+    semanticInvention: source.semanticInvention ?? false,
+    failClosed: source.failClosed ?? true,
+    preserveTransactionId: source.preserveTransactionId ?? true,
   };
 }
 
