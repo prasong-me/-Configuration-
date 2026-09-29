@@ -188,15 +188,23 @@ export function compileAppleDnsProxyProviderRuntime(input={}){
   const policy=input?.policy??input;
   const runtimeIR=policy?.providerRuntimeIR;
   if(!runtimeIR){
-    return {targetId:"apple-dns-proxy-provider-runtime",outputFormat:"text",representation:"",diagnostics:[{code:"PROVIDER_RUNTIME_IR_REQUIRED",message:"Provider Runtime IR is required; native DNS pipeline is never flattened into provider runtime source."}]};
+    const error=new Error("Provider Runtime IR is required; native DNS pipeline is never flattened into provider runtime source.");
+    error.code="PROVIDER_RUNTIME_IR_REQUIRED";
+    throw error;
   }
   const result=generateProviderRuntimeSwift({runtimeIR});
   if(result.status!=="GENERATED"){
-    return {targetId:"apple-dns-proxy-provider-runtime",outputFormat:"text",representation:"",diagnostics:[{code:"PROVIDER_RUNTIME_GENERATION_BLOCKED",message:"Provider Runtime generation was blocked by contract admission.",details:result.admission}]};
+    const error=new Error("Provider Runtime generation was blocked by contract admission.");
+    error.code="PROVIDER_RUNTIME_GENERATION_BLOCKED";
+    error.details=result.admission;
+    throw error;
   }
   const validation=validateGeneratedProviderRuntimeSwift(result);
   if(!validation.valid){
-    return {targetId:"apple-dns-proxy-provider-runtime",outputFormat:"text",representation:"",diagnostics:[{code:"PROVIDER_RUNTIME_GENERATED_ARTIFACT_INVALID",message:"Generated Provider Runtime artifact failed structural validation.",details:validation.errors}]};
+    const error=new Error("Generated Provider Runtime artifact failed structural validation.");
+    error.code="PROVIDER_RUNTIME_GENERATED_ARTIFACT_INVALID";
+    error.details=validation.errors;
+    throw error;
   }
   return {targetId:"apple-dns-proxy-provider-runtime",outputFormat:"text",representation:result.artifact.files[0].content,diagnostics:[]};
 }
