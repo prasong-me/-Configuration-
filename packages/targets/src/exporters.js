@@ -59,7 +59,7 @@ export function getExportArtifact(targetId,input={}){
   case "apple-mobileconfig":
   case "apple-mobileconfig-legacy": return compileAppleMobileConfig(input).content;
   case "apple-dns-declaration": return JSON.stringify(compileAppleDeclarativeDns(input),null,2);
-  case "surge": { const surgeInput=input?.policy?input:{policy:p}; const normalized={...surgeInput,policy:{...p,rules:rules(p).map(r=>({type:r.type,value:r.value,policy:r.action}))}}; return compileSurge(normalized).content; }
+  case "surge": { if (p.vpn) throw new TypeError("UNSUPPORTED_CAPABILITY: Surge exporter does not map canonical VPN tunnel fields."); const surgeInput=input?.policy?input:{policy:p}; const normalized={...surgeInput,policy:{...p,rules:rules(p).map(r=>({type:r.type,value:r.value,policy:r.action}))}}; return compileSurge(normalized).content; }
   case "mihomo": return exportMihomo(p);
   case "wireguard": return exportWireGuard(p);
   case "shadowrocket": return exportShadowrocket(p);
