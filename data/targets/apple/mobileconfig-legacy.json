@@ -1,26 +1,38 @@
 {
   "id": "apple-mobileconfig-legacy",
-  "version": "1.0.0",
-  "platforms": [
-    "ios",
-    "ipados",
-    "macos"
-  ],
-  "capabilities": [
-    "dns",
-    "mobileconfig"
-  ],
-  "required": [
-    "payload.metadata",
-    "payload.type",
-    "payload.identifier",
-    "payload.uuid",
-    "dnsSettings.payload"
-  ],
+  "version": "1.1.0",
+  "platforms": ["ios", "ipados", "macos"],
+  "capabilities": ["dns", "mobileconfig"],
+  "required": {
+    "profile": [
+      "PayloadType",
+      "PayloadVersion",
+      "PayloadIdentifier",
+      "PayloadUUID",
+      "PayloadContent"
+    ],
+    "dnsPayload": [
+      "PayloadType=com.apple.dnsSettings.managed",
+      "PayloadVersion",
+      "PayloadIdentifier",
+      "PayloadUUID",
+      "DNSSettings"
+    ],
+    "dnsSettings": [
+      "DNSProtocol",
+      "ServerURL"
+    ]
+  },
   "optional": [
-    "displayName",
-    "organization",
-    "description"
+    "PayloadDisplayName",
+    "PayloadOrganization",
+    "PayloadDescription",
+    "OnDemandRules",
+    "ProhibitDisablement",
+    "DNSSettings.AllowFailover",
+    "DNSSettings.PayloadCertificateUUID",
+    "DNSSettings.ServerAddresses",
+    "DNSSettings.SupplementalMatchDomains"
   ],
   "unsupported": [
     "declarative-only-fields",
@@ -29,15 +41,28 @@
     "third-party-syntax"
   ],
   "constraints": [
+    "This target uses the legacy com.apple.dnsSettings.managed configuration-profile payload.",
     "Legacy DNSSettings semantics are distinct from the declarative DNS model.",
-    "Do not alias this target to the declarative DNS schema."
+    "Do not alias this target to the declarative DNS schema.",
+    "This payload is deprecated on current Apple OS releases and must be treated as a legacy compatibility target."
   ],
+  "syntax": {
+    "container": "XML or binary property list (.mobileconfig)",
+    "payloadType": "com.apple.dnsSettings.managed",
+    "profileKeys": "PayloadType, PayloadVersion, PayloadIdentifier, PayloadUUID, PayloadContent",
+    "payloadKeys": "DNSSettings, OnDemandRules?, ProhibitDisablement?, PayloadType, PayloadVersion, PayloadIdentifier, PayloadUUID",
+    "dnsSettingsKeys": "DNSProtocol, ServerURL and/or ServerAddresses, AllowFailover?, PayloadCertificateUUID?, SupplementalMatchDomains?"
+  },
   "validation": [
+    "plist-structure",
     "legacy-dnssettings-schema",
+    "payload-type",
     "required-fields",
     "identifier",
     "uuid",
-    "payload-nesting"
+    "payload-nesting",
+    "platform-compatibility",
+    "deprecation-status"
   ],
   "output": {
     "format": "plist",
