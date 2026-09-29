@@ -86,3 +86,60 @@ test("DNS wire encoder rejects compressed-name RDATA without structured semantic
     error => error.code === "DNS_WIRE_RDATA_STRUCTURED_REQUIRED"
   );
 });
+
+test("DNS wire encoder and decoder preserve EDNS version 0 control fields and opaque options", () => {
+  const message = {
+    transactionId: 0x4321,
+    flags: 0x0100,
+    questions: [{ name: "example.com", typeCode: 1, class: 1 }],
+    answers: [],
+    authority: [],
+    additional: [{
+      name: ".",
+      type: "OPT",
+      typeCode: 41,
+      udpPayloadSize: 1232,
+      extendedRcode: 0,
+      version: 0,
+      do: true,
+      z: 0,
+      options: [{ code: 65001, data: Uint8Array.from([1, 2, 3]) }],
+    }],
+  };
+  const encoded = encodeDnsWireMessage(message);
+  const decoded = decodeDnsWireMessage(encoded);
+  assert.equal(decoded.additional[0].type, "OPT");
+  assert.equal(decoded.additional[0].udpPayloadSize, 1232);
+  assert.equal(decoded.additional[0].version, 0);
+  assert.equal(decoded.additional[0].do, true);
+  assert.equal(decoded.additional[0].options[0].code, 65001);
+  assert.deepEqual([...decoded.additional[0].options[0].data], [1, 2, 3]);
+});
+
+test("DNS wire encoder rejects multiple OPT records and unsupported EDNS versions", () => {
+  const opt = {
+    name: ".",
+    type: "OPT",
+    typeCode: 41,
+    udpPayloadSize: 1232,
+    extendedRcode: 0,
+    version: 0,
+    do: false,
+    z: 0,
+    options: [],
+  };
+  assert.throws(
+    () => encodeDnsWireMessage({
+      transactionId: 1, flags: 0x100,
+      questions: [], answers: [], authority: [], additional: [opt, { ...opt }],
+    }),
+    error => error.code === "DNS_WIRE_EDNS_INVALID"
+  );
+  assert.throws(
+    () => encodeDnsWireMessage({
+      transactionId: 1, flags: 0x100,
+      questions: [], answers: [], authority: [], additional: [{ ...opt, version: 1 }],
+    }),
+    error => error.code === "DNS_WIRE_EDNS_VERSION_UNSUPPORTED"
+  );
+});
