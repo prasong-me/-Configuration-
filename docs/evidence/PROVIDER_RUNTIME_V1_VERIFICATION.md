@@ -107,7 +107,7 @@ A dedicated macOS Swift Package compile fixture and GitHub Actions workflow were
 - `apple-runtime/GeneratedDNSProxyProvider.swift`
 - `.github/workflows/apple-networkextension.yml`
 
-The workflow uses the GitHub-hosted macOS 26 runner and invokes the installed Swift/Xcode toolchain. GitHub documents `macos-26` as an available macOS runner. citeturn0search12
+The workflow uses the GitHub-hosted macOS 26 runner and invokes the installed Swift/Xcode toolchain. GitHub documents the macOS 26 runner as an available macOS runner. citeturn0search12
 
 The fixture imports `NetworkExtension` and subclasses `NEDNSProxyProvider`, implementing the documented `startProxy`, `stopProxy`, and `handleNewFlow` boundary. Apple documents these methods as required for a DNS proxy provider. citeturn0search0turn0search2
 
