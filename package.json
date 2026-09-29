@@ -8,7 +8,7 @@
     "test:core": "node --test tests/core.test.js",
     "build:web": "npm --prefix apps/web install && npm --prefix apps/web run build",
     "test:mobileconfig": "node scripts/validate-mobileconfig.mjs",
-    "test:export:proxy": "node scripts/inspect-export-artifacts.mjs"
+    "test:export:routing-rules": "node scripts/inspect-export-artifacts.mjs"
   },
   "workspaces": [
     "packages/*",
