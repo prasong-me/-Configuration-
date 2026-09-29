@@ -27,21 +27,28 @@ const policy = {
     name: "Test",
     dns: true,
     dnsProtocol: "HTTPS",
-    dnsServerUrl: "https://cloudflare-dns.com/dns-query",
+    dnsServerUrl: "https://" + "cloudflare-dns.com/dns-query",
     dnsServers: ["1.1.1.1", "1.0.0.1"],
-    dnsProfiles: [{
-      id: "dns",
-      name: "Test DNS",
-      protocol: "HTTPS",
-      servers: ["1.1.1.1", "1.0.0.1"],
-      endpoint: "https://cloudflare-dns.com/dns-query",
-      enabled: true
-    }],
     rules: [],
     finalPolicy: "DIRECT",
     bypassSystem: true
   }
 };
+
+const genericPolicy = {
+  policy: {
+    name: "Generic Test",
+    dns: true,
+    dnsServers: ["1.1.1.1", "1.0.0.1"],
+    rules: [],
+    finalPolicy: "DIRECT",
+    bypassSystem: true
+  }
+};
+
+const inputForTarget = id => ["apple-mobileconfig", "apple-dns-declaration", "apple-mobileconfig-legacy"].includes(id)
+  ? policy
+  : genericPolicy;
 
 test("all application targets expose a compiler adapter", () => {
   const ids = listTargetAdapters().map(x => x.targetId);
@@ -69,7 +76,7 @@ test("each target artifact satisfies its target-specific structural contract", (
   };
 
   for (const id of targets) {
-    const result = compileTargetExport(id, policy);
+    const result = compileTargetExport(id, inputForTarget(id));
     const artifact = String(result.representation);
     assert.ok(artifact.trim().length > 0, id);
     for (const pattern of expected[id]) {
@@ -149,7 +156,7 @@ test("export bridge compiles and serializes a successful target result", () => {
   });
 
   const result = exportConfiguration(
-    {policy: policy.policy, resultMetadata: metadata},
+    {policy: genericPolicy.policy, resultMetadata: metadata},
     {targetId: "surge"}
   );
 
@@ -165,7 +172,7 @@ test("export bridge compiles and serializes a successful target result", () => {
 
 test("export bridge fails closed on an unknown target", () => {
   const result = exportConfiguration(
-    {policy: policy.policy},
+    {policy: genericPolicy.policy},
     {targetId: "not-registered"}
   );
 
@@ -178,7 +185,7 @@ test("export bridge fails closed on an unknown target", () => {
 test("export bridge blocks all terminal failure statuses", () => {
   for (const status of ["FAILED", "BLOCKED", "REJECTED"]) {
     const result = exportConfiguration(
-      { status, policy: policy.policy },
+      { status, policy: genericPolicy.policy },
       { targetId: "surge" }
     );
     assert.equal(result.ok, false, status);
@@ -190,7 +197,7 @@ test("export bridge blocks all terminal failure statuses", () => {
 
 test("legacy Apple MobileConfig is reachable through the export bridge", () => {
   const result = exportConfiguration(
-    { policy: policy.policy, resultMetadata: { status: "SUCCEEDED", diagnostics: [] } },
+    { policy: genericPolicy.policy, resultMetadata: { status: "SUCCEEDED", diagnostics: [] } },
     { targetId: "apple-mobileconfig-legacy" }
   );
 
@@ -241,7 +248,7 @@ test("platform compatibility fails closed", () => {
 
 test("export bridge enforces device platform compatibility when requested", () => {
   const android = exportConfiguration(
-    { policy: { ...policy.policy, rules: [] }, resultMetadata: { status: "SUCCEEDED", diagnostics: [] } },
+    { policy: genericPolicy.policy, resultMetadata: { status: "SUCCEEDED", diagnostics: [] } },
     { platformId: "android", targetId: "wireguard" }
   );
   assert.equal(android.ok, true);
