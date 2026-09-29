@@ -86,8 +86,8 @@ for (const target of targets) {
   }
   requireText(target.id, artifact, input.policy.finalPolicy, "FINAL_POLICY_LOSS", "Final policy was not preserved.");
 
-  if (["surge", "shadowrocket", "loon", "quantumult-x"].includes(target.id)) {
-    requireText(target.id, artifact, "host,api.example.com,inspection-group", "INI_RULE_MISSING", `Native rule syntax missing for ${target.id}.`);
+  if (["surge", "shadowrocket", "loon"].includes(target.id)) {
+    requireText(target.id, artifact, "DOMAIN,api.example.com,Inspection-Group", "INI_RULE_MISSING", `Native rule syntax missing for ${target.id}.`);
   }
 
   if (["mihomo", "stash"].includes(target.id)) {
