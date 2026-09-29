@@ -227,6 +227,7 @@ ROADMAP ใช้ [x] กับ Apple features ขณะที่ target manifes
 - [x] Knowledge page
 - [x] DNS profile add/remove UI
 - [x] Web UI fields parity กับ canonical policy
+- [x] Web export routed through ConfigurationExporter boundary
 - [ ] UI capability states ต้องอธิบาย UNKNOWN/UNSUPPORTED/EXTENSION-BACKED
 - [ ] Final mobile-first UI audit
 
@@ -263,7 +264,8 @@ ROADMAP ใช้ [x] กับ Apple features ขณะที่ target manifes
 - [x] Target evidence model
 - [x] Evidence register
 - [x] Fail-closed diagnostics
-- [ ] Complete target compatibility matrix
+- [x] Complete target compatibility matrix baseline (`docs/architecture/TARGET_COMPATIBILITY_MATRIX.md`)
+- [ ] Expand target compatibility matrix with per-capability evidence
 - [ ] Artifact validation matrix
 - [ ] Regression matrix
 - [x] Documentation reconciliation (รอบ repository reconciliation นี้)
