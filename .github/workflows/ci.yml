@@ -12,7 +12,7 @@ jobs:
         with:
           node-version: 22
       - run: npm test
-      - run: npm run test:export:proxy
+      - run: npm run test:export:routing-rules
   web:
     runs-on: ubuntu-latest
     steps:
