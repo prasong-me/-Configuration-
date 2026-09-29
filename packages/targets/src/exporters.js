@@ -12,6 +12,21 @@ function proxyGroups(p){return list(p.proxyGroups).filter(x=>x&&typeof x==="obje
 function proxyOptions(x){const out=[];if(x.username)out.push("username="+x.username);if(x.password)out.push("password="+x.password);if(x.tls===true)out.push("tls=true");if(x.udp===true)out.push("udp=true");return out;}
 function yaml(v){return v===null||v===undefined?"null":typeof v==="boolean"||typeof v==="number"?String(v):JSON.stringify(String(v));}
 function yamlList(v,indent=""){return list(v).map(x=>`${indent}- ${yaml(x)}`).join("\n");}
+const appleDnsTargets = new Set(["apple-mobileconfig", "apple-dns-declaration", "apple-mobileconfig-legacy"]);
+function assertDnsCapability(targetId, p){
+  const hasProfiles = Array.isArray(p.dnsProfiles) && p.dnsProfiles.length > 0;
+  const hasProtocol = typeof p.dnsProtocol === "string" && p.dnsProtocol.trim().length > 0;
+  const hasEndpoint = typeof p.dnsServerUrl === "string" && p.dnsServerUrl.trim().length > 0;
+  const hasServerName = typeof p.dnsServerName === "string" && p.dnsServerName.trim().length > 0;
+  const hasDomains = Array.isArray(p.dnsDomains) && p.dnsDomains.length > 0;
+  const hasFailover = typeof p.dnsAllowFailover === "boolean";
+  if (targetId === "apple-dns-declaration" && hasProfiles) {
+    throw new TypeError("UNSUPPORTED_CAPABILITY: Apple DNS declaration exports one DNS settings declaration and does not map multiple dnsProfiles.");
+  }
+  if (!appleDnsTargets.has(targetId) && (hasProfiles || hasProtocol || hasEndpoint || hasServerName || hasDomains || hasFailover)) {
+    throw new TypeError(`UNSUPPORTED_CAPABILITY: ${targetId} exporter supports DNS server addresses only; advanced DNS fields require an explicit target mapping.`);
+  }
+}
 
 function exportMihomo(p){
   const ps=proxies(p), gs=proxyGroups(p);
@@ -55,6 +70,7 @@ export const exportFormats=[
 
 export function getExportArtifact(targetId,input={}){
  const p=policyOf(input);
+ assertDnsCapability(targetId,p);
  switch(targetId){
   case "apple-mobileconfig":
   case "apple-mobileconfig-legacy": return compileAppleMobileConfig(input).content;
