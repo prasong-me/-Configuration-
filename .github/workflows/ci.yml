@@ -13,6 +13,7 @@ jobs:
           node-version: 22
       - run: npm test
       - run: npm run test:export:routing-rules
+      - run: npm run test:export:vpn
   web:
     runs-on: ubuntu-latest
     steps:
