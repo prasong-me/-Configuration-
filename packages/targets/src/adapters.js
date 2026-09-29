@@ -3,10 +3,12 @@ import { compileAppleMobileConfig, compileAppleDeclarativeDns, compileAppleDnsPr
 const adapters = new Map([
   ["apple-mobileconfig", Object.freeze({
     targetId: "apple-mobileconfig",
+    outputFormat: "plist",
     compile: compileAppleMobileConfig,
   })],
   ["apple-dns-declaration", Object.freeze({
     targetId: "apple-dns-declaration",
+    outputFormat: "json",
     compile: compileAppleDeclarativeDns,
   })],
   ["apple-dns-proxy-provider-runtime", Object.freeze({
