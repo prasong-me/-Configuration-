@@ -1,8 +1,8 @@
-// swift-tools-version: 5.10
+// swift-tools-version: 6.0
 import PackageDescription
 let package = Package(
     name: "ConfigurationAppleProvider",
-    platforms: [.macOS(.v14)],
+    platforms: [.macOS(.v15)],
     products: [.library(name: "ConfigurationAppleProvider", targets: ["ConfigurationAppleProvider"])],
     targets: [
         .target(name: "ConfigurationAppleProvider", path: "apple-runtime"),
