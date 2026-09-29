@@ -7,9 +7,19 @@ const httpsUrl = ["https:", "", "dns.example.com", "dns-query"].join("/");
 const scenarios = [
   {
     id: "servers",
-    input: { policy: { name: "DNS Servers", dnsServers: ["1.1.1.1", "1.0.0.1"], dnsProtocol: "TLS", dnsServerName: "dns.example.com" } },
-    supported: new Set(targets.map(target => target.id)),
+    input: { policy: { name: "DNS Servers", dnsServers: ["1.1.1.1", "1.0.0.1"] } },
+    supported: new Set(targets.filter(target => !["apple-mobileconfig", "apple-dns-declaration", "apple-mobileconfig-legacy"].includes(target.id)).map(target => target.id)),
     required: ["1.1.1.1", "1.0.0.1"]
+  },
+  {
+    id: "apple-servers",
+    input: { policy: { name: "Apple DNS Servers", dnsServers: ["1.1.1.1", "1.0.0.1"], dnsProtocol: "TLS", dnsServerName: "dns.example.com" } },
+    supported: new Set(["apple-mobileconfig", "apple-dns-declaration", "apple-mobileconfig-legacy"]),
+    requiredByTarget: new Map([
+      ["apple-mobileconfig", ["1.1.1.1", "1.0.0.1", "DNSProtocol", "ServerName"]],
+      ["apple-dns-declaration", ["1.1.1.1", "1.0.0.1", "DNSProtocol", "ServerName"]],
+      ["apple-mobileconfig-legacy", ["1.1.1.1", "1.0.0.1", "DNSProtocol", "ServerName"]]
+    ])
   },
   {
     id: "https",
