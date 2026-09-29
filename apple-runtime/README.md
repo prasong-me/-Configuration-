@@ -1,7 +1,17 @@
-# Apple NetworkExtension compile fixture
+# Apple NetworkExtension runtime integration v1
 
-This target establishes a real macOS/Xcode toolchain compilation boundary for the generated NetworkExtension provider shape.
+This phase establishes a concrete flow-to-upstream transport boundary.
 
-It is not a signed app extension and does not prove entitlement, provisioning, device execution, or end-to-end DNS forwarding.
+Implemented:
+- NEDNSProxyProvider.handleNewFlow accepts UDP and TCP proxy flows.
+- Provider retains a session for each accepted flow.
+- Current UDP datagram read/write APIs are used.
+- Current TCP read/write APIs are used.
+- Upstream transport uses Network.framework NWConnection.
+- Terminal errors close both flow directions.
 
-The fixture intentionally keeps handleNewFlow fail-closed, matching Provider Runtime Generator v1.
+Boundary:
+- This is transport forwarding, not DNS policy execution.
+- DNS wire parsing/encoding and stage execution remain separate boundaries.
+- No entitlement, signing, provisioning, packaged extension, or physical-device evidence is claimed.
+- The 1.1.1.1:53 value is a compile-fixture value only, not a product policy.
