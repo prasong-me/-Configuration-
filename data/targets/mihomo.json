@@ -1,0 +1,64 @@
+{
+  "id": "mihomo",
+  "version": "1.0.0",
+  "platforms": [
+    "android",
+    "windows",
+    "linux"
+  ],
+  "capabilities": [
+    "dns",
+    "proxy",
+    "routing",
+    "rules"
+  ],
+  "required": {
+    "dns": [
+      "dns.nameserver"
+    ],
+    "proxy": [
+      "proxy.id",
+      "proxy.type",
+      "proxy.server",
+      "proxy.port"
+    ],
+    "rule": [
+      "rule.match",
+      "rule.action"
+    ]
+  },
+  "optional": [
+    "dns.fake-ip",
+    "dns.enhanced-mode",
+    "proxy-groups",
+    "tun",
+    "sniffer"
+  ],
+  "unsupported": [
+    "unresolved-proxy-reference"
+  ],
+  "constraints": [
+    "A PROXY policy must resolve to a defined proxy or proxy-group.",
+    "Do not silently map PROXY to DIRECT."
+  ],
+  "validation": [
+    "yaml-structure",
+    "proxy-reference-resolution",
+    "proxy-groups",
+    "dns-configuration",
+    "rule-syntax",
+    "required-fields"
+  ],
+  "output": {
+    "format": "yaml",
+    "extension": ".yaml",
+    "mime": "text/yaml"
+  },
+  "artifactStatus": {
+    "complete": "runnable",
+    "missingRuntimeData": "template",
+    "partialMapping": "partial",
+    "unsupportedCapability": "rejected",
+    "invalidSyntax": "invalid"
+  }
+}
