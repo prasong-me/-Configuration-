@@ -29,9 +29,9 @@ const scenarios = [
       "Endpoint = vpn.example.com:51820",
       "AllowedIPs = 0.0.0.0/0, ::/0",
       "PersistentKeepalive = 25",
+      "PresharedKey = CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC=",
       "DNS = 1.1.1.1, 1.0.0.1"
-    ],
-    unsupportedSecrets: ["CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC="]
+    ]
   },
   {
     id: "apple-ikev2-full",
@@ -123,9 +123,6 @@ for (const target of targets) {
     }
     for (const value of scenario.required) {
       if (!artifact.includes(value)) fail(target.id, "VPN_FIELD_LOSS", "Missing WireGuard field: " + value);
-    }
-    for (const secret of scenario.unsupportedSecrets) {
-      if (artifact.includes(secret)) fail(target.id, "SECRET_FIELD_LOSS", "WireGuard preshared key was supplied but not emitted.");
     }
     const targetDir = path.join(outputPath, scenarioId, target.id);
     await fs.mkdir(targetDir, { recursive: true });
