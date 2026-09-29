@@ -24,18 +24,111 @@ Third-party aggregators are excluded from Source of Truth.
 - https://www.wireguard.com/
 - https://www.wireguard.com/protocol/
 - https://www.wireguard.com/quickstart/
+- https://www.wireguard.com/xplatform/
+- https://www.wireguard.com/install/
 
-**Capability boundary**
-- Core protocol concepts include Interface/PrivateKey and Peer/PublicKey.
-- Peer routing uses AllowedIPs.
-- Endpoint and PersistentKeepalive are protocol/configuration concepts.
-- IPv4 and IPv6 are part of the WireGuard addressing/routing model.
-- UAPI/userspace interfaces exist, but protocol capability must not be treated as proof of a particular OS/client UI capability.
+### Core protocol / configuration evidence
 
-**Platform note**
-- The Configuration Platform should model WireGuard protocol capability separately from iOS, Android, and desktop client capabilities.
+WireGuard securely encapsulates IP packets over UDP and uses a simple interface + peer model. The official conceptual documentation describes an interface with a private key and peers identified by public keys; peer selection/routing is based on AllowedIPs and peer endpoints. citeturn0search3turn0search0
 
-**Status:** VERIFIED — official protocol/configuration evidence.
+The official quick-start documentation explicitly demonstrates these WireGuard configuration fields:
+- `PrivateKey` — interface private key
+- `ListenPort` — interface UDP listening port
+- `PublicKey` — peer public key
+- `AllowedIPs` — peer cryptokey-routing/address selection
+- `Endpoint` — peer endpoint
+- `PersistentKeepalive` — optional peer keepalive interval citeturn0search0
+
+### Capability boundary: protocol vs host/network configuration
+
+The following distinction is required in the Configuration Platform:
+
+| Dimension | WireGuard status | Modeling rule |
+|---|---|---|
+| Tunnel protocol | CORE_CAPABILITY | WireGuard UDP tunnel |
+| Interface private key | CORE_CONFIG | Secret; schema only in repository |
+| Peer public key | CORE_CONFIG | Non-secret identifier |
+| AllowedIPs | CORE_CONFIG | Core cryptokey-routing field |
+| Endpoint | CORE_CONFIG | Peer endpoint |
+| PersistentKeepalive | CORE_CONFIG | Optional peer setting |
+| ListenPort | CORE_CONFIG | Interface setting |
+| Interface IP address | PLATFORM/HOST_CONFIG | Do not treat as a WireGuard peer field |
+| OS routes | PLATFORM/HOST_CONFIG | Host networking concern |
+| DNS resolver configuration | PLATFORM/CLIENT_CONFIG | Do not assume it is a WireGuard protocol field |
+| UI/import/export behavior | CLIENT_CAPABILITY / FORMAT_CAPABILITY | Must be established per target client |
+
+The official conceptual documentation states that WireGuard adds a network interface and that ordinary networking utilities manage interface addresses and routes; the WireGuard-specific interface is configured using the `wg` tool. Therefore interface addressing and routing should not be collapsed into the protocol schema. citeturn0search3
+
+### Cross-platform implementation boundary
+
+The official cross-platform documentation states that userspace implementations should conform to the same WireGuard protocol/specification and configuration interface. It documents the `wg(8)` configuration interface and UAPI-style `get` / `set` operations. This supports a shared protocol-level model, while still requiring separate client/platform adapters. citeturn0search2
+
+### Platform evidence — official WireGuard distribution
+
+The current official installation page lists:
+- Windows 10/11 and Windows Server 2016/2019/2022/2025 — v1.1.1
+- macOS App Store — v1.0.16
+- Android — v1.0.20260315
+- iOS — v1.0.16
+- Linux distributions with corresponding WireGuard module/tools packages
+- FreeBSD/OpenBSD and additional platforms with userspace/kernel/tool variants citeturn0search1
+
+These are official distribution/version observations from the WireGuard installation page. They are **not** runtime compatibility tests performed by this project.
+
+### NAT / PersistentKeepalive semantics
+
+The official quick-start documentation explains that PersistentKeepalive is useful when a peer behind NAT/firewall needs to maintain the mapping for incoming traffic after a period of inactivity. The documented sensible interval is 25 seconds; 0 disables the feature and is the default. The configuration model should therefore preserve the field as optional rather than silently inserting a value. citeturn0search0
+
+### Cryptographic capability
+
+The official protocol documentation specifies:
+- ChaCha20 + Poly1305 AEAD
+- Curve25519 ECDH
+- BLAKE2s
+- SipHash24
+- HKDF citeturn0search4
+
+These are protocol-level properties and should not be represented as user-editable client configuration fields unless a target explicitly exposes such controls.
+
+### Configuration-model boundary for this project
+
+Recommended normalized WireGuard target model:
+
+```text
+WireGuardTarget
+├── interface
+│   ├── privateKey        [SECRET / required]
+│   ├── listenPort        [optional]
+│   └── addresses         [HOST/CLIENT layer, target-dependent]
+└── peers[]
+    ├── publicKey         [required]
+    ├── allowedIPs[]      [required]
+    ├── endpoint          [optional]
+    └── persistentKeepalive [optional]
+```
+
+Additional DNS, route, MTU, kill-switch, on-demand, split-tunnel UI, import/export, and platform-specific settings must be modeled outside the protocol core unless an official target-specific source establishes their mapping.
+
+### Security boundary
+
+Do not commit:
+- WireGuard private keys
+- generated client secrets
+- subscription secrets
+- user-specific endpoint credentials
+
+The repository may store field schemas, capability metadata, source URLs, examples with non-secret placeholder values when clearly marked as examples, and evidence classifications.
+
+### Evidence classification
+
+- **Protocol/configuration:** VERIFIED from official WireGuard documentation.
+- **Cross-platform userspace configuration interface:** VERIFIED from official documentation.
+- **Official distribution/platform availability:** VERIFIED from official installation page.
+- **Specific third-party/client UI behavior:** NOT IMPLIED by the protocol evidence.
+- **Real-device import/connection result:** RUNTIME_UNVERIFIED until separately tested.
+
+**Status:** VERIFIED — official protocol/configuration/platform-source evidence.
+**Runtime status:** RUNTIME_UNVERIFIED.
 
 ---
 
