@@ -10,6 +10,7 @@ import { DnsController, createDnsController } from "./dns-controller.js";
 export { CapabilityState, DiagnosticLevel, diagnostic, hasBlockingDiagnostics, redact };
 export { DnsStageResult, normalizeDnsPipeline, processDnsQuery } from "./dns-pipeline.js";
 export { DnsController, createDnsController } from "./dns-controller.js";
+export { buildSearchIndex, searchRecords, SearchContract } from "./search.js";
 
 export function normalizePolicy(input) {
   const source=input ?? {};
