@@ -1,14 +1,9 @@
 import { compileSurge } from "../../surge-adapter/src/index.js";
 import { compileAppleMobileConfig, compileAppleDeclarativeDns } from "../../apple-adapter/src/index.js";
 
-const DEFAULT_DNS = [
-  { id:"privacy-dns", name:"Privacy DNS", protocol:"HTTPS", servers:["1.1.1.1","1.0.0.1"], endpoint:"https://cloudflare-dns.com/dns-query", enabled:true, order:1 },
-  { id:"security-dns", name:"Security DNS", protocol:"HTTPS", servers:["9.9.9.9","149.112.112.112"], endpoint:"https://dns.quad9.net/dns-query", enabled:true, order:2 },
-  { id:"backup-dns", name:"Backup DNS", protocol:"HTTPS", servers:["8.8.8.8","8.8.4.4"], endpoint:"https://dns.google/dns-query", enabled:true, order:3 }
-];
 const list=v=>Array.isArray(v)?v:[];
 const policyOf=input=>input?.policy&&typeof input.policy==="object"?input.policy:(input||{});
-function profiles(p){const x=list(p.dnsProfiles).filter(v=>v&&v.enabled!==false);if(x.length)return x;const s=list(p.dnsServers).filter(Boolean);return s.length?[{id:"dns-default",name:"DNS",protocol:p.dnsProtocol||"HTTPS",servers:s,endpoint:p.dnsServerUrl||""}]:DEFAULT_DNS;}
+function profiles(p){const x=list(p.dnsProfiles).filter(v=>v&&v.enabled!==false);if(x.length)return x;const s=list(p.dnsServers).filter(Boolean);return s.length?[{id:"dns-default",name:"DNS",protocol:p.dnsProtocol||"HTTPS",servers:s,endpoint:p.dnsServerUrl||""}]:[];}
 function servers(p){return profiles(p).flatMap(x=>list(x.servers).filter(Boolean));}
 function rules(p){return list(p.rules).map((r,i)=>({type:r?.type||(r?.domainSuffix?"DOMAIN-SUFFIX":r?.domain?"DOMAIN":"DOMAIN"),value:r?.value||r?.domainSuffix||r?.domain||r?.match||"*",action:r?.policy||r?.action||"DIRECT",id:r?.id||`rule-${i+1}`}));}
 function blocked(p){return [...new Set([...list(p.blockedDomains),...rules(p).filter(r=>/REJECT|BLOCK/i.test(r.action)).map(r=>r.value).filter(v=>v&&v!=="*")])];}
@@ -50,7 +45,8 @@ export const exportFormats=[
 export function getExportArtifact(targetId,input={}){
  const p=policyOf(input);
  switch(targetId){
-  case "apple-mobileconfig": return compileAppleMobileConfig(input).content;
+  case "apple-mobileconfig":
+  case "apple-mobileconfig-legacy": return compileAppleMobileConfig(input).content;
   case "apple-dns-declaration": return JSON.stringify(compileAppleDeclarativeDns(input),null,2);
   case "surge": { const surgeInput=input?.policy?input:{policy:p}; const normalized={...surgeInput,policy:{...p,rules:rules(p).map(r=>({type:r.type,value:r.value,policy:r.action}))}}; return compileSurge(normalized).content; }
   case "mihomo": return exportMihomo(p);
@@ -64,7 +60,7 @@ export function getExportArtifact(targetId,input={}){
 }
 export function getExportWarnings(targetId,input={}){
  const p=policyOf(input);
- if(targetId==="apple-mobileconfig")return compileAppleMobileConfig(input).warnings;
+ if(targetId==="apple-mobileconfig"||targetId==="apple-mobileconfig-legacy")return compileAppleMobileConfig(input).warnings;
  if(targetId==="wireguard"&&!p.vpn)return [{code:"WIREGUARD_VPN_NOT_ENABLED",message:"WireGuard target selected without VPN enabled."}];
  return [];
 }
