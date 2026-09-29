@@ -120,4 +120,28 @@ A Provider Runtime Contract is admissible only when:
 6. resource values, when supplied, are positive integers;
 7. failure actions belong to the defined finite set.
 
+## DNS Wire Parser Contract
+
+The parser boundary is explicit:
+
+`RAW_DNS_DATA → DNS_MESSAGE → optional inspection/mutation → DNS_MESSAGE → RAW_DNS_DATA`
+
+The parser contract requires bounded message size, name length, and record count. It requires rejection of truncated input, malformed compression, and limit violations. These are application-runtime safety contracts; they are not claims about an Apple DNS parser API.
+
+The parser contract currently models DNS semantic sections and common record types without committing the generator to a specific parser implementation or zero-copy strategy.
+
+## Stage Runtime Contract
+
+Each generated stage is a deterministic runtime node:
+
+`DNS_CONTEXT → STAGE_RESULT`
+
+A stage has a stable ID, explicit order, explicit dependencies, an immutable context by default, an optional timeout, and explicit success/failure results.
+
+Execution order is resolved from dependency edges first and deterministic ordering second. Missing dependencies and dependency cycles fail admission.
+
+A stage never silently converts parse, timeout, or upstream failures into PASS. Failure behavior is explicit in the stage contract.
+
+These two contracts are implementation-side inputs to a future Swift provider generator.
+
 This contract is the implementation-side counterpart to the evidence-backed Apple Chain IR boundary.
