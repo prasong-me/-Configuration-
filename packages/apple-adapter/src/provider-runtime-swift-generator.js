@@ -57,8 +57,13 @@ public final class ${contract.artifact.entrypoint}: NEDNSProxyProvider {
         completionHandler(GeneratedProviderRuntime.validateStageOrder() ? nil : NSError(domain: "ConfigurationPlatform.ProviderRuntime", code: 1))
     }
 
-    public override func stopProxy(withReason reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
+    public override func stopProxy(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
         completionHandler()
+    }
+
+    public override func handleNewFlow(_ flow: NEAppProxyFlow) -> Bool {
+        // Fail closed: flow I/O and DNS wire execution are outside Generator v1.
+        return false
     }
 }
 `;
