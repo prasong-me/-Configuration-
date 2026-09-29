@@ -1,6 +1,6 @@
 import {isIP} from "node:net";
 import {createAppleDnsCommandLayers} from "./dns-command-model.js";
-import {compileAppleDnsDeclaration} from "./dns-schema.js";
+import {compileAppleDnsDeclaration} from "./dns-schema.js";\nimport { analyzeAppleChainTopology, classifyAppleDnsChain, createAppleChainIR, isAppleChainAdmissionAllowed, AppleClassification, AppleTopology } from "./apple-chain-ir.js";
 
 const xmlEscape=value=>String(value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;");
 
@@ -191,3 +191,5 @@ export function compileAppleDeclarativeDns(input={}){
     serverToken:policy.dnsServerToken,
   });
 }
+
+export { analyzeAppleChainTopology, classifyAppleDnsChain, createAppleChainIR, isAppleChainAdmissionAllowed, AppleClassification, AppleTopology } from "./apple-chain-ir.js";
