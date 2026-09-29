@@ -6,7 +6,7 @@
 - [x] Project direction and terminology
 - [x] Repository structure and repository roles
 - [x] Public/private boundary documented in docs/PRIVACY.md, docs/SECURITY.md, and CONTRIBUTING.md
-- [ ] Final product brand — working name is Configuration Platform; final brand remains an owner decision and is not invented by implementation
+- [>] DEFERRED — Final product brand is an owner decision; implementation uses working name Configuration Platform
 
 ## Phase 1 — Canonical Policy / Profile / Target Model
 - [x] Canonical policy model
@@ -49,11 +49,11 @@
 Adapter implementation is complete at repository level. Target capability support is governed separately by the evidence matrix.
 
 ## Phase 5 — Import / Round-trip
-- [ ] Target-specific parsers for external configurations
-- [ ] Canonical conversion from imported target configurations
-- [ ] Import diagnostics
-- [ ] Target round-trip tests
-- Status: not closed; no equivalent parser layer exists in the current repository and no parser is being invented without target specifications.
+- [>] DEFERRED — Target-specific parsers for external configurations (requires target-specific normative syntax/specifications)
+- [>] DEFERRED — Canonical conversion from imported target configurations
+- [>] DEFERRED — Import diagnostics
+- [>] DEFERRED — Target round-trip tests
+- Status: intentionally deferred; import is not required to close the current export-first product scope.
 
 ## Phase 6 — Web Application
 - [x] React + Vite shell
@@ -84,8 +84,8 @@ Adapter implementation is complete at repository level. Target capability suppor
 - [x] Target artifact validation matrix
 - [x] Regression matrix
 - [x] Evidence-aware target compatibility matrix
-- [ ] Physical-device validation for targets without sufficient evidence
-- [ ] End-to-end runtime validation where applicable
+- [>] DEFERRED — Physical-device validation for targets without sufficient repository-side evidence
+- [>] DEFERRED — End-to-end runtime validation where applicable
 
 ## Phase 9 — Public Release
 - [x] README / architecture / terminology documentation
@@ -94,14 +94,14 @@ Adapter implementation is complete at repository level. Target capability suppor
 - [x] GitHub Pages deployment workflow
 - [x] Versioned schemas/contracts
 - [x] GitHub Actions verification workflow
-- [ ] Final product brand decision
+- [>] DEFERRED — Final product brand decision
 
 ## Release Gate Classification
 
 ### CLOSED — repository implementation
 Canonical model, capability engine, compiler, exporter boundary, target registry, web wizard, artifact validation, regression suite, security/privacy model and documentation are implemented.
 
-### OPEN — requires evidence outside repository execution
+### DEFERRED — deliberately skipped until the required external evidence or owner decision is available
 - Physical device observations for targets currently partial/unverified.
 - Apple NetworkExtension entitlement/signing/provisioning.
 - Physical Apple NetworkExtension runtime.
@@ -109,7 +109,7 @@ Canonical model, capability engine, compiler, exporter boundary, target registry
 - Performance/reliability/battery measurements.
 - Target-specific import/round-trip behavior.
 
-These are intentionally not marked complete by code existence or CI success.
+These are intentionally deferred, not falsely marked complete. The project implementation scope is closed without claiming those external validations.
 
 ## Verification rule
 
