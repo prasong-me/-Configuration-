@@ -73,14 +73,21 @@ for (const target of targets) {
   }
 
   for (const rule of input.policy.rules) {
-    requireText(target.id, artifact, rule.type, "RULE_TYPE_LOSS", `Rule type ${rule.type} was not preserved.`);
     requireText(target.id, artifact, rule.value, "RULE_VALUE_LOSS", `Rule value ${rule.value} was not preserved.`);
-    requireText(target.id, artifact, rule.policy, "RULE_POLICY_LOSS", `Rule policy ${rule.policy} was not preserved.`);
+    if (target.id !== "quantumult-x") {
+      requireText(target.id, artifact, rule.type, "RULE_TYPE_LOSS", `Rule type ${rule.type} was not preserved.`);
+      requireText(target.id, artifact, rule.policy, "RULE_POLICY_LOSS", `Rule policy ${rule.policy} was not preserved.`);
+    }
+  }
+  if (target.id === "quantumult-x") {
+    requireText(target.id, artifact, "host,api.example.com,inspection-group", "QX_DOMAIN_RULE_MISSING", "Quantumult X DOMAIN rule was not mapped to host syntax.");
+    requireText(target.id, artifact, "host-suffix,example.org,direct", "QX_DOMAIN_SUFFIX_RULE_MISSING", "Quantumult X DOMAIN-SUFFIX rule was not mapped to host-suffix syntax.");
+    requireText(target.id, artifact, "host,blocked.example.net,reject", "QX_REJECT_RULE_MISSING", "Quantumult X REJECT rule was not mapped to native reject syntax.");
   }
   requireText(target.id, artifact, input.policy.finalPolicy, "FINAL_POLICY_LOSS", "Final policy was not preserved.");
 
   if (["surge", "shadowrocket", "loon", "quantumult-x"].includes(target.id)) {
-    requireText(target.id, artifact, "DOMAIN,api.example.com,Inspection-Group", "INI_RULE_MISSING", `Native rule syntax missing for ${target.id}.`);
+    requireText(target.id, artifact, "host,api.example.com,inspection-group", "INI_RULE_MISSING", `Native rule syntax missing for ${target.id}.`);
   }
 
   if (["mihomo", "stash"].includes(target.id)) {
