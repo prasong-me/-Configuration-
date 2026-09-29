@@ -27,7 +27,7 @@ test("Runtime IR composes parser, stages, transports, lifecycle and resource con
   assert.equal(ir.targetEngine, "APPLE_DNS_PROXY_PROVIDER");
   assert.equal(ir.parser.output, "DNS_MESSAGE");
   assert.deepEqual(ir.stages.map(stage => stage.id), ["a", "b", "c"]);
-  assert.deepEqual(ir.transports.transports, ["UDP", "DOT", "DOH"]);
+  assert.deepEqual(ir.transports.transports, ["DOH", "DOT", "UDP"]);
   assert.equal(ir.resources.maxConcurrentFlows, 32);
   assert.deepEqual(ir.lifecycle.terminalStates, ["STOPPED", "FAILED"]);
   assert.equal(validateProviderRuntimeIR(ir).valid, true);
