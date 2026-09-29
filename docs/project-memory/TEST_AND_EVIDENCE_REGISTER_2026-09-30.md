@@ -3,14 +3,18 @@
 ## Completed
 - DNS Wire Encoder phase: final recorded phase evidence 145/145 core tests passed; web build and related verification jobs were recorded as successful at that phase.
 - Provider Runtime / Flow I/O repository tests were implemented.
-- Apple compile fixture and workflow were added and merged.
+- Apple NetworkExtension compile fixture was implemented.
+- Apple DNS Proxy Transport Runtime v1 was merged in commit `8294457c6e25c824eb95f1357fbac98f96bff6e4`.
+- Apple transport runtime repository validation recorded: NetworkExtension workflow #18 PASS, Xcode 26.6 / Swift 6.3.3, compile PASS, Swift tests PASS 3/3, core CI PASS, platform verification PASS, Apple style guide PASS.
 
 ## Not proven
-- Latest Apple macOS compile runner result for PR #26.
-- Physical Apple runtime.
 - Network Extension entitlement/signing/provisioning.
-- End-to-end DNS forwarding.
-- Performance/reliability.
+- Packaged app-extension validation.
+- Physical Apple runtime.
+- Real upstream connectivity on device.
+- End-to-end DNS forwarding/policy execution on physical hardware.
+- Performance/reliability/battery measurements.
+- Universal semantic DNS RDATA roundtrip coverage.
 
 ## Rule
-A test implementation is not test evidence. A configured workflow is not a successful workflow run. Only runner/device evidence closes the corresponding validation state.
+A test implementation is not test evidence. A configured workflow is not a successful workflow run. Only runner/device evidence closes the corresponding validation state. The recorded Apple transport workflow evidence closes repository/macOS compile-and-test validation only; it does not close device/runtime gates.
