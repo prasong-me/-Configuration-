@@ -393,6 +393,153 @@ Repository research may contain capability schemas, official source URLs, releas
 **Runtime status:** RUNTIME_UNVERIFIED.
 
 
+## 3A. Mihomo core
+
+**Identity:** Mihomo / Meta Kernel by MetaCubeX
+
+**Official sources**
+- Repository: https://github.com/MetaCubeX/mihomo
+- Documentation: https://wiki.metacubex.one/
+- Configuration: https://wiki.metacubex.one/en/config/
+- DNS: https://wiki.metacubex.one/en/config/dns/
+- Proxy groups: https://wiki.metacubex.one/en/config/proxy-groups/
+- Routing rules: https://wiki.metacubex.one/en/config/rules/
+- Proxy providers: https://wiki.metacubex.one/en/config/proxy-providers/
+
+### Core capability evidence
+
+The official MetaCubeX repository identifies Mihomo as a network proxy kernel with:
+- Local HTTP/HTTPS/SOCKS servers with authentication.
+- VMess, VLESS, Shadowsocks, Trojan, Snell, TUIC, and Hysteria protocol support.
+- Built-in DNS with DoH/DoT upstreams and fake-IP capability.
+- Domain, GEOIP, IPCIDR, and process-based routing rules.
+- Remote proxy groups with fallback, load balancing, and latency-based selection.
+- Remote providers for proxy-node lists.
+- Netfilter TCP redirection.
+- A RESTful API controller.
+
+The official configuration documentation further establishes distinct configuration domains for inbounds, outbound proxies, DNS, proxy groups, routing rules, rule providers, and proxy providers.
+
+### DNS capability boundary
+
+Official Mihomo DNS documentation establishes fields including:
+- `enable`
+- `cache-algorithm`
+- `prefer-h3`
+- `listen`
+- `ipv6`
+- `enhanced-mode`
+- `fake-ip-range` / `fake-ip-range6`
+- `fake-ip-filter` / `fake-ip-filter-mode`
+- `use-hosts` / `use-system-hosts`
+- `respect-rules`
+- `default-nameserver`
+- `nameserver`
+- `nameserver-policy`
+- `fallback` / `fallback-filter`
+- `proxy-server-nameserver`
+- `proxy-server-nameserver-policy`
+- `direct-nameserver`
+- `direct-nameserver-follow-policy`
+
+The documentation explicitly supports encrypted DNS endpoints such as DoH/DoT and domain-policy routing for DNS queries. This is a **CORE_CAPABILITY** of Mihomo, not evidence that every client exposes every field.
+
+### Routing / rules boundary
+
+Official routing documentation supports:
+- DOMAIN / DOMAIN-SUFFIX / DOMAIN-KEYWORD / DOMAIN-WILDCARD / DOMAIN-REGEX
+- GEOIP / GEOSITE
+- IP-CIDR / IP-CIDR6 / IP-ASN
+- source-IP and source-GEOIP rules
+- source/destination ports
+- process/path/package matching where the platform supports it
+- UID rules
+- NETWORK / DSCP
+- RULE-SET
+- AND / OR / NOT logical composition
+- SUB-RULE
+- MATCH
+
+Rules are evaluated top-to-bottom, so rule ordering is semantically significant.
+
+### Proxy-group capability
+
+Official proxy-group documentation establishes:
+- `name`
+- `type`
+- `proxies`
+- `use` for providers
+- health-check `url`, `interval`, `lazy`
+- `default-selected`
+- `timeout`
+- `max-failed-times`
+- UDP disabling
+- provider/proxy inclusion and regex filtering
+- expected HTTP status
+- hidden/icon metadata
+
+Proxy groups therefore belong to the core routing/policy model, while whether a client UI exposes all fields remains target-specific.
+
+### Proxy provider capability
+
+Official provider documentation supports provider types `http`, `file`, and `inline`, with URL/path/update interval semantics and security restrictions on local paths.
+
+Provider secrets/URLs may contain user-specific credentials and therefore must be treated as sensitive configuration even when the syntax itself is public.
+
+### Inbound / TUN boundary
+
+Official documentation distinguishes ordinary proxy ports, TUN capture, and listeners. TUN supports system-traffic capture, DNS hijacking, automatic routing, and platform-dependent redirection behavior.
+
+Do not collapse TUN into a generic proxy-port field. It is a separate **INBOUND / PLATFORM_CAPABILITY** dimension.
+
+### Configuration-model boundary for this project
+
+```text
+MihomoCore
+├── INBOUND_CAPABILITY
+│   ├── HTTP / HTTPS / SOCKS
+│   ├── TUN
+│   └── listeners
+├── OUTBOUND_CAPABILITY
+│   └── protocol-specific proxy nodes
+├── DNS_CAPABILITY
+│   ├── plain / DoH / DoT
+│   ├── fake-IP / redir-host
+│   ├── policy-based DNS
+│   └── fallback / proxy-node DNS
+├── ROUTING_CAPABILITY
+│   ├── ordered rules
+│   ├── rule providers
+│   └── logical composition
+├── PROXY_GROUP_CAPABILITY
+│   ├── select
+│   ├── health-check / url-test
+│   ├── fallback
+│   ├── load balancing
+│   └── provider inclusion/filtering
+├── API_CAPABILITY
+│   └── RESTful controller
+└── PLATFORM_CAPABILITY
+    └── host-specific TUN/process/UID behavior
+```
+
+**Critical rule:** Mihomo core capability is reusable only at the core/configuration layer. Clash Mi, Clash Lite, Rocket Proxy, and other clients must retain independent adapters for the subset they actually expose and support.
+
+### Evidence classification
+
+- **Core proxy capabilities:** VERIFIED — official MetaCubeX repository/docs.
+- **DNS capabilities:** VERIFIED — official Mihomo documentation.
+- **Routing rules:** VERIFIED — official Mihomo documentation.
+- **Proxy groups/providers:** VERIFIED — official Mihomo documentation.
+- **TUN/inbound model:** VERIFIED — official Mihomo documentation.
+- **Specific client implementation:** NOT IMPLIED.
+- **Real-device/runtime compatibility:** RUNTIME_UNVERIFIED.
+
+**Status:** VERIFIED — official Mihomo core/documentation evidence.
+**Runtime status:** RUNTIME_UNVERIFIED.
+
+---
+
 ## 4. Clash Mi
 
 **Identity:** Clash Mi
