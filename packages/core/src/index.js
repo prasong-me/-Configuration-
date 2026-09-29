@@ -73,7 +73,8 @@ export function compatibilityReport(policyInput,targetId){
   }
 
   for(const [feature,read] of Object.entries(SEMANTIC_CAPABILITY_PATHS)){
-    const value=read(policy.policy);\n    const requested=Array.isArray(value) ? value.length>0 : value!==undefined;
+    const value=read(policy.policy);
+    const requested=Array.isArray(value) ? value.length>0 : value!==undefined;
     const state=requested
       ? (manifest.capabilities[feature] ?? CapabilityState.UNKNOWN)
       : CapabilityState.UNKNOWN;
