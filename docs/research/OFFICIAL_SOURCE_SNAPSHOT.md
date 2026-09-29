@@ -140,6 +140,128 @@ The repository may store field schemas, capability metadata, source URLs, exampl
 - https://surge.sh/
 - https://surge.sh/docs/api/
 - https://surge.sh/docs/api/authentication
+- https://surge.sh/docs/cli/
+- https://surge.sh/docs/api/deploys
+
+### API boundary
+
+The official Surge API is the HTTP interface used by the official CLI and SDK. The documented API base is:
+
+`https://surge.surge.sh`
+
+The API has no path-based versioning; clients identify their own release through a `version` header. Authenticated endpoints use HTTP Basic authentication. The documented token form uses the literal username `token` and the API token as the password.
+
+### Authentication model
+
+Official authentication documentation defines two credential forms:
+
+| Credential form | Username | Password | Use |
+|---|---|---|---|
+| Token | literal `token` | API token | Day-to-day authenticated API calls |
+| Email + password | account email | account password | Minting tokens |
+
+The documented token endpoint is `POST /token`. Official documentation states that minted tokens are valid for three years.
+
+**Repository rule:** never store a real Surge token, account password, or other secret. Store only credential metadata/schema.
+
+### API capability surface
+
+The official API overview states that the API covers the operations exposed by the CLI, including:
+- publish
+- rollback
+- DNS management
+- analytics
+
+The deploy API documents publishing as a `PUT /:domain` operation with a gzipped tar archive as the request body and newline-delimited JSON progress output.
+
+### CLI capability surface
+
+The official CLI documentation currently exposes commands covering:
+- publishing
+- previews
+- revisions
+- rollback / roll-forward / cutover
+- DNS
+- analytics
+- project configuration
+- collaborators
+- SSL
+- account/token management
+
+This is CLI capability evidence, not proof that every command is available through every client or UI integration.
+
+### Publish / revision semantics
+
+The official documentation states that a normal publish creates an immutable revision and moves production to the new revision after upload completes. Rollback/cutover operations move the production pointer between existing revisions rather than rebuilding the project.
+
+A preview can upload without moving production.
+
+This distinction is useful to the Configuration Platform as **deployment/release semantics**, not as a network-configuration target capability.
+
+### DNS boundary
+
+Surge's official custom-domain documentation describes three domain-routing arrangements:
+1. Surge name-server delegation
+2. CNAME at the existing DNS provider
+3. A record at the existing DNS provider
+
+These are hosting/platform DNS behaviors and must not be conflated with the DNS resolver configuration model used by network clients.
+
+### Configuration-model boundary for this project
+
+Surge should therefore be represented with separate dimensions:
+
+```text
+SurgeTarget
+├── PLATFORM_CAPABILITY
+│   └── Surge hosting / project lifecycle
+├── API_CAPABILITY
+│   ├── publish
+│   ├── rollback
+│   ├── DNS management
+│   └── analytics
+├── AUTH_CAPABILITY
+│   └── token / email-password token minting
+├── FORMAT_CAPABILITY
+│   └── deploy archive + project files
+└── RUNTIME_EVIDENCE
+    └── separate from official documentation
+```
+
+Do **not** model Surge's hosting API as though it were a proxy/VPN protocol. If the project later targets a Surge network configuration feature, that capability must be established from the specific Surge configuration documentation rather than inferred from the hosting API.
+
+### Security boundary
+
+Never commit:
+- Surge API tokens
+- Surge account passwords
+- session credentials
+- private deployment secrets
+
+The repository may store endpoint URLs, authentication schema, capability metadata, command names, and official source references.
+
+### Evidence classification
+
+- **API surface:** VERIFIED — official API documentation.
+- **Authentication model:** VERIFIED — official authentication documentation.
+- **CLI surface:** VERIFIED — official CLI documentation.
+- **Deployment/revision semantics:** VERIFIED — official API/CLI documentation.
+- **Network proxy/VPN client capability:** NOT IMPLIED by the Surge hosting API.
+- **Runtime behavior in this project:** RUNTIME_UNVERIFIED.
+
+**Status:** VERIFIED — official API/CLI evidence.
+**Runtime status:** RUNTIME_UNVERIFIED.
+
+---
+
+## 2. Surge 5
+
+**Identity:** Surge
+
+**Official sources**
+- https://surge.sh/
+- https://surge.sh/docs/api/
+- https://surge.sh/docs/api/authentication
 
 **API**
 - Official API base: https://surge.surge.sh
