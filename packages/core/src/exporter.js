@@ -2,6 +2,21 @@ import { DiagnosticLevel, diagnostic } from "../../diagnostics/src/index.js";
 import { defaultSerializerRegistry } from "./serializer-registry.js";
 import { getTargetManifest } from "../../targets/src/index.js";
 import { getTargetAdapter } from "../../targets/src/adapters.js";
+import { compileSurge } from "../../surge-adapter/src/index.js";
+import { getExportArtifact } from "../../targets/src/exporters.js";
+
+const OUTPUT_FORMATS=Object.freeze({
+  "apple-mobileconfig":"plist",
+  "apple-dns-declaration":"json",
+  "apple-mobileconfig-legacy":"plist",
+  surge:"text",
+  mihomo:"yaml",
+  wireguard:"text",
+  shadowrocket:"text",
+  loon:"text",
+  "quantumult-x":"text",
+  stash:"yaml"
+});
 
 function fail(code,message,details){
   return diagnostic(DiagnosticLevel.CRITICAL,code,message,details);
@@ -25,9 +40,27 @@ function validateCompileResult(result,targetId,expectedFormat){
 
 function defaultTargetResolver(targetId){
   const manifest=getTargetManifest(targetId);
-  const adapter=getTargetAdapter(targetId);
-  if(!manifest||!adapter) return null;
-  return {targetId,manifest,adapter};
+  if(!manifest) return null;
+  const registered=getTargetAdapter(targetId);
+  if(registered) return {targetId,manifest,adapter:registered};
+  if(targetId==="surge") return {
+    targetId,
+    manifest,
+    adapter:{targetId,compile(policy){
+      const legacy=compileSurge({policy});
+      return {targetId,outputFormat:"text",representation:legacy.content};
+    }}
+  };
+  const outputFormat=OUTPUT_FORMATS[targetId];
+  if(outputFormat) return {
+    targetId,
+    manifest:{...manifest,outputFormat},
+    adapter:{targetId,compile(policy){
+      const representation=getExportArtifact(targetId,{policy});
+      return {targetId,outputFormat,representation};
+    }}
+  };
+  return {targetId,manifest,adapter:null};
 }
 
 export function createConfigurationExporter({targets={resolve:defaultTargetResolver},serializers=defaultSerializerRegistry}={}){
