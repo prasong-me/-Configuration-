@@ -27,7 +27,7 @@ test("resolved Apple request executes through registry and adapter", () => {
   assert.equal(result.stage, "COMPLETED");
   assert.equal(result.targetId, "apple-mobileconfig");
   assert.deepEqual(result.trace, ["RECEIVED", "ANALYZING", "RESOLVED", "ROUTING", "VALIDATING", "EXECUTING", "EXPORTING", "COMPLETED"]);
-  assert.match(result.artifact.content, /com\.apple\.dnsSettings\.managed/);
+  assert.match(result.artifact.representation, /com\.apple\.dnsSettings\.managed/);
 });
 
 test("execution does not proceed when target format is unregistered", () => {
