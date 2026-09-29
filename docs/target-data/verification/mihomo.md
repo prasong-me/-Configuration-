@@ -14,7 +14,7 @@ Target Data reference: data/targets/mihomo.json
 - https://wiki.metacubex.one/en/config/proxy-groups/
 - https://wiki.metacubex.one/en/config/dns/
 
-Evidence note: Mihomo documentation confirms YAML configuration, proxy name/type/server/port, proxy-groups proxies/use, and DNS nameserver model.
+Evidence note: Mihomo documentation confirms YAML configuration, required common proxy fields, proxy-group references, and DNS nameserver configuration.
 
 ## Test vectors
 - VALID_MINIMAL — minimum required configuration; expected validation success.
