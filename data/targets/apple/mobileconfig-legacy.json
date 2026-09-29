@@ -1,0 +1,53 @@
+{
+  "id": "apple-mobileconfig-legacy",
+  "version": "1.0.0",
+  "platforms": [
+    "ios",
+    "ipados",
+    "macos"
+  ],
+  "capabilities": [
+    "dns",
+    "mobileconfig"
+  ],
+  "required": [
+    "payload.metadata",
+    "payload.type",
+    "payload.identifier",
+    "payload.uuid",
+    "dnsSettings.payload"
+  ],
+  "optional": [
+    "displayName",
+    "organization",
+    "description"
+  ],
+  "unsupported": [
+    "declarative-only-fields",
+    "proxy",
+    "routing",
+    "third-party-syntax"
+  ],
+  "constraints": [
+    "Legacy DNSSettings semantics are distinct from the declarative DNS model.",
+    "Do not alias this target to the declarative DNS schema."
+  ],
+  "validation": [
+    "legacy-dnssettings-schema",
+    "required-fields",
+    "identifier",
+    "uuid",
+    "payload-nesting"
+  ],
+  "output": {
+    "format": "plist",
+    "extension": ".mobileconfig",
+    "mime": "application/x-apple-aspen-config"
+  },
+  "artifactStatus": {
+    "complete": "runnable",
+    "missingRequired": "template",
+    "schemaFailure": "invalid",
+    "unsupportedCapability": "rejected"
+  }
+}
