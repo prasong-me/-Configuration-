@@ -44,7 +44,7 @@ export function createProviderRuntimeIR(input = {}) {
     provenance,
     flow: stable(runtime.flow),
     parser: stable(parser),
-    stages: execution.valid ? execution.stages.map(stable) : stages.map(stable),
+    stages: execution.valid ? execution.stages.map(stage => stable({ ...stage, dependsOn: [...stage.dependsOn].sort() })) : stages.map(stage => stable({ ...stage, dependsOn: [...stage.dependsOn].sort() })),
     transports: stable(transports),
     failure: stable(runtime.failure),
     resources: stable(runtime.resources),
@@ -100,5 +100,6 @@ export function isProviderRuntimeIRAdmissionAllowed(ir) {
 }
 
 export function canonicalizeProviderRuntimeIR(ir) {
-  return canonicalJson(ir);
+  const normalized = { ...ir, stages: (ir?.stages || []).map(stage => ({ ...stage, dependsOn: [...(stage.dependsOn || [])].sort() })), parser: ir?.parser ? { ...ir.parser, inspect: [...(ir.parser.inspect || [])].sort(), mutate: [...(ir.parser.mutate || [])].sort() } : ir?.parser };
+  return canonicalJson(normalized);
 }
