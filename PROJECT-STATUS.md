@@ -1,6 +1,6 @@
 # Configuration Platform · Project Status
 
-อัปเดต: 2026-09-27
+อัปเดต: 2026-09-29
 
 > **Baseline:** Contract v2.1 Finalized / Baseline Locked
 
@@ -333,19 +333,49 @@ Implementation Batch ของ Contract v2.1 ให้จำกัดอยู�
 
 ## 15. Current implementation queue
 
-สถานะล่าสุดหลังจาก Target Registry:
+สถานะล่าสุดของ Contract v2.1 Export Boundary:
 
-```
 Target Registry                         DONE
 JSON Serializer                         DONE
-Contract v2.1                          FINALIZED
-Serializer Registry implementation      PENDING
-Exporter Bridge implementation           PENDING
-Exporter unit/integration tests          PENDING
-CI validation                            PENDING
-```
+Serializer Registry implementation      DONE
+Exporter Bridge implementation           DONE
+Exporter unit/integration tests          DONE
+CI validation                            DONE
+Web deployment                          DONE
 
-การวิเคราะห์และ contract นี้ถูกเก็บไว้ใน PROJECT-STATUS.md เพื่อให้ repository เป็น source of truth ร่วมกับ baseline ในแชท
+Export boundary ที่บังคับใช้จริง:
+- FAILED processing → BLOCKED ก่อน resolve target/adapter/serializer
+- SUCCESS / PARTIAL → export ได้เมื่อ target/adapter/serializer ผ่าน contract
+- Processing diagnostics ไม่ถูก merge หรือ mutate โดย Exporter
+- CompileResult ตรวจ targetId, outputFormat และ own representation
+- serializer ถูก resolve ตาม output format ที่ผ่าน allow-list
+- adapter/serializer exceptions ถูกแปลงเป็น export diagnostics
+- resultMetadata ถูกส่งกลับโดยไม่ mutate
+
+Commit chain ของ batch:
+- ab4f2c1 serializer registry
+- 76d2be6 exporter bridge
+- 3f6e22c contract tests
+- 2a3e405 serializer registry correction
+- 2687a4a exporter bridge completion
+- 731734c core API exports
+
+Validation:
+- CI #485: PASS
+- Verify Configuration Platform #264: PASS
+- Apple Style Guide & Grammar Checker #141: PASS
+- Deploy Web App #232: PASS
+
+GitHub architecture issues #2–#10 ถูกปิดเป็น completed หลังตรวจ implementation/contract ที่สอดคล้องกับงานใน repository แล้ว
+
+สิ่งที่ยังเป็นงานอนาคต ไม่ใช่ blocker ของ Export Boundary:
+- เพิ่ม/ลบ DNS profile ใน UI แบบอิสระ
+- target-specific real-device evidence เพิ่มเติม
+- Apple declarative DNS evidence/version matrix
+- certificate/signing เฉพาะ target ที่จำเป็น
+- resolver-level benchmark และ iPhone workflow benchmark
+- public/private project identity (#1)
+- PR #15 Excel interchange adapter (protected)
 
 ## 16. Protected work
 
