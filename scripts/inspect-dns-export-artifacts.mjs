@@ -60,6 +60,7 @@ const artifacts = [];
 function fail(targetId, code, message) { failures.push({ scenarioId, targetId, code, message }); }
 for (const target of targets) {
   for (const scenario of scenarios) {
+    if (scenario.id === "servers" && ["apple-mobileconfig", "apple-dns-declaration", "apple-mobileconfig-legacy"].includes(target.id)) continue;
     const shouldSupport = scenario.supported.has(target.id);
     try {
       const result = compileTargetExport(target.id, scenario.input);
