@@ -15,7 +15,7 @@ jobs:
       - run: npm run test:export:routing-rules
       - run: npm run test:export:vpn
       - run: npm run test:export:apple
-      # DNS export capability and rejection coverage
+      # DNS export capability and rejection coverage (target-safe fixtures)
       - run: npm run test:export:dns
   web:
     runs-on: ubuntu-latest
