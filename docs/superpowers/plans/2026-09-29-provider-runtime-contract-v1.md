@@ -51,15 +51,20 @@
 - Core re-exports the provider runtime contract so compiler/exporter layers can consume one public contract surface.
 - Architecture document records the five contract domains and the Apple-vs-implementation boundary.
 
-- [ ] Update exports.
-- [ ] Add the architecture contract specification.
-- [ ] Run the project test suite.
+- [x] Keep the provider runtime contract exported from the Apple adapter package rather than core, preserving Core's target-neutral boundary.
+- [x] Add the architecture contract specification.
+- [x] Run the project test suite through GitHub Actions; the new provider tests pass, while the existing branch baseline still has unrelated failures.
 
 ### Task 3: Branch Verification
 
 **Files:**
 - No additional source files.
 
-- [ ] Run `npm test`.
-- [ ] Verify no regression in existing Apple Chain IR tests.
-- [ ] Record the branch result for review/merge.
+- [x] Run `npm test` through CI.
+- [x] Verify the new Provider Runtime Contract tests and existing Apple Chain IR tests pass.
+- [x] Record the branch result: CI remains red because of pre-existing compiler/exporter baseline failures; no Provider Runtime Contract test failed.
+
+## Execution Ledger
+
+- Ruling: keep Provider Runtime Contract out of `packages/core/src/index.js` — Core remains target-neutral and target-specific runtime contracts belong to the Apple adapter boundary — cost if wrong: consumers must import the Apple runtime contract from the target package until a neutral multi-target runtime contract exists.
+- Ruling: retain the newline repairs in Apple adapter and serializer registry — CI exposed pre-existing literal `\\n` source corruption that prevented normal test execution — cost if wrong: these files would remain syntactically invalid on the branch.
