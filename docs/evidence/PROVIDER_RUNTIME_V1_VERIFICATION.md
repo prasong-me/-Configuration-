@@ -60,3 +60,41 @@ The generated v1 Swift flow entrypoint intentionally fails closed because actual
 - VERIFIED: supported by repository implementation/tests or authoritative Apple documentation.
 - NOT PROVEN: implementation exists but lacks Apple device/Xcode runtime evidence.
 - BLOCKED: deliberately refused by the fail-closed boundary.
+
+
+## DNS Wire Encoder Phase — Verification Addendum
+
+### Scope completed
+- DNS Wire Encoder Contract v1
+- deterministic, fail-closed DNS message encoder
+- uncompressed output names for v1
+- explicit structured RDATA paths for name-bearing records
+- EDNS(0) OPT contract and version-0 wire support
+- semantic query/A round-trip and EDNS control/opaque-option round-trip tests
+- explicit rejection of multiple OPT records and unsupported EDNS versions
+
+### Normative evidence
+RFC 1035 defines the DNS message sections, RR fields, RDLENGTH/RDATA encoding, and permits implementations to omit compression when generating messages. citeturn0search0turn1search0
+
+RFC 6891 defines OPT as RR type 41, with UDP payload size in CLASS, extended RCODE/version/flags in TTL, and option code/length/data tuples in RDATA. v1 therefore treats OPT separately from ordinary RR semantics. citeturn0search1
+
+RFC 9460 defines SVCB/HTTPS RDATA as priority, target name, and service parameters; the current encoder preserves these as an explicit structured mapping rather than inventing parameter semantics. citeturn1search1turn1search23
+
+### CI evidence
+For head b51a4b922d9ffc9d6a5d3438d73eea02aaca0a00:
+- CI #587: SUCCESS
+- Core: 145 tests, 145 pass, 0 fail
+- Web build: SUCCESS
+- Verify Configuration Platform #366: SUCCESS
+- MobileConfig Run Profile #175: SUCCESS
+- Apple Style Guide & Grammar Checker #243: SUCCESS
+
+### Correction evidence
+Two intermediate encoder regressions were observed and corrected before the final passing run:
+1. RR TTL was omitted from the encoded RR header, causing decoder truncation. Corrected by restoring the 32-bit TTL field before RDLENGTH.
+2. Root DNS name normalization did not strip the terminal root dot correctly. Corrected to normalize "." to the zero-length root label.
+
+These were implementation defects, not accepted semantics. They are closed by the final 145/145 CI result above.
+
+### Remaining boundary
+This phase does not claim byte-identical encode(decode(wire)). v1 establishes semantic round-trip only for explicitly represented fields. Full wire-preservation/compression reconstruction remains a separate contract. Physical Apple Network Extension execution remains outside this phase.

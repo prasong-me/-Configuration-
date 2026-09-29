@@ -223,6 +223,8 @@ export { analyzeAppleChainTopology, classifyAppleDnsChain, createAppleChainIR, i
 
 export { createProviderRuntimeContract, validateProviderRuntimeContract, isProviderRuntimeAdmissionAllowed } from "./provider-runtime-contract.js";
 export { createDnsWireParserContract, validateDnsWireParserContract } from "./dns-wire-contract.js";
+export { createDnsWireEncoderContract, validateDnsWireEncoderContract, DnsWireEncoderCompression, DnsWireEncoderRdataMode } from "./dns-wire-encoder-contract.js";
+export { createDnsWireEdnsContract, validateDnsWireEdnsContract, DnsWireEdnsVersion, DnsWireEdnsOption } from "./dns-wire-edns-contract.js";
 export { createProviderStageContract, validateProviderStageContract, resolveProviderStageExecutionOrder } from "./provider-stage-contract.js";
 export { createProviderTransportContract, validateProviderTransportContract, ProviderTransportMode } from "./provider-transport-contract.js";
 export { createProviderRuntimeIR, validateProviderRuntimeIR, isProviderRuntimeIRAdmissionAllowed, canonicalizeProviderRuntimeIR } from "./provider-runtime-ir.js";
