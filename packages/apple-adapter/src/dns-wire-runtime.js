@@ -82,8 +82,7 @@ function readName(bytes, start, limits, sectionOffset) {
   return { name: labels.join("."), nextOffset, labels };
 }
 
-function parseRecord(bytes, offset, limits, section) {
-  const name = readName(bytes, offset, limits, section);
+function parseRecord(bytes, name, limits, section) {
   let cursor = name.nextOffset;
   if (cursor + 10 > bytes.length) fail("DNS_WIRE_TRUNCATED", `Truncated ${section} record header.`);
   const typeCode = u16(bytes, cursor);
@@ -155,7 +154,7 @@ export function decodeDnsWireMessage(input, options = {}) {
         message.questions.push({ name: name.name, typeCode: u16(bytes, offset), class: u16(bytes, offset + 2) });
         offset += 4;
       } else {
-        const parsed = parseRecord(bytes, offset - (name.nextOffset - (offset)), limits, key);
+        const parsed = parseRecord(bytes, name, limits, key);
         message[key].push(parsed.record);
         offset = parsed.nextOffset;
       }
