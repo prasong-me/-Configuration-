@@ -28,6 +28,14 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Build Web App source
+        run: npm install && npm --prefix apps/web run build
+      - name: Bundle Web App into Android assets
+        run: rm -rf apps/android/app/src/main/assets/web && mkdir -p apps/android/app/src/main/assets/web && cp -R apps/web/dist/. apps/android/app/src/main/assets/web/
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
