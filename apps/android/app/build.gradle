@@ -17,6 +17,10 @@ android {
         release { minifyEnabled false }
     }
 
+    dependencies {
+        implementation "androidx.webkit:webkit:1.17.1"
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
