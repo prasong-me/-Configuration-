@@ -2,7 +2,7 @@ package com.prasong.networkconfiguration;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Intent;
+import android.content.ContentValues;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,20 +14,22 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.webkit.WebResourceResponse;
+import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.content.ContentValues;
+
+import androidx.annotation.RequiresApi;
+import androidx.webkit.WebViewAssetLoader;
+import androidx.webkit.WebViewClientCompat;
 
 import java.io.OutputStream;
 
 public final class MainActivity extends Activity {
-    private static final String WEB_APP_URL = "https://prasong-me.github.io/-Configuration-/";
-    private static final String ALLOWED_HOST = "prasong-me.github.io";
+    private static final String LOCAL_APP_URL =
+            "https://appassets.androidplatform.net/assets/web/index.html";
     private WebView webView;
     private ProgressBar progressBar;
     private TextView errorView;
@@ -54,20 +56,26 @@ public final class MainActivity extends Activity {
         root.addView(errorView, new FrameLayout.LayoutParams(-1, -1));
         setContentView(root);
 
+        WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+                .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+                .build();
+
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
         webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
         webView.getSettings().setSupportMultipleWindows(false);
+        webView.getSettings().setAllowFileAccess(false);
+        webView.getSettings().setAllowContentAccess(false);
         webView.setWebChromeClient(new WebChromeClient());
         webView.addJavascriptInterface(new AndroidBridge(), "AndroidBridge");
-        webView.setWebViewClient(new AppWebViewClient());
-        webView.loadUrl(WEB_APP_URL);
+        webView.setWebViewClient(new LocalContentWebViewClient(assetLoader));
+        webView.loadUrl(LOCAL_APP_URL);
     }
 
     private void showError(String message) {
         progressBar.setVisibility(View.GONE);
         errorView.setText("Network Configuration\n\n" + message
-                + "\n\nเปิดการเชื่อมต่ออินเทอร์เน็ตแล้วลองใหม่อีกครั้ง");
+                + "\n\nแอปนี้ใช้ Web App ที่ bundle มากับ APK");
         errorView.setVisibility(View.VISIBLE);
     }
 
@@ -77,7 +85,26 @@ public final class MainActivity extends Activity {
         else super.onBackPressed();
     }
 
-    private final class AppWebViewClient extends WebViewClient {
+    private final class LocalContentWebViewClient extends WebViewClientCompat {
+        private final WebViewAssetLoader assetLoader;
+
+        LocalContentWebViewClient(WebViewAssetLoader assetLoader) {
+            this.assetLoader = assetLoader;
+        }
+
+        @Override
+        @RequiresApi(21)
+        public WebResourceResponse shouldInterceptRequest(
+                WebView view, WebResourceRequest request) {
+            return assetLoader.shouldInterceptRequest(request.getUrl());
+        }
+
+        @Override
+        @SuppressWarnings("deprecation")
+        public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+            return assetLoader.shouldInterceptRequest(Uri.parse(url));
+        }
+
         @Override
         public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
             progressBar.setVisibility(View.VISIBLE);
@@ -93,27 +120,23 @@ public final class MainActivity extends Activity {
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
             Uri uri = request.getUrl();
             if ("https".equalsIgnoreCase(uri.getScheme())
-                    && ALLOWED_HOST.equalsIgnoreCase(uri.getHost())) {
+                    && "appassets.androidplatform.net".equalsIgnoreCase(uri.getHost())) {
                 return false;
             }
             try {
-                startActivity(new Intent(Intent.ACTION_VIEW, uri));
+                startActivity(new android.content.Intent(
+                        android.content.Intent.ACTION_VIEW, uri));
             } catch (Exception ignored) {
             }
             return true;
         }
 
         @Override
-        public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+        public void onReceivedError(
+                WebView view, WebResourceRequest request, WebResourceError error) {
             if (request.isForMainFrame()) {
-                showError("โหลด Web App ไม่สำเร็จ: " + error.getDescription());
-            }
-        }
-
-        @Override
-        public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse response) {
-            if (request.isForMainFrame() && response.getStatusCode() >= 400) {
-                showError("Web App ตอบกลับ HTTP " + response.getStatusCode());
+                showError("โหลด Web App ที่ bundle มาไม่สำเร็จ: "
+                        + error.getDescription());
             }
         }
     }
@@ -125,6 +148,7 @@ public final class MainActivity extends Activity {
                 toast("ไฟล์ใหญ่เกินขนาดที่รองรับ");
                 return;
             }
+
             String safeName = fileName == null ? "network-config"
                     : fileName.replaceAll("[^a-zA-Z0-9._-]", "_");
             if (safeName.length() > 120) safeName = safeName.substring(0, 120);
@@ -144,7 +168,9 @@ public final class MainActivity extends Activity {
                 if (uri == null) throw new IllegalStateException("MediaStore insert failed");
 
                 try (OutputStream output = getContentResolver().openOutputStream(uri)) {
-                    if (output == null) throw new IllegalStateException("Download stream unavailable");
+                    if (output == null) {
+                        throw new IllegalStateException("Download stream unavailable");
+                    }
                     output.write(bytes);
                 }
                 toast("บันทึกไฟล์ไว้ที่ Downloads/Network Configuration");
