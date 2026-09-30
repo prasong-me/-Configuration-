@@ -772,3 +772,143 @@ Only store normalized schemas, capability metadata, source references, and non-s
 4. Keep shared protocol/core fields in the common model.
 5. Reconcile platform/version differences before freezing.
 6. Runtime-test targets separately; do not promote documentation claims to runtime verification.
+---
+
+## Latest target format / key inventory
+
+> Research-level field inventory for downstream target adapters. This does not claim runtime interoperability. Secrets are represented only by field names/schema.
+
+### A. WireGuard — native interface/peer configuration
+
+    [Interface]
+    PrivateKey = <SECRET>
+    ListenPort = <optional UDP port>
+    Address = <target/platform address>
+
+    [Peer]
+    PublicKey = <peer public key>
+    AllowedIPs = <CIDR list>
+    Endpoint = <host:port, optional>
+    PersistentKeepalive = <seconds, optional>
+
+Normalized keys:
+- interface.privateKey — SECRET / required
+- interface.listenPort — optional
+- interface.addresses[] — PLATFORM/HOST layer
+- peers[].publicKey — required
+- peers[].allowedIPs[] — required
+- peers[].endpoint — optional
+- peers[].persistentKeepalive — optional
+
+Do not promote Address, host routes, DNS, MTU, kill-switch, or on-demand controls into the WireGuard protocol core without target-specific evidence.
+
+### B. Mihomo — YAML configuration surface
+
+    proxies:
+      - name: <proxy-name>
+        type: <protocol>
+        server: <host>
+        port: <port>
+
+    proxy-groups:
+      - name: <group-name>
+        type: <select|url-test|fallback|load-balance>
+        proxies:
+          - <proxy-name>
+
+    dns:
+      enable: true
+      nameserver:
+        - <DNS endpoint>
+      nameserver-policy:
+        <domain/policy>: [<DNS endpoint>]
+
+    rules:
+      - DOMAIN-SUFFIX,<domain>,<target>
+      - IP-CIDR,<cidr>,<target>
+      - MATCH,<target>
+
+Verified key families include: proxies, proxy-groups, rules, rule-providers, proxy-providers, dns, TUN/inbound configuration, and RESTful API controller.
+
+DNS keys frozen at research level include: enable, cache-algorithm, prefer-h3, listen, ipv6, enhanced-mode, fake-ip-range, fake-ip-range6, fake-ip-filter, fake-ip-filter-mode, use-hosts, use-system-hosts, respect-rules, default-nameserver, nameserver, nameserver-policy, fallback, fallback-filter, proxy-server-nameserver, proxy-server-nameserver-policy, direct-nameserver, direct-nameserver-follow-policy.
+
+### C. Clash Mi / Clash Lite — Mihomo-compatible client format
+
+Input format: Mihomo/Clash-compatible configuration with proxies, proxy-groups, rules, rule-providers, proxy-providers, and dns.
+
+Client adapter boundary: config syntax compatibility != identical client capability.
+
+Clash Mi:
+- App ID 6744321968
+- official listing identifies it as Mihomo-based
+- client lifecycle/UI/platform behavior remains target-specific
+
+Clash Lite:
+- App ID 6761357475
+- official listing identifies it as a Mihomo Proxy Client
+- configuration import/management, active-config switching, routing rules/logs, latency testing, subscription updates, and advanced configuration are documented
+- detailed API mapping remains PENDING
+
+No client-specific field is promoted merely because the underlying Mihomo syntax supports it.
+
+### D. ProxyPin — interception/debugging configuration surface
+
+ProxyPin does not have a frozen generic VPN/DNS configuration schema in this research baseline. The adapter therefore records capability keys rather than inventing a YAML/JSON format:
+
+    listener
+      ├── localProxyPort
+      └── platformRouting
+    tlsInterception
+      ├── localCA
+      └── trustInstallation
+    trafficPolicy
+      ├── domainFilter
+      ├── requestRewrite
+      ├── requestMapping
+      ├── requestBlocking
+      └── javascriptHooks
+    debugging
+      ├── breakpoints
+      ├── repeatReplay
+      └── requestResponseInspection
+    exchange
+      ├── HAR import/export
+      └── QR configuration sync
+
+localProxyPort has official wiki evidence for default port 9099, but the adapter must not hard-code that as a universal value. TLS interception/CA material is sensitive and must never be committed.
+
+### E. Surge — API/deployment format, not proxy/VPN core
+
+    api
+      ├── baseURL = https://surge.surge.sh
+      ├── authentication
+      │   └── HTTP Basic
+      │       ├── username = token
+      │       └── password = <SECRET>
+      ├── deploy
+      │   └── PUT /:domain
+      ├── revision
+      │   ├── publish
+      │   ├── rollback
+      │   └── cutover
+      ├── dns
+      └── analytics
+
+The deploy request uses a gzipped tar archive and NDJSON progress output.
+
+Credential fields are schema-only:
+- auth.token — SECRET
+- auth.email / auth.password — SECRET when used for token minting
+
+Surge hosting/API semantics must remain isolated from the network proxy/VPN common model.
+
+### Adapter promotion rule
+
+The above inventory is research/schema input only.
+1. Common model fields require stable semantics across targets.
+2. Each target adapter owns fields that are target-specific.
+3. Unsupported mappings fail closed as UNSUPPORTED_CAPABILITY.
+4. UNKNOWN is never treated as a fallback value.
+5. REQUIRED + UNKNOWN blocks export.
+6. No real private keys, API tokens, passwords, certificates, or user-specific endpoint secrets are committed.
+7. Format compatibility does not imply shared implementation.
