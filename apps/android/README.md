@@ -24,7 +24,7 @@ CI จะ build Web App จาก source เดียวกัน (`apps/web`) �
 
 ## Permissions
 
-มีเฉพาะ INTERNET. ไม่มี storage permission เพราะ Android 10+ ใช้ MediaStore สำหรับบันทึกไฟล์ export ลง Downloads
+ไม่มี INTERNET หรือ storage permission สำหรับตัว Web App หลัก เพราะ web content ถูก bundle เข้า APK; การ export ใช้ MediaStore
 
 ## Security boundary
 
