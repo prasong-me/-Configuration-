@@ -11,8 +11,7 @@
 - apps/web/src/WizardApp.jsx
 - apps/web/vite.config.js
 
-GitHub Pages เป็นช่องทาง runtime ของ Web App; Android app จะโหลดผ่าน HTTPS ที่:
-https://prasong-me.github.io/-Configuration-/
+CI จะ build Web App จาก source เดียวกัน (`apps/web`) แล้ว bundle `apps/web/dist` เข้า APK เป็น in-app content ผ่าน WebViewAssetLoader
 
 ## Android target
 
@@ -29,10 +28,10 @@ https://prasong-me.github.io/-Configuration-/
 
 ## Security boundary
 
-- HTTPS only / cleartext disabled
-- WebView allowlist เฉพาะ prasong-me.github.io
+- WebView ใช้ `WebViewAssetLoader` และ `https://appassets.androidplatform.net/`
+- ปิด file/content access
 - URL ภายนอกเปิดด้วย browser ของระบบ
-- native bridge ใช้เฉพาะการบันทึก export จาก Web App ที่เป็น Source of Truth
+- native bridge ใช้เฉพาะการบันทึก export จาก Web App ที่ bundle จาก Source of Truth
 
 ## Build
 
