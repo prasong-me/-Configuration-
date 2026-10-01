@@ -96,3 +96,6 @@ pre{max-width:100%;padding:13px;border-radius:11px;background:#111827;color:#f3f
 .review-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:14px 0}.review-grid>div{padding:11px;border:1px solid #e0e5ed;border-radius:12px;background:#fafbff}.review-grid span,.review-grid strong{display:block}.review-grid span{font-size:10px;color:#687482}.review-grid strong{margin-top:3px;font-size:12px;overflow-wrap:anywhere}
 @media(min-width:700px){.search-workspace{padding:20px}.review-grid{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:500px){.search-heading{display:block}.source-badge{display:inline-block;margin-top:8px}.review-grid{grid-template-columns:1fr 1fr}}
+
+
+.delivery-status{display:grid;gap:6px;margin-top:12px;padding:12px;border:1px solid #dfe3ea;border-radius:12px;background:#fafbfc}.delivery-status strong{font-size:14px}.delivery-status span,.delivery-status small{color:#687482}.delivery-status small{line-height:1.45}.delivery-status details{margin-top:4px}.delivery-status summary{cursor:pointer;font-weight:600}.delivery-status ul{margin:8px 0;padding-left:20px}.delivery-status p{margin:8px 0 0;color:#687482;font-size:13px}
