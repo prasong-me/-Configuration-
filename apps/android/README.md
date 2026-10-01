@@ -21,3 +21,11 @@ SYNTAX-TESTED = GitHub Actions Android build succeeds.
 REAL-DEVICE-TESTED = requires an Android device; not claimed by repository build alone.
 
 Download/share behavior is inherited from the web application and must be verified on an Android device before being marked runtime-validated.
+
+## Support policy
+
+The application requirement is Android 12 and later: minimum API 31 with version-by-version compatibility evidence for subsequent supported releases. `minSdk = 31` defines the installation floor; compile/target SDK values do not by themselves prove runtime compatibility.
+
+## Evidence gate
+
+Do not treat a successful CI APK build as Android runtime verification. Device/emulator runtime, WebView asset loading, configuration/export, navigation, download/share, and version-specific platform behavior require separate evidence.
