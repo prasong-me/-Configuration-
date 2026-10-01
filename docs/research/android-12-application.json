@@ -1,40 +1,47 @@
 {
-  "record_type": "android-platform-research",
-  "record_version": "1.0",
-  "status": "TEST_RESEARCHED",
-  "repository": "prasong-me/-Configuration-",
+  "record_type": "android-platform-compatibility-research",
+  "record_version": "2.0",
+  "status": "PARTIAL",
   "scope": "apps/android",
-  "android": {
-    "version": "12",
-    "api_level": 31,
-    "minimum_supported_api": 31,
-    "compile_sdk": 35,
-    "target_sdk": 35
+  "support_policy": {
+    "minimum_os": "Android 12",
+    "minimum_api": 31,
+    "model": "API 31+ version-by-version compatibility matrix"
   },
-  "verified": [
-    "Android 12 is API level 31; Android 12L is API level 32.",
-    "Android 12 SDK Platform 31 is the SDK package used for Android 12 development and testing.",
-    "Apps targeting Android 12+ must explicitly declare android:exported for components with intent filters.",
-    "Android 12 changes WebView SameSite cookie behavior for apps targeting API 31+.",
-    "The current launcher activity declares android:exported=true."
-  ],
-  "implementation_decision": {
-    "host": "WebView",
+  "implementation": {
     "min_sdk": 31,
     "compile_sdk": 35,
     "target_sdk": 35,
     "java": 17,
-    "kotlin": "2.0.21"
+    "kotlin": "2.0.21",
+    "host": "WebView"
   },
-  "validation_required": [
-    "CI debug APK build",
-    "Android 12 API 31 emulator or physical-device launch test",
-    "WebView production asset loading",
-    "configuration and export flow",
-    "back navigation",
-    "download/share behavior"
+  "matrix": [
+    {
+      "api": 31,
+      "release": "Android 12",
+      "evidence_status": "PARTIAL_VERIFIED_DOCUMENTATION",
+      "runtime_status": "NOT_VERIFIED"
+    },
+    {
+      "api": 32,
+      "release": "Android 12L",
+      "evidence_status": "MISSING_VERSION_SPECIFIC_RECORD",
+      "runtime_status": "NOT_VERIFIED"
+    },
+    {
+      "api": "33+",
+      "release": "Later Android releases",
+      "evidence_status": "MISSING_VERSION_SPECIFIC_RECORDS",
+      "runtime_status": "NOT_VERIFIED"
+    }
   ],
-  "sources": [
+  "rules": [
+    "CI build success is not runtime interoperability proof",
+    "compile/target SDK version does not prove runtime support for every OS release",
+    "new evidence versions are appended, not overwritten"
+  ],
+  "historical_sources": [
     "https://developer.android.com/about/versions/12",
     "https://developer.android.com/about/versions/12/behavior-changes-12",
     "https://developer.android.com/about/versions/12/setup-sdk",
