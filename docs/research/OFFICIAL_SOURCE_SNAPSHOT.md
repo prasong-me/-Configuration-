@@ -571,7 +571,7 @@ MihomoCore
 **App ID:** 6761357475
 
 **Official source**
-- App Store: https://apps.apple.com/th/app/clash-lite-clash-for-ios/id6761357475
+- App Store: https://apps.apple.com/th/app/clash-lite-clash-for-iOS/id6761357475
 
 **Officially described capability**
 - Identifies itself as a Mihomo Proxy Client.
