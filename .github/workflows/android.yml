@@ -53,6 +53,7 @@ jobs:
 
       - name: Install Android API 31 emulator
         run: |
+          export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
           sdkmanager "platforms;android-31" "build-tools;35.0.0" "emulator" "platform-tools" "system-images;android-31;google_apis;x86_64"
           yes | sdkmanager --licenses >/dev/null || true
           echo "no" | avdmanager create avd -n api31 -k "system-images;android-31;google_apis;x86_64" --force
@@ -66,6 +67,7 @@ jobs:
 
       - name: Start API 31 emulator
         run: |
+          export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
           nohup emulator -avd api31 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > emulator.log 2>&1 &
           adb wait-for-device
           timeout 180 bash -c 'until adb shell getprop sys.boot_completed | tr -d "\r" | grep -q "^1$"; do sleep 2; done'
@@ -75,6 +77,7 @@ jobs:
 
       - name: Install and launch APK
         run: |
+          export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
           adb install -r artifacts/app-debug.apk
           adb shell am force-stop com.prasongme.configuration
           adb shell am start -n com.prasongme.configuration/.MainActivity
@@ -84,6 +87,7 @@ jobs:
 
       - name: Verify WebView UI is rendered
         run: |
+          export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
           adb shell uiautomator dump /sdcard/window.xml >/dev/null
           adb shell cat /sdcard/window.xml > ui.xml
           grep -E "Configuration Platform|Search|Configuration Compiler" ui.xml
@@ -91,6 +95,7 @@ jobs:
       - name: Capture runtime evidence
         if: always()
         run: |
+          export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
           adb shell getprop ro.build.version.sdk || true
           adb shell dumpsys activity top || true
           adb shell pidof com.prasongme.configuration || true
