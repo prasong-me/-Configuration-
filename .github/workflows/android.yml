@@ -68,8 +68,8 @@ jobs:
       - name: Start API 31 emulator
         run: |
           export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
-          nohup emulator -avd api31 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > emulator.log 2>&1 &
-          adb wait-for-device
+          nohup emulator -avd api31 -no-window -no-audio -no-boot-anim -no-snapshot -no-metrics -gpu swiftshader_indirect -accel off > emulator.log 2>&1 &
+          timeout 120 bash -c 'until adb devices | grep -q "emulator-"; do sleep 2; done'
           timeout 180 bash -c 'until adb shell getprop sys.boot_completed | tr -d "\r" | grep -q "^1$"; do sleep 2; done'
           adb shell settings put global window_animation_scale 0
           adb shell settings put global transition_animation_scale 0
