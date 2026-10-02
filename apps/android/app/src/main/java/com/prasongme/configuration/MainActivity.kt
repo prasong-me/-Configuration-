@@ -14,6 +14,15 @@ import android.window.OnBackInvokedDispatcher
 class MainActivity : Activity() {
     private lateinit var webView: WebView
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private val backCallback = OnBackInvokedCallback {
+        if (webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            finish()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         webView = WebView(this)
@@ -32,22 +41,11 @@ class MainActivity : Activity() {
         webView.loadUrl("file:///android_asset/web/index.html")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerBackCallback()
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                backCallback
+            )
         }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private fun registerBackCallback() {
-        onBackInvokedDispatcher.registerOnBackInvokedCallback(
-            OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-            OnBackInvokedCallback {
-                if (webView.canGoBack()) {
-                    webView.goBack()
-                } else {
-                    finish()
-                }
-            }
-        )
     }
 
     @Suppress("DEPRECATION")
@@ -63,14 +61,5 @@ class MainActivity : Activity() {
         }
         webView.destroy()
         super.onDestroy()
-    }
-
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private val backCallback = OnBackInvokedCallback {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            finish()
-        }
     }
 }
