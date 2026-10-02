@@ -1,11 +1,15 @@
 package com.prasongme.configuration
 
 import android.app.Activity
+import android.os.Build
 import android.os.Bundle
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.annotation.RequiresApi
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
 
 class MainActivity : Activity() {
     private lateinit var webView: WebView
@@ -26,9 +30,47 @@ class MainActivity : Activity() {
         webView.webChromeClient = WebChromeClient()
         setContentView(webView)
         webView.loadUrl("file:///android_asset/web/index.html")
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerBackCallback()
+        }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun registerBackCallback() {
+        onBackInvokedDispatcher.registerOnBackInvokedCallback(
+            OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+            OnBackInvokedCallback {
+                if (webView.canGoBack()) {
+                    webView.goBack()
+                } else {
+                    finish()
+                }
+            }
+        )
+    }
+
+    @Suppress("DEPRECATION")
     override fun onBackPressed() {
-        if (webView.canGoBack()) webView.goBack() else super.onBackPressed()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            if (webView.canGoBack()) webView.goBack() else super.onBackPressed()
+        }
+    }
+
+    override fun onDestroy() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            onBackInvokedDispatcher.unregisterOnBackInvokedCallback(backCallback)
+        }
+        webView.destroy()
+        super.onDestroy()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private val backCallback = OnBackInvokedCallback {
+        if (webView.canGoBack()) {
+            webView.goBack()
+        } else {
+            finish()
+        }
     }
 }
