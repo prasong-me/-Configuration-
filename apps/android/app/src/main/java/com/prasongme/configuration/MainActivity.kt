@@ -7,21 +7,12 @@ import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.annotation.RequiresApi
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
 
 class MainActivity : Activity() {
     private lateinit var webView: WebView
-
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private val backCallback = OnBackInvokedCallback {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            finish()
-        }
-    }
+    private var backCallback: OnBackInvokedCallback? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,9 +32,17 @@ class MainActivity : Activity() {
         webView.loadUrl("file:///android_asset/web/index.html")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val callback = OnBackInvokedCallback {
+                if (webView.canGoBack()) {
+                    webView.goBack()
+                } else {
+                    finish()
+                }
+            }
+            backCallback = callback
             onBackInvokedDispatcher.registerOnBackInvokedCallback(
                 OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                backCallback
+                callback
             )
         }
     }
@@ -57,7 +56,8 @@ class MainActivity : Activity() {
 
     override fun onDestroy() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            onBackInvokedDispatcher.unregisterOnBackInvokedCallback(backCallback)
+            backCallback?.let { onBackInvokedDispatcher.unregisterOnBackInvokedCallback(it) }
+            backCallback = null
         }
         webView.destroy()
         super.onDestroy()
