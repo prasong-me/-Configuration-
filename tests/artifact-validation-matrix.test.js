@@ -4,11 +4,12 @@ import { configurationExporter } from "../packages/core/src/index.js";
 import { exportFormats } from "../packages/targets/src/exporters.js";
 
 const applePolicy={name:"artifact-matrix",dnsServers:["1.1.1.1","2606:4700:4700::1111"],dnsProtocol:"HTTPS",dnsServerUrl:"https://dns.example/dns-query",webEntry:{name:"Configuration Web",url:"https://example.com",enabled:true},applePayloads:{dns:true,webclip:true,wifi:true,vpn:false,globalProxy:false},wifiSSID:"TestWiFi",wifiPassword:"password"};
+const appleDnsPolicy={name:"artifact-matrix",dnsServers:["1.1.1.1","2606:4700:4700::1111"],dnsProtocol:"HTTPS",dnsServerUrl:"https://dns.example/dns-query",applePayloads:{dns:true,webclip:false,wifi:false,vpn:false,globalProxy:false}};
 
 const targetFixtures={
   "apple-mobileconfig":{version:"0.6",policy:applePolicy},
-  "apple-dns-declaration":{version:"0.6",policy:{...applePolicy,applePayloads:{dns:true,webclip:false,wifi:false,vpn:false,globalProxy:false}}},
-  "apple-mobileconfig-legacy":{version:"0.6",policy:{...applePolicy,applePayloads:{dns:true,webclip:false,wifi:false,vpn:false,globalProxy:false}}}
+  "apple-dns-declaration":{version:"0.6",policy:appleDnsPolicy},
+  "apple-mobileconfig-legacy":{version:"0.6",policy:appleDnsPolicy}
 };
 
 test("every export-registered target has a repository-side artifact fixture",()=>{
@@ -36,7 +37,7 @@ test("Apple export matrix produces distinct declared artifacts for all public Ap
   assert.match(mobile.artifact,/com\.apple\.webClip\.managed/);
   assert.match(mobile.artifact,/com\.apple\.wifi\.managed/);
 
-  const legacy=configurationExporter.export({status:"SUCCESS",policy:targetFixtures["apple-mobileconfig-legacy"].policy},"apple-mobileconfig-legacy");
+  const legacy=configurationExporter.export({status:"SUCCESS",policy:appleDnsPolicy},"apple-mobileconfig-legacy");
   assert.match(legacy.artifact,/com\.apple\.dnsSettings\.managed/);
   assert.doesNotMatch(legacy.artifact,/com\.apple\.webClip\.managed/);
 });
