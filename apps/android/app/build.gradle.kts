@@ -22,4 +22,8 @@ android {
     }
 }
 
+dependencies {
+    implementation("androidx.webkit:webkit:1.17.1")
+}
+
 kotlin { jvmToolchain(17) }
