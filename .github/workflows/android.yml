@@ -73,47 +73,7 @@ jobs:
           heap-size: 256M
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -no-snapshot -no-metrics
-          script: |
-            set -e
-            adb shell getprop ro.build.version.sdk | grep -Fx "31"
-            adb logcat -c
-            adb install -r artifacts/app-debug.apk
-            adb shell am force-stop com.prasongme.configuration
-            adb shell am start -n com.prasongme.configuration/.MainActivity
-
-            ready=0
-            for i in $(seq 1 30); do
-              adb shell uiautomator dump /sdcard/window.xml >/dev/null 2>&1 || true
-              if adb shell cat /sdcard/window.xml 2>/dev/null | grep -F "Configuration Platform" >/dev/null; then
-                ready=1
-                break
-              fi
-              sleep 1
-            done
-
-            test -n "$(adb shell pidof com.prasongme.configuration)"
-            adb shell dumpsys activity top | grep -F "com.prasongme.configuration/.MainActivity"
-            adb shell dumpsys window windows | grep -F "com.prasongme.configuration/.MainActivity"
-            adb shell dumpsys webviewupdate
-
-            echo "sdk=$(adb shell getprop ro.build.version.sdk | tr -d '\r')" > api31-runtime-evidence.txt
-            echo "package_pid=$(adb shell pidof com.prasongme.configuration | tr -d '\r')" >> api31-runtime-evidence.txt
-            echo "activity=" >> api31-runtime-evidence.txt
-            adb shell dumpsys activity top >> api31-runtime-evidence.txt
-            echo "webview=" >> api31-runtime-evidence.txt
-            adb shell dumpsys webviewupdate >> api31-runtime-evidence.txt
-            echo "ui_webview=" >> api31-runtime-evidence.txt
-            adb shell cat /sdcard/window.xml >> api31-runtime-evidence.txt
-            echo "logcat=" >> api31-runtime-evidence.txt
-            adb shell logcat -d -t 800 >> api31-runtime-evidence.txt
-            adb shell cat /sdcard/window.xml > ui.xml
-
-            test "$ready" -eq 1
-            adb shell cat /sdcard/window.xml | grep -F "android.webkit.WebView"
-            adb shell cat /sdcard/window.xml | grep -F "Configuration Platform"
-            adb shell cat /sdcard/window.xml | grep -vF "Webpage not available"
-            adb shell cat /sdcard/window.xml | grep -vF "ERR_INVALID_RESPONSE"
-            adb shell logcat -d -t 800 | grep -F "IRIS_WEBAPP_PAGE_FINISHED url=https://appassets.androidplatform.net/assets/web/index.html"
+          script: bash scripts/android-api31-runtime.sh
 
       - name: Upload API 31 runtime evidence
         if: ${{ always() }}
