@@ -52,4 +52,4 @@ adb shell cat /sdcard/window.xml | grep -F "android.webkit.WebView"
 adb shell cat /sdcard/window.xml | grep -F "Configuration Platform"
 ! adb shell cat /sdcard/window.xml | grep -F "Webpage not available" >/dev/null
 ! adb shell cat /sdcard/window.xml | grep -F "ERR_INVALID_RESPONSE" >/dev/null
-adb shell logcat -d -t 800 | grep -F "IRIS_WEBAPP_PAGE_FINISHED url=$EXPECTED_URL"
+adb shell logcat -d -v brief "ConfigurationWebView:I *:S" | grep -F "IRIS_WEBAPP_PAGE_FINISHED url=$EXPECTED_URL"
