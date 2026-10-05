@@ -88,13 +88,23 @@ jobs:
             grep -F "android.webkit.WebView" ui.xml
             adb shell dumpsys webviewupdate
             adb shell logcat -d -t 400 | grep -E "com.prasongme.configuration|chromium|WebView" || true
-      - name: Record API 31 runtime evidence
+            {
+              echo "sdk=$(adb shell getprop ro.build.version.sdk | tr -d '\r')"
+              echo "package_pid=$(adb shell pidof com.prasongme.configuration | tr -d '\r')"
+              echo "activity="
+              adb shell dumpsys activity top
+              echo "webview="
+              adb shell dumpsys webviewupdate
+              echo "ui_webview="
+              cat ui.xml
+              echo "logcat="
+              adb shell logcat -d -t 400
+            } > api31-runtime-evidence.txt
+      - name: Upload API 31 runtime evidence
         if: ${{ success() }}
-        run: |
-          adb shell getprop ro.build.version.sdk
-          adb shell pidof com.prasongme.configuration
-          adb shell dumpsys activity top
-          adb shell dumpsys webviewupdate
-          adb shell uiautomator dump /sdcard/window.xml >/dev/null
-          adb shell cat /sdcard/window.xml
-          adb shell logcat -d -t 400
+        uses: actions/upload-artifact@v4
+        with:
+          name: api31-runtime-evidence
+          path:
+            api31-runtime-evidence.txt
+            ui.xml
