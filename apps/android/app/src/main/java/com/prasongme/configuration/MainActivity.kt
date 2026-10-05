@@ -24,7 +24,7 @@ class MainActivity : Activity() {
 
     companion object {
         private const val REQUEST_CREATE_DOCUMENT = 4101
-        private const val ASSET_BASE_URL = "https://appassets.androidplatform.net/assets/"
+        private const val ASSET_BASE_URL = "https://appassets.androidplatform.net/assets/web/"
         private const val TAG = "ConfigurationWebView"
     }
 
