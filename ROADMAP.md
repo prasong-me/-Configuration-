@@ -13,7 +13,7 @@
 - [x] Canonical profile contract
 - [x] Profile schema
 - [x] Target manifest/capability model
-- [ ] HOLD — Target Profile contract reconciliation is pending normative-source verification; do not freeze or invent a target-profile shape
+- [x] Target Profile contract
 - [x] Diagnostic model
 - [x] Result/evidence metadata model
 

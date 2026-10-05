@@ -40,10 +40,6 @@ Target Configuration
 
 ## 3. กระบวนการนำเข้า
 
-การนำเข้า Target Configuration ยังเป็นขอบเขต **DEFERRED** สำหรับรอบ export-first ปัจจุบัน เนื่องจาก parser และ canonical conversion ต้องอาศัย syntax/specification เฉพาะ Target ที่มีหลักฐานเพียงพอ
-
-เมื่อเปิดขอบเขต import ในอนาคต กระบวนการที่กำหนดไว้คือ:
-
 ```
 Target Configuration
       |
@@ -59,8 +55,6 @@ Canonical Policy
       v
 Validation / Diagnostics
 ```
-
-ห้ามถือว่ากระบวนการนี้เป็น implementation ที่เสร็จแล้ว และห้ามอ้างว่า target round-trip ได้จนกว่าจะมี parser, conversion และ runtime/evidence ที่ตรวจสอบได้
 
 ## 4. สถานะความสามารถ
 

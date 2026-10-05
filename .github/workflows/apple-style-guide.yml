@@ -50,17 +50,11 @@ jobs:
             return results;
           }
 
-          // Validate prose, not URL paths. A lowercase platform token inside an
-          // official URL is an address supplied by the source and is not prose.
-          function stripUrls(content) {
-            return content.replace(/https?:\/\/[^\s)]+/g, "");
-          }
-
           const mdFiles = walkDir(".");
           let hasError = false;
 
           for (const file of mdFiles) {
-            const content = stripUrls(fs.readFileSync(file, "utf8"));
+            const content = fs.readFileSync(file, "utf8");
             for (const pattern of incorrectPatterns) {
               pattern.regex.lastIndex = 0;
               if (pattern.regex.test(content)) {
