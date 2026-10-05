@@ -103,8 +103,8 @@ jobs:
             adb shell logcat -d -t 800 >> api31-runtime-evidence.txt
             adb shell cat /sdcard/window.xml > ui.xml
 
-            adb shell logcat -d -t 800 | grep -F "IRIS_WEBAPP_ASSET_SERVED"
-            adb shell logcat -d -t 800 | grep -F "IRIS_WEBAPP_PAGE_FINISHED url=https://appassets.androidplatform.net/assets/web/index.html"
+            adb shell cat /sdcard/window.xml | grep -F 'resource-id="root"'
+            adb shell logcat -d -t 800 | grep -E 'IRIS_WEBAPP_DOM_READY.*Configuration Platform.*complete.*[1-9]'
       - name: Upload API 31 runtime evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
