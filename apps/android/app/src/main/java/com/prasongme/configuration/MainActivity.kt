@@ -4,13 +4,17 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
+import androidx.webkit.WebViewAssetLoader
+import androidx.webkit.WebViewClientCompat
 import java.io.IOException
 
 class MainActivity : Activity() {
@@ -20,6 +24,8 @@ class MainActivity : Activity() {
 
     companion object {
         private const val REQUEST_CREATE_DOCUMENT = 4101
+        private const val ASSET_BASE_URL = "https://appassets.androidplatform.net/assets/"
+        private const val TAG = "ConfigurationWebView"
     }
 
     private inner class AndroidExportBridge {
@@ -49,23 +55,63 @@ class MainActivity : Activity() {
         }
     }
 
+    private inner class LocalContentWebViewClient(
+        private val assetLoader: WebViewAssetLoader
+    ) : WebViewClientCompat() {
+        override fun shouldInterceptRequest(
+            view: WebView,
+            request: WebResourceRequest
+        ): WebResourceResponse? {
+            val response = assetLoader.shouldInterceptRequest(request.url)
+            if (response != null) {
+                Log.i(TAG, "IRIS_WEBAPP_ASSET_SERVED path=${request.url.path}")
+            }
+            return response
+        }
+
+        override fun shouldInterceptRequest(
+            view: WebView,
+            url: String
+        ): WebResourceResponse? {
+            val uri = android.net.Uri.parse(url)
+            val response = assetLoader.shouldInterceptRequest(uri)
+            if (response != null) {
+                Log.i(TAG, "IRIS_WEBAPP_ASSET_SERVED path=${uri.path}")
+            }
+            return response
+        }
+
+        override fun onPageFinished(view: WebView, url: String) {
+            super.onPageFinished(view, url)
+            Log.i(TAG, "IRIS_WEBAPP_PAGE_FINISHED url=$url title=${view.title.orEmpty()}")
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val assetLoader = WebViewAssetLoader.Builder()
+            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
+            .build()
+
         webView = WebView(this)
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
-            allowFileAccess = true
-            allowContentAccess = true
+            allowFileAccess = false
+            allowContentAccess = false
+            setAllowFileAccessFromFileURLs(false)
+            setAllowUniversalAccessFromFileURLs(false)
+            mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
             builtInZoomControls = false
             displayZoomControls = false
             cacheMode = WebSettings.LOAD_DEFAULT
         }
-        webView.webViewClient = WebViewClient()
+        webView.webViewClient = LocalContentWebViewClient(assetLoader)
         webView.webChromeClient = WebChromeClient()
         webView.addJavascriptInterface(AndroidExportBridge(), "AndroidExport")
         setContentView(webView)
-        webView.loadUrl("file:///android_asset/web/index.html")
+        webView.loadUrl(ASSET_BASE_URL + "index.html")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val callback = OnBackInvokedCallback {
@@ -84,7 +130,7 @@ class MainActivity : Activity() {
     }
 
     @Deprecated("Deprecated in Android API 33; retained for API 31/32 compatibility.")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode != REQUEST_CREATE_DOCUMENT) return
         val content = pendingDocumentContent
@@ -96,7 +142,7 @@ class MainActivity : Activity() {
                 output.write(content.toByteArray(Charsets.UTF_8))
             }
         } catch (_: IOException) {
-            // The WebView remains usable; the failed save is not treated as a successful export.
+            Log.e(TAG, "Failed to save exported configuration")
         }
     }
 
