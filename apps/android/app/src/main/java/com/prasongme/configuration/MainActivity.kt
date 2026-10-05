@@ -84,6 +84,9 @@ class MainActivity : Activity() {
         override fun onPageFinished(view: WebView, url: String) {
             super.onPageFinished(view, url)
             Log.i(TAG, "IRIS_WEBAPP_PAGE_FINISHED url=$url title=${view.title.orEmpty()}")
+            view.evaluateJavascript("(function(){var root=document.getElementById('root');return document.title+'|'+document.readyState+'|'+(root?root.childElementCount:-1);})()") { result ->
+                Log.i(TAG, "IRIS_WEBAPP_DOM_READY $result")
+            }
         }
     }
 
