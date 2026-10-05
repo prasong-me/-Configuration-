@@ -76,6 +76,7 @@ jobs:
           script: |
             set -e
             adb shell getprop ro.build.version.sdk | grep -Fx "31"
+            adb logcat -c
             adb install -r artifacts/app-debug.apk
             adb shell am force-stop com.prasongme.configuration
             adb shell am start -n com.prasongme.configuration/.MainActivity
@@ -99,11 +100,11 @@ jobs:
             echo "ui_webview=" >> api31-runtime-evidence.txt
             adb shell cat /sdcard/window.xml >> api31-runtime-evidence.txt
             echo "logcat=" >> api31-runtime-evidence.txt
-            adb shell logcat -d -t 400 >> api31-runtime-evidence.txt
+            adb shell logcat -d -t 800 >> api31-runtime-evidence.txt
             adb shell cat /sdcard/window.xml > ui.xml
 
-            adb shell logcat -d -t 400 | grep -F "IRIS_WEBAPP_ASSET_SERVED"
-            adb shell logcat -d -t 400 | grep -F "IRIS_WEBAPP_PAGE_FINISHED url=https://appassets.androidplatform.net/assets/web/index.html"
+            adb shell logcat -d -t 800 | grep -F "IRIS_WEBAPP_ASSET_SERVED"
+            adb shell logcat -d -t 800 | grep -F "IRIS_WEBAPP_PAGE_FINISHED url=https://appassets.androidplatform.net/assets/web/index.html"
       - name: Upload API 31 runtime evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
