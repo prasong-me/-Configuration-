@@ -6,14 +6,15 @@ Android API 31 runtime validation for the native WebView shell that packages the
 
 ### Current authoritative state
 - Android branch: `feat/android-app-v1`
-- Branch HEAD: `31b97a460cf2ad206cafefad01b9c6ef067a2575`
-- PR: #31, open/draft, base `main` at `0ed434c95d250802067dd2d6c73b6578efc9d63c`
-- Latest Android run: #53 / `37252392469`, HEAD matches branch, completed FAILURE.
-- Run #53 build job: PASS.
-- Run #53 runtime job: FAILURE.
-- Run #53 emulator boot/install/activity/UI WebView checks reached success before the final runtime script failed.
-- Run #53 failure point: shell syntax error in the runtime evidence-generation block; evidence upload was skipped.
-- Previous Run #52 failure was on the runtime job; historical record showed the runtime execution path had reached the evidence-recording stage before failure. Current Run #53 supersedes that interpretation for the current HEAD.
+- Latest implementation correction: asset-loader URL aligned to the actual packaged path `assets/web/index.html`.
+- PR: #31, open/draft, base `main` at `0ed434c95d250802067dd2d6c73b6578efc9d63c`.
+- Run #64 / `37253429644` is the latest validation after the evidence-shell correction.
+- Run #64 build job: PASS.
+- Run #64 runtime job: FAILURE, but evidence artifact upload: PASS.
+- Run #64 runtime reached API 31 boot, APK install, MainActivity start, WebView creation and evidence capture.
+- Run #64 failure point: the WebView page itself returned `net::ERR_INVALID_RESPONSE`.
+- Root cause identified by current-source reconciliation: the CI packages the web bundle at `apps/android/app/src/main/assets/web/`, while the first WebViewAssetLoader implementation loaded `/assets/index.html`; the corresponding packaged asset path is `/assets/web/index.html`.
+- This correction is implemented in MainActivity and requires a new full runtime run.
 
 ### Architecture
 - Existing web app remains the implementation source of configuration behavior.
@@ -22,66 +23,49 @@ Android API 31 runtime validation for the native WebView shell that packages the
 - Android applicationId: `com.prasongme.configuration`
 - minSdk 31, targetSdk 35, compileSdk 35.
 - AGP 8.7.3, Kotlin plugin 2.0.21, Gradle runner 8.9, JVM 17.
+- Stable AndroidX WebKit dependency: `androidx.webkit:webkit:1.17.1`.
 
 ### Current source facts
-MainActivity currently:
-- enables JavaScript and DOM storage;
-- currently uses `file:///android_asset/web/index.html`;
-- currently allows file and content access;
-- exposes `AndroidExport` JavaScript bridge for ACTION_SEND and ACTION_CREATE_DOCUMENT;
-- uses WebViewClient/WebChromeClient;
-- supports API 31/32 back handling and API 33+ OnBackInvokedDispatcher;
-- destroys WebView and removes the JS interface in onDestroy.
-
-The web source:
-- is Vite/React;
-- current blocked-domain parsing is `blockedDomains.split(/[\\\\s,]+/)` in repository source as read on 2026-10-05;
-- DNS textarea uses `p.servers.join("\\n")` and parses with `split(/[,\\s]+/)`;
-- Android bridge is detected through `window.AndroidExport`.
+MainActivity now:
+- uses `WebViewAssetLoader`;
+- maps `/assets/` to the Android asset root;
+- loads `https://appassets.androidplatform.net/assets/web/index.html` because the packaged bundle is under `assets/web/`;
+- disables broad file/content access;
+- disables file-to-file and universal file URL access;
+- keeps the AndroidExport JS bridge for ACTION_SEND/ACTION_CREATE_DOCUMENT;
+- records deterministic `IRIS_WEBAPP_ASSET_SERVED` and `IRIS_WEBAPP_PAGE_FINISHED` log markers.
 
 ### Authoritative external principles
 
 #### Android local WebView content
-Android Developers recommends `WebViewAssetLoader` with `https://appassets.androidplatform.net/assets/index.html` for local app assets. The documentation explicitly recommends against `file://` URLs and recommends keeping `setAllowFileAccessFromFileURLs(false)` and `setAllowUniversalAccessFromFileURLs(false)` disabled/false for security. Source: Android Developers, “Load in-app content”, accessed 2026-10-05.
+Android Developers recommends `WebViewAssetLoader` with an HTTP(S) app-assets origin for local app assets and explicitly recommends against `file://` URLs and enabling file-URL universal access. The documented pattern uses `AssetsPathHandler` behind `/assets/` and loads a matching asset URL.
+Source: Android Developers, “Load in-app content”, accessed 2026-10-05.
 
 Applicability:
-- Directly applicable because the app packages a Vite-generated HTML/JS/CSS bundle under Android assets.
-- This is not merely a style preference: it affects origin behavior, web APIs, and file-based attack surface.
+- Directly applicable because this app packages a Vite bundle into Android assets.
 
 Implementation impact:
-- Add stable `androidx.webkit:webkit` dependency.
-- Use `WebViewAssetLoader` + custom `WebViewClient.shouldInterceptRequest`.
-- Load `https://appassets.androidplatform.net/assets/index.html`.
-- Disable broad file/content access unless a concrete requirement proves otherwise.
+- Asset URL must match the actual packaged asset path exactly.
+- The handler prefix and packaged directory are part of one dependency chain:
+  CI copy destination → APK asset path → AssetLoader path handler → WebView URL.
+- A mismatch is a runtime load failure even when build/package/install are all successful.
 
 #### AndroidX WebKit version
 Android Developers lists `androidx.webkit:webkit:1.17.1` as the stable release as of 2026-09-23.
 Applicability:
-- Project minSdk 31 is above the library's minimum supported SDK.
-Implementation impact:
-- Pin the stable version rather than using an alpha release.
+- Project minSdk 31 is above the library minimum.
 
 #### Android Emulator CI
-ReactiveCircus `android-emulator-runner@v2` documents KVM setup on Ubuntu runners using udev rules and supports API level, target, architecture, profile, CPU, RAM, heap, and emulator options.
-Applicability:
-- Current workflow already uses the documented KVM setup and API 31/google_apis/x86_64 configuration.
+ReactiveCircus `android-emulator-runner@v2` documents KVM setup and API/target/architecture/profile configuration.
 Current evidence:
-- KVM setup passed in Run #53.
-- Emulator boot completed and API 31 was verified.
-- Runtime failure was after boot, not an emulator boot failure.
+- KVM setup passed.
+- API 31 boot passed.
+- APK installation passed.
 
 #### GitHub Actions artifact paths
-Official `actions/upload-artifact` documentation supports multiple paths using a YAML multiline scalar:
-```yaml
-path: |
-  path/to/first
-  path/to/second
-```
-The current workflow's `path:` followed by two indented scalar lines without `|` is therefore not the documented multi-path form.
-Implementation impact:
-- Change evidence upload to `path: |`.
-- Prefer `if: always()` for evidence upload when evidence files are intentionally produced before a later command can fail, while ensuring missing-file behavior is explicit.
-- Evidence upload must never be used to turn an execution failure into PASS.
+Official `actions/upload-artifact` supports multiple paths through a YAML multiline scalar using `path: |`.
+Current workflow uses this documented form.
+Evidence upload is now run with `always()` and `if-no-files-found: error`, so incomplete evidence cannot silently become a successful evidence step.
 
 ### Evidence model
 Separate:
@@ -95,36 +79,43 @@ EVIDENCE PASS
 REGRESSION PASS
 FINAL VERIFIED
 
-Run #53 currently proves:
+Run #64 proves:
 - BUILD PASS
-- PACKAGE/ARTIFACT availability sufficient for runtime
-- API 31 emulator boot PASS
-- APK install PASS
-- Activity start PASS
-- WebView UI node present PASS
-- WebView provider available PASS
-- Runtime script/evidence generation FAIL
-- EVIDENCE PASS = NO
+- APK artifact PASS
+- API 31 boot PASS
+- INSTALL PASS
+- MainActivity START PASS
+- WebView object PRESENT
+- EVIDENCE CAPTURE PASS
+- WebView content LOAD PASS = NO
+- RUNTIME PASS = NO
 - FINAL VERIFIED = NO
 
-### Current technical gap
-1. Runtime evidence shell block is malformed and must be corrected.
-2. Current MainActivity uses `file://`, contrary to current Android guidance; this is a substantive architecture/security gap, not just a test formatting issue.
-3. Runtime evidence should verify that the packaged web document actually loads, not only that a WebView object exists.
-4. The current WebView runtime check should produce deterministic, inspectable evidence for page-load state.
-5. After changing WebView loading, the full build → install → start → page-load → evidence → regression chain must be rerun.
+### Error event — current work
+**OPE-ANDROID-20261005-001 — Asset path mismatch**
+- Intended: replace insecure `file://` loading with `WebViewAssetLoader`.
+- Actual: loader mapped `/assets/` to the Android asset root, but the CI package placed the web bundle under `assets/web/`; MainActivity loaded `/assets/index.html`.
+- Error point: runtime page load.
+- Observed evidence: UIAutomator reported `Webpage not available` and `net::ERR_INVALID_RESPONSE`; WebView itself and the app process were alive.
+- Root cause: failure to reconcile the loader URL against the current packaging destination before implementation.
+- Impact: build/package/install/start passed, but web application content did not load.
+- Correction: load `https://appassets.androidplatform.net/assets/web/index.html`.
+- Verification: pending new runtime run.
+- Prevention: before changing asset-loading architecture, verify the complete path chain: source output → copy command → packaged APK asset tree → loader mapping → load URL.
 
-### Required verification after changes
+### Previous operational error
+The first attempt to make runtime evidence failure-safe used a shell function/trap and failed under the runner's shell invocation. It was replaced with simple POSIX-compatible sequential commands. This is now verified because Run #64 successfully generated and uploaded the evidence artifact.
+
+### Required verification after current correction
 - Web build succeeds.
 - Android APK builds.
 - API 31 emulator boots.
 - APK installs.
 - MainActivity starts.
-- WebViewAssetLoader serves the packaged index.
-- Page-load marker/evidence confirms the web document loaded.
+- `/assets/web/index.html` is served by WebViewAssetLoader.
+- Page-load marker is present.
 - UI evidence is captured.
-- WebView provider state is captured.
-- Logcat is captured.
 - Runtime evidence artifact is uploaded.
-- Workflow is terminal SUCCESS.
-- No unrelated protected boundary is changed.
+- Workflow reaches terminal SUCCESS.
+- Relevant regression checks remain green.
+- No protected Apple/DNS boundary is changed.
