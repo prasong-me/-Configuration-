@@ -8,6 +8,7 @@ on:
       - 'apps/android/**'
       - 'apps/web/**'
       - '.github/workflows/android.yml'
+      - 'scripts/**'
 
 jobs:
   build:
