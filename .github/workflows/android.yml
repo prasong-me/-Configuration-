@@ -58,6 +58,7 @@ jobs:
           path: artifacts
 
       - name: Run API 31 emulator
+        timeout-minutes: 12
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 31
@@ -83,13 +84,13 @@ jobs:
             grep -F "android.webkit.WebView" ui.xml
 
       - name: Record API 31 runtime evidence
-        if: always()
+        if: ${{ success() }}
         run: |
-          adb shell getprop ro.build.version.sdk || true
-          adb shell dumpsys activity top || true
-          adb shell dumpsys window windows || true
-          adb shell pidof com.prasongme.configuration || true
-          adb shell dumpsys webviewupdate || true
-          adb shell uiautomator dump /sdcard/window.xml >/dev/null 2>&1 || true
-          adb shell cat /sdcard/window.xml || true
-          adb logcat -d -t 400 || true
+          adb shell getprop ro.build.version.sdk
+          adb shell dumpsys activity top
+          adb shell dumpsys window windows
+          adb shell pidof com.prasongme.configuration
+          adb shell dumpsys webviewupdate
+          adb shell uiautomator dump /sdcard/window.xml >/dev/null
+          adb shell cat /sdcard/window.xml
+          adb logcat -d -t 400
