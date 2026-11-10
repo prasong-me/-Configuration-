@@ -1,9 +1,6 @@
 import type { Diagnostic } from './diagnostics';
 
-export type ResultStatus =
-  | 'SUCCESS'
-  | 'PARTIAL'
-  | 'FAILED';
+export type ResultStatus = 'SUCCESS' | 'PARTIAL' | 'FAILED';
 
 export interface ResultSummary {
   profilesTotal: number;
@@ -14,6 +11,7 @@ export interface ResultSummary {
   featuresSupported: number;
   featuresPartial: number;
   featuresUnsupported: number;
+  featuresUnknown: number;
   diagnosticsTotal: number;
 }
 

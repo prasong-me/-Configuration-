@@ -147,3 +147,79 @@ test("DNS controller does not treat resolver failure as filter-stage PASS", asyn
   assert.equal(result.ok,false);
   assert.equal(result.reason,"DNS_CHAIN_STAGE_FAILED");
 });
+
+
+test("processing: missing capability yields UNKNOWN and evidence diagnostic", async ()=>{
+  const {applySkipSemantics}=await import("../packages/core/src/processing/skip-semantics.js");
+  const {matchCapabilities}=await import("../packages/core/src/processing/capability-matcher.js");
+  const doc={schemaVersion:"1.0",profiles:[{id:"p1",name:"Test",enabled:true,order:1,requirements:[{featureKey:"dns-over-https",requirementLevel:"REQUIRED"}]}],target:{targetId:"mock-target",outputFormat:"json"}};
+  const {activeProfiles}=applySkipSemantics(doc);
+  const {outcomes,diagnostics}=matchCapabilities(activeProfiles,undefined,"mock-target");
+  assert.equal(outcomes[0].result,"UNKNOWN");
+  assert.equal(outcomes[0].targetSupported,undefined);
+  assert.ok(diagnostics.some(d=>d.code==="TARGET_CAPABILITY_UNKNOWN"));
+});
+
+test("processing: REQUIRED + UNKNOWN yields FAILED", async ()=>{
+  const {applySkipSemantics}=await import("../packages/core/src/processing/skip-semantics.js");
+  const {matchCapabilities}=await import("../packages/core/src/processing/capability-matcher.js");
+  const {evaluateCompatibility}=await import("../packages/core/src/processing/compatibility.js");
+  const doc={schemaVersion:"1.0",profiles:[{id:"p2",name:"Required",enabled:true,order:1,requirements:[{featureKey:"dns-over-https",requirementLevel:"REQUIRED"}]}],target:{targetId:"mock-target",outputFormat:"json"}};
+  const {activeProfiles}=applySkipSemantics(doc);
+  const {outcomes,diagnostics}=matchCapabilities(activeProfiles,[],"mock-target");
+  const result=evaluateCompatibility(1,1,0,outcomes,diagnostics);
+  assert.equal(result.status,"FAILED");
+  assert.equal(result.summary.featuresUnknown,1);
+});
+
+test("processing: OPTIONAL + UNKNOWN yields PARTIAL", async ()=>{
+  const {applySkipSemantics}=await import("../packages/core/src/processing/skip-semantics.js");
+  const {matchCapabilities}=await import("../packages/core/src/processing/capability-matcher.js");
+  const {evaluateCompatibility}=await import("../packages/core/src/processing/compatibility.js");
+  const doc={schemaVersion:"1.0",profiles:[{id:"p3",name:"Optional",enabled:true,order:1,requirements:[{featureKey:"ipv6",requirementLevel:"OPTIONAL"}]}],target:{targetId:"mock-target",outputFormat:"json"}};
+  const {activeProfiles}=applySkipSemantics(doc);
+  const {outcomes,diagnostics}=matchCapabilities(activeProfiles,[],"mock-target");
+  const result=evaluateCompatibility(1,1,0,outcomes,diagnostics);
+  assert.equal(outcomes[0].result,"UNKNOWN");
+  assert.equal(result.status,"PARTIAL");
+  assert.equal(result.summary.featuresUnknown,1);
+});
+
+test("processing: explicit unsupported is distinct from UNKNOWN", async ()=>{
+  const {applySkipSemantics}=await import("../packages/core/src/processing/skip-semantics.js");
+  const {matchCapabilities}=await import("../packages/core/src/processing/capability-matcher.js");
+  const {evaluateCompatibility}=await import("../packages/core/src/processing/compatibility.js");
+  const doc={schemaVersion:"1.0",profiles:[{id:"p4",name:"Mixed",enabled:true,order:1,requirements:[{featureKey:"dns-over-https",requirementLevel:"REQUIRED"},{featureKey:"ipv6",requirementLevel:"OPTIONAL"}]}],target:{targetId:"mock-target",outputFormat:"json"}};
+  const {activeProfiles}=applySkipSemantics(doc);
+  const {outcomes,diagnostics}=matchCapabilities(activeProfiles,[{featureKey:"dns-over-https",supported:false},{featureKey:"ipv6",supported:false}],"mock-target");
+  const result=evaluateCompatibility(1,1,0,outcomes,diagnostics);
+  assert.equal(outcomes.find(o=>o.featureKey==="dns-over-https").result,"UNSUPPORTED");
+  assert.equal(outcomes.find(o=>o.featureKey==="ipv6").result,"PARTIAL");
+  assert.equal(result.status,"FAILED");
+  assert.equal(diagnostics.some(d=>d.code==="TARGET_CAPABILITY_UNKNOWN"),false);
+});
+
+test("processing: partial capability evidence leaves missing requested feature UNKNOWN", async ()=>{
+  const {matchCapabilities}=await import("../packages/core/src/processing/capability-matcher.js");
+  const profiles=[{id:"p5",name:"Partial",enabled:true,order:1,requirements:[{featureKey:"proxy-tcp",requirementLevel:"REQUIRED"},{featureKey:"dns-over-https",requirementLevel:"REQUIRED"}]}];
+  const {outcomes}=matchCapabilities(profiles,[{featureKey:"proxy-tcp",supported:true}],"mock-target");
+  assert.equal(outcomes.find(o=>o.featureKey==="proxy-tcp").result,"SUPPORTED");
+  assert.equal(outcomes.find(o=>o.featureKey==="dns-over-https").result,"UNKNOWN");
+});
+
+test("processing: disabled profiles are excluded before capability matching", async ()=>{
+  const {applySkipSemantics}=await import("../packages/core/src/processing/skip-semantics.js");
+  const {matchCapabilities}=await import("../packages/core/src/processing/capability-matcher.js");
+  const doc={schemaVersion:"1.0",profiles:[{id:"p6",name:"Disabled",enabled:false,order:1,requirements:[{featureKey:"dns-over-https",requirementLevel:"REQUIRED"}]}],target:{targetId:"mock-target",outputFormat:"json"}};
+  const {activeProfiles}=applySkipSemantics(doc);
+  assert.equal(activeProfiles.length,0);
+  assert.equal(matchCapabilities(activeProfiles,[],"mock-target").outcomes.length,0);
+});
+
+test("processing: skip semantics removes only skipped component types and preserves profile", async ()=>{
+  const {applySkipSemantics}=await import("../packages/core/src/processing/skip-semantics.js");
+  const doc={schemaVersion:"1.0",profiles:[{id:"p7",name:"Multi",enabled:true,order:1,components:[{type:"dns",data:{}},{type:"proxy",data:{}}]}],target:{targetId:"mock-target",outputFormat:"json"},skipContext:{skippedSteps:["dns"]}};
+  const {activeProfiles}=applySkipSemantics(doc);
+  assert.equal(activeProfiles.length,1);
+  assert.deepEqual(activeProfiles[0].components.map(c=>c.type),["proxy"]);
+});

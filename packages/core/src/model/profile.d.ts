@@ -1,6 +1,7 @@
 export type ProfileId = string;
 
 import type { CapabilityRequirement } from './capability';
+import type { ProfileComponent } from './component';
 
 export interface ProfileMetadata {
   source?: string;
@@ -10,10 +11,7 @@ export interface ProfileMetadata {
   [key: string]: unknown;
 }
 
-export interface ProfileComponent {
-  type: string;
-  data: Record<string, unknown>;
-}
+export { ProfileComponent } from './component';
 
 export interface Profile {
   id: ProfileId;
